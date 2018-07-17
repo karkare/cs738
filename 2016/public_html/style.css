@@ -1,0 +1,120 @@
+*{
+	margin : 1px;
+}
+
+p {
+	margin:10px 0px 10px 0px;
+}
+
+html, body{
+		height : auto;
+		min-height : 100%;
+}
+
+body {
+    background-color: rgb(151, 201, 202);
+    font-family: lucida grande, Verdana, Arial, Tahoma, Helvetica;
+    margin : 0px;
+    padding : 0px;
+#    font-size : 24px;
+#    line-height : 24px;
+#    text-align: justify;
+}
+
+a:link {
+    color: darkblue;
+}
+
+
+a:visited {
+    color: rgb(101, 001, 152);
+}
+
+
+h1 {
+    color: #907050;
+    font-family: lucida grande, Verdana, Arial, Tahoma, Helvetica;
+#    font-size: 28px;
+}
+
+h2 {
+    color: #907050;
+    font-family: lucida grande, Verdana, Arial, Tahoma, Helvetica;
+#    font-size: 16px;
+}
+
+h3 {
+#    font-size: 14px;
+    font-family: lucida grande, Verdana, Arial, Tahoma, Helvetica;
+}
+
+h4 {
+#    font-size: 14px;
+    font-family: lucida grande, Verdana, Arial, Tahoma, Helvetica;
+}
+
+.pics {
+    border: 1px #ccc solid; margin: 2px; padding: 6px 
+}
+
+.picsnoborder {
+    border: 0px #ccc solid; margin: 2px; padding: 0px 
+}
+
+
+.header {
+    margin: 15px 10px 0px 5px;
+}
+
+#navigation-right {
+    float: right;
+    text-align:right;
+}
+
+#navigation-left {
+    text-align:left;
+}
+
+
+.wrapper {
+    margin: 30px 100px 10px 100px;
+}
+
+
+ul {
+}
+
+
+div.contents {
+    font-family: lucida grande, Verdana, Arial, Tahoma, Helvetica;
+}
+
+td {
+#     font-size: 12px;
+     font-family: lucida grande, Verdana, Arial, Tahoma, Helvetica;
+}
+
+th {
+#	font-size: 12px;
+    	font-family: lucida grande, Verdana, Arial, Tahoma, Helvetica;
+        background-color: lightgray;
+}
+
+strong {
+    background-color: #ffa000;
+    color: #000000;
+#    font-size: 15px;
+}
+
+.small {
+    font-size: smaller;
+}
+
+table.bordered {
+    background-color: #000000
+    border: 10;
+    cellspacing: 10;
+    cellpadding: 10;
+    width="100%"
+}
+

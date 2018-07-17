@@ -1,0 +1,618 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{anysize}
+\usepackage{fancyhdr}
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+
+\setlength{\headheight}{15pt}
+\pagestyle{fancyplain}
+\lhead{\fancyplain{}{{\em Page \#\/}\thepage}}
+\chead{CS618}
+\rhead{\fancyplain{}{\textit{Roll No:}\rule{30mm}{0pt}}}
+\lfoot{}
+\cfoot{}
+\rfoot{}
+
+\newcommand{\tbd}[1]{{\red #1}}
+\newcommand{\answer}[1]{{{\blue #1}}}
+%\renewcommand{\answer}[1]{\mbox{}}
+\newcommand{\symbox}[2]{B#1\psframebox{#2}\phantom{B#1}}
+\newcommand{\rsymbox}[2]{\phantom{B#1}\psframebox{#2} B#1}
+
+
+%% \textwidth 7in
+%% \addtolength{\oddsidemargin}{-1in}
+%% \textheight 9.5in
+%% \addtolength{\topmargin}{-1in}
+%% \setlength{\parindent}{0pt}
+%% \setlength{\parskip}{0.5cm}
+%% \topskip 0.0in
+\thispagestyle{empty}
+
+\begin{document}
+
+{\Large\bf NAME: \hspace*{3in} ROLL NO:}
+
+\begin{center}
+CS618: Program Analysis \\
+Mid Semester Examination, 2016-17 I\\
+Max Time: 2 Hours  \hfill Max Marks: 125 \\
+
+{\bf NOTE: }
+\begin{itemize}
+\item There are total {\bf 5} questions on {\bf 4 pages}
+\item Write your name and roll number on the question paper and the
+  answer book.
+\item No explanations will be provided. In case of a doubt, make
+  suitable assumptions and justify.
+
+\item Presenting your answers properly is your
+  responsibility. You lose credit if you can not present your
+  ideas clearly, and in proper form. Please DO NOT come back
+  for re-evaluation saying, ``What I actually meant was
+  \ldots''.
+
+\item Be precise and write clearly. Remember that somebody
+  has to read it to evaluate!
+
+\end{itemize}
+\hrule
+\end{center}
+%\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\thispagestyle{empty} \vspace{-5mm}
+%\includegraphics[angle=90,scale=.99]{Endsem-2011.Q2.eps}
+%\clearpage
+\begin{enumerate}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item Consider a flow graph G with a unique entry node ENTRY that
+  dominates all nodes of G. Prove that every node in G except
+  ENTRY has a unique {\em immediate dominator}.  By definition,
+  immediate dominator of a node $n$ is the {\em closest strict
+    dominator} of $n$.  \hfill[10] \answer{
+  \begin{itemize}
+  \item Every node except ENTRY has at least one strict
+    dominator. Consider a node Z that has more than one strict
+    dominators. Consider two such dominators X and Y. Then, it
+    can be proved that either X dominates Y or Y dominates X
+    (*proof below). Thus, it possible to find {\em least} element
+    among all strict dominators of Z. This element is the desired
+    immediate dominator.
+  \item * Consider a cycle free path from
+    ENTRY$\rightarrow$Z. Because both X and Y strictly
+    dominate Z, they must occur on this path. WLOG, assume
+    that X occurs before Y in this path.  Thus the path is:
+    Entry $\rightarrow$ X $\rightarrow$ Y $\rightarrow$ Z. We
+    will prove that X must dominate Y.
+
+    Assume the contrary (X does not dominate Y). Then, we
+    have a path Entry $\Rightarrow Y$ free of X. But then,
+    Entry $\Rightarrow$ Y $\rightarrow$ Z is a path to Z free
+    of X. But that also contradicts the fact that X dominates
+    Z.
+  \end{itemize}
+}
+
+\newcommand{\df}{\mbox{\rm df}}
+\item The original definition of {\em Dominance Frontier} (\df) is:
+A node $m$ is in $\df(n)$ if
+\begin{enumerate}
+\item $n$ dominates a predecessor of $m$ in the flow graph, and
+\item $n$ does not strictly dominate $m$
+\end{enumerate}
+Dr Dominoz thinks the following modified definition of $\df(n)$ is equivalent as far as computation of SSA form is concerned: A node $m$ is in $\df(n)$ if
+\begin{enumerate}
+\item $n$ dominates a predecessor of $m$ in the flow graph, and
+\item $n$ does not dominate $m$
+\end{enumerate}
+i.e., Dr Dominoz has dropped the term ``strictly'' from the
+definition.
+
+You jobs  is to either {\bf  prove that  Dr Dominoz is  right} or
+show that  he is {\bf  wrong, by  giving a counter  example}. The
+proof must work for any  arbitrary CFG, while the counter example
+must  show   an  incorrect  SSA   form  being  generated   for  a
+CFG.\hfill[10]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\newcommand{\px}{\mbox{\bf x}}
+\item Consider the following extensions to our 3-address code
+  language:
+  \begin{itemize}
+  \item {\tt \px.lock}: ``locks'' a variable \px
+  \item {\tt \px.unlock}: ``unlocks'' a variable \px
+  \item {\tt \px.secureComp} does some ``secure computation'' on \px
+  \end{itemize}
+
+  In this language, a ``secure computation'' on a variable \px\
+  is allowed only when it is locked (\px.lock executed before
+  \px.secureComp, without an intervening \px.unlock). We call
+  such secureComp {\bf safe}, otherwise it is {\bf unsafe}.
+
+  The language obviously contains basic constructs like {\em
+    assignment} statements, {\em goto} statements, and
+  conditionals ({\em if-goto}). Following semantic properties
+  hold:
+ \begin{itemize}
+ \item All variables are {\bf unlocked} at the {\em entry}
+ \item  {\bf lock}  and  {\bf unlock}  operations are  idempotent
+   (Locking a locked variable is allowed, but it has no effect on
+   the  lock-status  of  the  variable.  Similarly,  unlocking  an
+   unlocked variable is also allowed)
+ \end{itemize}
+ Here are couple of sample programs, {\tt PROGRAM-1} is valid and {\tt PROGRAM-2} is invalid.
+\begin{verbatim}
+   // PROGRAM-1                  // PROGRAM-2
+     c = 5                         c = 5 
+     n = 0                         n = 0
+     t = c > 0                     t = c > 0
+     if t goto L1                  if t goto L1
+     n.lock                          n.lock   
+     n.secureComp                    c.secureComp // BAD, c not locked
+     goto L2                         c.unlock  
+                                     goto L2
+   L1:                             L1:
+     c.lock                          n.lock
+     c.secureComp                    n.secureComp
+     d = e - 5;                      d  = e - 5;
+     c.unlock                        c.lock
+   L2:                             L2:
+     n.lock                          n.secureComp // OK, n locked on
+                                                  // all paths
+     n.secureComp                    c.secureComp // BAD,  c may not
+                                                  // be locked 
+     n.unlock                        n.unlock
+     c.unlock                        c.unlock
+\end{verbatim}
+
+ Design an {\bf intraprocedural} data flow
+ analysis framework to mark unsafe secure computations
+ (``secureComp''). In particular,
+ \begin{enumerate}
+ \item Draw the lattice for the
+   framework, and describe it briefly.\hfill[5]
+ \item Describe the meet operator ($\wedge$).\hfill[5]
+ \item Describe intuitively the meaning of the top and the
+   bottom elements. \hfill[5]
+ \item Define the flow functions  for statements. You do not need
+   to   list  all   types   of  statements,   but  use   suitable
+   representatives (for  e.g. {\tt  x op  y} to  represent binary
+   operators).\hfill[10]
+ \item Is your framework {\em Forward} or {\em Backward}?
+   Justify your answer. Also describe the {\em BoundaryInfo}
+   (initialization information at the boundary of the flow
+   graph). \hfill[2+3]
+ \end{enumerate}
+ \answer{
+   \begin{enumerate}
+\item Lattice:
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(50,50)
+      %\psframe(0,0)(50,50)
+      \putnode{b0}{origin}{25}{45}{$\top$}
+      \putnode{b1}{b0}{-20}{-20}{int}
+      \putnode{b2}{b0}{20}{-20}{bool}
+      \putnode{b3}{b0}{0}{-40}{$\bot$}        
+      \ncline{b0}{b1}
+      \ncline{b0}{b2}
+      \ncline{b2}{b3}
+      \ncline{b1}{b3}      
+    \end{pspicture}
+  \end{center}
+\item meet: 
+  \begin{center}
+    \begin{tabular}{c||c|c|c|c}
+      $\wedge$ & $\top$ & int    & bool   & $\bot$ \\ \hline \hline
+      $\top$   & $\top$ & int    & bool   & $\bot$ \\ \hline
+      int      & int    & int    & $\bot$ & $\bot$ \\ \hline
+      bool     & bool   & $\bot$ & bool   & $\bot$ \\ \hline
+      $\bot$   & $\bot$ & $\bot$ & $\bot$ & $\bot$ \\ \hline
+    \end{tabular}
+  \end{center}
+\item $\top$ represents no type inferred yet. $\bot$
+  represents conflicting types inferred (more than one type
+  for a variable).
+\item Flow functions. (This is one of the many possible solutions)
+  \begin{enumerate}
+  \item z = x == y:
+    \begin{eqnarray*}
+      Out(z) &=& In(z) \wedge bool \\
+      Out(x) &=& In(x) \wedge In(y) \\
+      Out(y) &=& In(x) \wedge In(y) 
+    \end{eqnarray*}
+
+  \item z = x + y:
+    \begin{eqnarray*}
+      Out(z) &=& In(z) \wedge int \\
+      Out(x) &=& In(x) \wedge int \\
+      Out(y) &=& In(y) \wedge int 
+    \end{eqnarray*}
+
+  \item z = x \&\& y:
+    \begin{eqnarray*}
+      Out(z) &=& In(z) \wedge bool \\
+      Out(x) &=& In(x) \wedge bool \\
+      Out(y) &=& In(y) \wedge bool
+    \end{eqnarray*}
+
+  \item z = int\_constant:
+    \begin{eqnarray*}
+      Out(z) &=& In(z) \wedge int \\
+    \end{eqnarray*}
+
+  \item z = bool\_constant:
+    \begin{eqnarray*}
+      Out(z) &=& In(z) \wedge bool \\
+    \end{eqnarray*}
+
+  \item z = x:
+    \begin{eqnarray*}
+      Out(z) &=& In(z) \wedge In(x)  \\
+      Out(x) &=& In(z) \wedge In(x)  \\
+    \end{eqnarray*}
+  \end{enumerate}
+\item My framework is forward (but yours could be backward,
+  depends on the flow functions!). Out is computed in terms
+  of In. 
+    \begin{eqnarray*}
+      \mbox{\em BoundaryInfo} &=& BI, \mbox{ s.t. } BI(x) =
+      \top\       \forall x \\
+    \end{eqnarray*} 
+\end{enumerate}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%\clearpage
+\item Consider the following flow graph:
+
+\begin{center}
+\psset{unit=1mm}
+\begin{pspicture}(0,0)(150,-120)
+  \psframe(0,10)(150,-120)
+  \putnode{b1}{origin}{75}{5}{\symbox{1}{ENTRY}}
+  \putnode{b2}{b1}{0}{-20}{\symbox{2}{x = 2}}
+  \putnode{b3}{b2}{-30}{-20}{\symbox{3}{y = 3}}
+  \putnode{b4}{b2}{30}{-20}{\symbox{4}{x = x + 1}}
+  \putnode{b5}{b3}{-15}{-20}{\symbox{5}{z = x + y}}
+  \putnode{b6}{b3}{15}{-20}{\symbox{6}{\phantom{w = y + 3}}}
+  \putnode{b7}{b4}{-15}{-20}{\symbox{7}{y = y + 1}}
+  \putnode{b8}{b4}{15}{-20}{\symbox{8}{\phantom{y = y + 1}}}
+  \putnode{b9}{b5}{15}{-20}{\symbox{9}{\phantom{w = 2 * x}}}
+  \putnode{b10}{b6}{15}{-20}{\symbox{10}{ x = z - 1}}
+  \putnode{b11}{b7}{15}{-20}{\symbox{11}{y = y + x}}
+  \putnode{b12}{b10}{0}{-20}{\symbox{12}{\phantom{y = y + 1}}}
+  \putnode{b15}{b12}{0}{-20}{\symbox{13}{EXIT}}
+
+  \ncline{->}{b1}{b2}
+  \ncline{->}{b2}{b3}
+  \ncline{->}{b2}{b4}
+  \ncline{->}{b3}{b5}
+  \ncline{->}{b3}{b6}
+  \ncline{->}{b4}{b7}
+  \ncline{->}{b4}{b8}
+  \ncline{->}{b5}{b9}
+  \ncline{->}{b6}{b9}
+  \ncline{->}{b6}{b10}
+  \ncline{->}{b7}{b10}
+  \ncline{->}{b8}{b11}
+  \ncline{->}{b10}{b12}
+  \ncline{->}{b11}{b12}
+  \ncline{->}{b13}{b15}
+  \ncline{->}{b12}{b15}
+
+  \nccurve[angleA=-155,angleB=135,nodesep=-.1,ncurv=2]{->}{b9}{b3}
+  \nccurve[angleA=-35,angleB=25,nodesep=-.1,ncurv=1.2]{->}{b12}{b8}
+\end{pspicture}
+\end{center}
+
+\begin{enumerate}
+\item Draw the dominator tree for the graph. \hfill[10]
+\item Calculate the dominance frontier for each
+  block. \hfill[15] 
+\item Calculate the iterated dominance frontiers for the nodes containing the definitions of x, y and z. Assume that
+  ENTRY node (B1) contains implicit definitions of x, y, z as
+  {\tt undef}.
+\hfill[3*5 = 15] 
+\item Convert the flow graph to minimal SSA form.  
+\hfill[10]
+\end{enumerate}
+
+\answer{
+\clearpage
+  Dominator Tree:
+\begin{center}
+\psset{unit=1mm}
+\begin{pspicture}(0,0)(150,-90)
+  %\psframe(0,0)(150,-90)
+  \putnode{b1}{origin}{75}{-5}{\symbox{1}{ENTRY}}
+  \putnode{b2}{b1}{0}{-20}{\symbox{2}{x = 2}}
+  \ncline{->}{b1}{b2}
+
+  \putnode{b3}{b2}{-50}{-20}{\symbox{3}{y = 3}}
+  \putnode{b4}{b3}{20}{0}{\symbox{4}{x = x + 1}}
+  \putnode{b10}{b4}{20}{0}{\symbox{10}{ x = z - 1}}
+  \putnode{b11}{b10}{20}{0}{\symbox{11}{y = y + x}}
+  \putnode{b12}{b11}{20}{0}{\symbox{12}{\phantom{y = y + 1}}}
+  \putnode{b15}{b12}{0}{-20}{\symbox{13}{EXIT}}
+  \ncline{->}{b2}{b3}
+  \ncline{->}{b2}{b4}
+  \ncline{->}{b2}{b10}
+  \ncline{->}{b2}{b11}
+  \ncline{->}{b2}{b12}
+  \ncline{->}{b2}{b15}
+
+  \putnode{b5}{b3}{-35}{-20}{\symbox{5}{z = x + y}}
+  \putnode{b6}{b5}{15}{0}{\symbox{6}{\phantom{w = y + 3}}}
+  \putnode{b9}{b6}{15}{0}{\symbox{9}{\phantom{w = 2 * x}}}
+  \ncline{->}{b3}{b5}
+  \ncline{->}{b3}{b6}
+  \ncline{->}{b3}{b9}
+
+  \putnode{b7}{b4}{-10}{-20}{\symbox{7}{y = y + 1}}
+  \putnode{b8}{b7}{20}{0}{\symbox{8}{\phantom{y = y + 1}}}
+  \ncline{->}{b4}{b7}
+  \ncline{->}{b4}{b8}
+
+\end{pspicture}
+\end{center}
+
+Dominance Frontier:
+%\begin{center}
+  \begin{tabular}{r|l}
+    Node & DF \\ \hline \hline
+     1 & \{\} \\ \hline
+     2 & \{\} \\ \hline
+     3 & \{3,10,13\} \\ \hline
+     4 & \{10,11\} \\ \hline
+     5 & \{3,9\} \\ \hline
+     6 & \{9,10\} \\ \hline
+     7 & \{10\} \\ \hline
+     8 & \{11\} \\ \hline
+     9 & \{13\} \\ \hline
+    10 & \{12\} \\ \hline
+    11 & \{12\} \\ \hline
+    12 & \{11,13,15\} \\ \hline
+    13 & \{15\} \\ \hline
+    14 & \{11,15\} \\ \hline
+    15 & \{\} \\ \hline
+  \end{tabular}
+%\end{center}
+
+\begin{center}
+  ENTRY node (1) contains implicit definitions of x, y, z.
+
+  \begin{tabular}{c|c|l} \hline
+  Var & Defs & Iterated Dom Frontier of Defs \\ \hline \hline
+  x & 1, 2, 4, 10 & \{ 10, 11, 12, 13, 15 \} \\ \hline
+  y & 1, 3, 7, 11 & \{  3, 10, 11, 12, 13, 15 \} \\ \hline
+  z & 1, 5 &        \{  3,  9, 10, 11, 12, 13, 15 \} \\ \hline
+  \end{tabular}
+\end{center}
+\begin{center}
+\psset{unit=1mm}
+\begin{pspicture}(0,0)(150,-160)
+  \psframe(0,0)(150,-160)
+  \putnode{b1}{origin}{75}{-10}{\symbox{1}{ENTRY [x, y, z]}}
+  \putnode{b2}{b1}{0}{-20}{\symbox{2}{x = 2}}
+  \putnode{b3}{b2}{-30}{-20}{\symbox{3}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z = $\phi$(z, z) \\
+        y = $\phi$(y, y) \\
+        y = 3 \\
+      \end{tabular}
+  }}
+  \putnode{b4}{b2}{30}{-20}{\symbox{4}{x = x + 1}}
+  \putnode{b5}{b3}{-15}{-20}{\symbox{5}{z = x + y}}
+  \putnode{b6}{b3}{15}{-20}{\symbox{6}{\phantom{w = y + 3}}}
+  \putnode{b7}{b4}{-15}{-20}{\symbox{7}{y = y + 1}}
+  \putnode{b8}{b4}{15}{-20}{\symbox{8}{\phantom{y = y + 1}}}
+  \putnode{b9}{b5}{15}{-20}{\symbox{9}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z = $\phi$(z, z)
+      \end{tabular}
+  }}
+  \putnode{b10}{b6}{15}{-20}{\symbox{10}{ 
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z = $\phi$(z, z) \\
+        y = $\phi$(y, y) \\
+        x = $\phi$(x, x) \\
+        x = z - 1 \\
+      \end{tabular}
+  }}
+  \putnode{b11}{b7}{15}{-20}{\symbox{11}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z = $\phi$(z, z) \\
+        y = $\phi$(y, y) \\
+        x = $\phi$(x, x) \\
+        y = y + x \\
+      \end{tabular}
+  }}
+  \putnode{b12}{b10}{0}{-20}{\symbox{12}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z = $\phi$(z, z) \\
+        y = $\phi$(y, y) \\
+        x = $\phi$(x, x) \\
+      \end{tabular}
+  }}
+  \putnode{b15}{b12}{0}{-20}{\symbox{13}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z = $\phi$(z, z) \\
+        y = $\phi$(y, y) \\
+        x = $\phi$(x, x) \\
+        EXIT \\
+      \end{tabular}
+  }}
+
+  \ncline{->}{b1}{b2}
+  \ncline{->}{b2}{b3}
+  \ncline{->}{b2}{b4}
+  \ncline{->}{b3}{b5}
+  \ncline{->}{b3}{b6}
+  \ncline{->}{b4}{b7}
+  \ncline{->}{b4}{b8}
+  \ncline{->}{b5}{b9}
+  \ncline{->}{b6}{b9}
+  \ncline{->}{b6}{b10}
+  \ncline{->}{b7}{b10}
+  \ncline{->}{b8}{b11}
+  \ncline{->}{b10}{b12}
+  \ncline{->}{b11}{b12}
+  \ncline{->}{b12}{b15}
+
+  \nccurve[angleA=-155,angleB=135,nodesep=-.1,ncurv=2]{->}{b9}{b3}
+  \nccurve[angleA=-35,angleB=25,nodesepB=-3,ncurv=1.2]{->}{b12}{b8}
+\end{pspicture}
+\end{center}
+
+\begin{center}
+\psset{unit=1mm}
+\begin{pspicture}(0,0)(150,-160)
+  \psframe(0,0)(150,-160)
+  \putnode{b1}{origin}{75}{-10}{\symbox{1}{ENTRY [x0, y0, z0]}}
+  \putnode{b2}{b1}{0}{-20}{\symbox{2}{x1 = 2}}
+  \putnode{b3}{b2}{-30}{-20}{\symbox{3}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z1 = $\phi$(z2, z0) \\
+        y1 = $\phi$(y2, y0) \\
+        y2 = 3 \\
+      \end{tabular}
+  }}
+  \putnode{b4}{b2}{30}{-20}{\symbox{4}{x2 = x1 + 1}}
+  \putnode{b5}{b3}{-15}{-20}{\symbox{5}{z2 = x1 + y2}}
+  \putnode{b6}{b3}{15}{-20}{\symbox{6}{\phantom{w = y + 3}}}
+  \putnode{b7}{b4}{-15}{-20}{\symbox{7}{y3 = y0 + 1}}
+  \putnode{b8}{b4}{15}{-20}{\symbox{8}{\phantom{y = y + 1}}}
+  \putnode{b9}{b5}{10}{-20}{\symbox{9}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z3 = $\phi$(z2, z1)
+      \end{tabular}
+  }}
+  \putnode{b10}{b6}{15}{-20}{\symbox{10}{ 
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z4 = $\phi$(z1, z0) \\
+        y4 = $\phi$(y2, y3) \\
+        x3 = $\phi$(x1, x2) \\
+        x4 = z4 - 1 \\
+      \end{tabular}
+  }}
+  \putnode{b11}{b7}{20}{-20}{\symbox{11}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z5 = $\phi$(z0, z6) \\
+        y5 = $\phi$(y0, y7) \\
+        x5 = $\phi$(x2, x6) \\
+        y6 = y5 + x5 \\
+      \end{tabular}
+  }}
+  \putnode{b12}{b10}{0}{-20}{\symbox{12}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z6 = $\phi$(z4, z5) \\
+        y7 = $\phi$(y4, y6) \\
+        x6 = $\phi$(x4, x5) \\
+      \end{tabular}
+  }}
+  \putnode{b15}{b12}{0}{-20}{\symbox{13}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z8 = $\phi$(z7, z6) \\
+        y9 = $\phi$(y8, y7) \\
+        x8 = $\phi$(x7, x6) \\
+        EXIT \\
+      \end{tabular}
+  }}
+
+  \ncline{->}{b1}{b2}
+  \ncline{->}{b2}{b3}
+  \ncline{->}{b2}{b4}
+  \ncline{->}{b3}{b5}
+  \ncline{->}{b3}{b6}
+  \ncline{->}{b4}{b7}
+  \ncline{->}{b4}{b8}
+  \ncline{->}{b5}{b9}
+  \ncline{->}{b6}{b9}
+  \ncline{->}{b6}{b10}
+  \ncline{->}{b7}{b10}
+  \ncline{->}{b8}{b11}
+  \ncline{->}{b10}{b12}
+  \ncline[nodesepA=-1]{->}{b11}{b12}
+  \ncline{->}{b12}{b15}
+
+  \nccurve[angleA=-155,angleB=135,nodesep=-.1,ncurv=2]{->}{b9}{b3}
+  \nccurve[angleA=-35,angleB=45,nodesepB=-.2,ncurv=1.4]{->}{b12}{b8}
+\end{pspicture}
+\end{center}
+
+}
+
+%%\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item Consider the following flow graph in SSA form, with one instruction per block:
+
+\begin{center}
+\psset{xunit=1mm,yunit=.7mm}
+\begin{pspicture}(0,0)(150,-230)
+  \psframe(0,10)(150,-230)
+  \putnode{b0}{origin}{75}{5}{\symbox{0}{ENTRY}}
+  \putnode{b1}{b0}{0}{-20}{\symbox{1}{$a_1 = 3$}}
+  \putnode{b2}{b1}{0}{-20}{\symbox{2}{$d_1 = 2$}}
+  \putnode{b3}{b2}{0}{-20}{\symbox{3}{$d_3 = \phi(d_1, d_2)$}}
+  \putnode{b4}{b3}{0}{-20}{\symbox{4}{$a_3 = \phi(a_1, a_2)$}}
+  \putnode{b5}{b4}{0}{-20}{\symbox{5}{$f_1 =a_3 + d_3$ }}
+  \putnode{b6}{b5}{0}{-20}{\symbox{6}{$g_1 = 5$}}
+  \putnode{b7}{b6}{0}{-20}{\symbox{7}{$a_2 = g_1 - d_3$}}
+  \putnode{b8}{b7}{0}{-20}{\symbox{8}{if $(f_1 <= g_1)$}}
+  \putnode{b9}{b8}{-15}{-20}{\symbox{9}{$f_2 = g_1 + 1$}}
+  \putnode{b10}{b8}{15}{-20}{\rsymbox{10}{if $(g_1 < a_2)$}}
+  \putnode{b11}{b10}{-15}{-20}{\symbox{11}{$f_3 = \phi(f_1, f_2)$}}
+  \putnode{b12}{b11}{0}{-20}{\symbox{12}{$d_2 = 2$}}
+  \putnode{b13}{b10}{15}{-20}{\rsymbox{13}{EXIT}}
+
+  \ncline{->}{b0}{b1}
+  \ncline{->}{b1}{b2}
+  \ncline{->}{b2}{b3}
+  \ncline{->}{b3}{b4}
+  \ncline{->}{b4}{b5}
+  \ncline{->}{b5}{b6}
+  \ncline{->}{b6}{b7}
+  \ncline{->}{b7}{b8}
+  \ncline{->}{b8}{b9}\Bput[0.0]{{\small T}}
+  \ncline{->}{b8}{b10}\Aput[0.0]{{\small F}}
+  \ncline{->}{b10}{b11}\Bput[0.0]{{\small T}}
+  \ncline{->}{b9}{b11}
+  \ncline{->}{b11}{b12}
+  \ncline{->}{b10}{b13}\Aput[0.0]{{\small F}}
+
+  \nccurve[angleA=215,angleB=155,nodesep=0,ncurv=1.2]{->}{b12}{b3}
+\end{pspicture}
+\end{center}
+
+\begin{enumerate}
+\item Draw the SSA edges (def-use chains) for the CFG. \hfill[5]
+\item Perform Sparse conditional Constant Propagation for the CFG. Clearly show
+\begin{enumerate}
+\item The contents of the worklists (FWL and SWL) at each stage.
+\item The SSA edge or the CFG edge being processed
+\item The values that are updated during processing.
+\end{enumerate}~\hfill[20]
+\end{enumerate}
+\end{enumerate}
+\hrule
+\[ T H E ~~ E N D \]
+\end{document}
+

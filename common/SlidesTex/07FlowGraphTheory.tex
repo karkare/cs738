@@ -1,0 +1,723 @@
+\mode<presentation>
+{
+  \usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{xspace}
+
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[]{\ \\{\LARGE Flow Graph Theory}\\}
+
+\input{defs.tex}
+\begin{document}
+
+\frame{\titlepage}
+\frame{
+  \frametitle{Agenda}
+  \begin{itemize}
+  \item Speeding up DFA
+  \item Depth of a flow graph
+  \item Natural Loops
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Acknowledgement}
+  Rest of the slides based on the material at  \url{http://infolab.stanford.edu/~ullman/dragon/w06/} \url{w06.html}
+}
+
+
+\frame{
+  \frametitle{Speeding up DFA}
+  \begin{itemize}[<+->]
+  \item Proper ordering of nodes of a flow graph speeds up the
+    iterative algorithms: {\bf depth-first ordering}.
+  \item ``Normal'' flow graphs have a surprising property ---
+    {\bf reducibility} --- that simplifies several matters.
+  \item Outcome: few iterations ``normally'' needed.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Depth-First Search}
+  \begin{itemize}[<+->]
+  \item Start at entry.
+  \item If you can follow an edge to an unvisited node, do so.
+  \item If not, backtrack to your {\em parent} (node from which
+    you were visited).
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Depth-First Spanning Tree (DFST)}
+  \begin{itemize}[<+->]
+  \item Root = \bbent.
+  \item Tree edges are the edges along which we first visit the
+    node at the head.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{DFST Example}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(30,40)
+      \putnode{n1}{origin}{15}{35}{\pscirclebox{1}}
+      \putnode{n2}{n1}{-15}{-15}{\pscirclebox{2}}
+      \putnode{n3}{n1}{0}{-30}{\pscirclebox{3}}
+      \putnode{n4}{n2}{30}{0}{\pscirclebox{4}}
+      \putnode{n5}{n3}{30}{0}{\pscirclebox{5}}
+
+      \ncline[nodesep=-0.9]{->}{n1}{n2}
+      \ncline[nodesep=-0.9]{->}{n1}{n4}
+      \ncline[nodesep=-0.9]{->}{n2}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n5}
+
+      \nccurve[nodesep=-0.3,angleA=-180,angleB=-180,ncurv=2]{->}{n3}{n1}
+      \nccurve[nodesep=-0.7,angleA=45,angleB=45]{->}{n5}{n4}
+
+      \pause
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n1}{n2}
+      \pause
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n2}{n3}
+      \pause
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n1}{n4}
+      \pause
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n4}{n5}
+
+      
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Depth-First Node Order}
+  \begin{itemize}[<+->]
+  \item The reverse of the order in which a DFS {\bf retreats} from the nodes.
+  \item Alternatively, reverse of postorder traversal of the tree.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{DF Order Example}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(30,40)
+      \putnode{n1}{origin}{15}{35}{\pscirclebox{1}}
+      \putnode{n2}{n1}{-15}{-15}{\pscirclebox{4}}
+      \putnode{n3}{n1}{0}{-30}{\pscirclebox{5}}
+      \putnode{n4}{n2}{30}{0}{\pscirclebox{2}}
+      \putnode{n5}{n3}{30}{0}{\pscirclebox{3}}
+
+      \ncline[nodesep=-0.9]{->}{n1}{n2}
+      \ncline[nodesep=-0.9]{->}{n1}{n4}
+      \ncline[nodesep=-0.9]{->}{n2}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n5}
+
+      \nccurve[nodesep=-0.3,angleA=-180,angleB=-180,ncurv=2]{->}{n3}{n1}
+      \nccurve[nodesep=-0.7,angleA=45,angleB=45]{->}{n5}{n4}
+
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n1}{n2}
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n2}{n3}
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n1}{n4}
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n4}{n5}
+
+      
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Four Kind of Edges}
+  \begin{enumerate}[<+->]
+  \item Tree edges.
+  \item {\bf Forward edges}: node to proper descendant.
+  \item {\bf Retreating edges}: node to ancestor.
+  \item {\bf Cross edges}: between two node, niether of which is
+    an ancestor of the other.
+  \end{enumerate}
+}
+
+\frame{
+  \frametitle{A Little Magic}
+  \begin{itemize}[<+->]
+  \item Of these edges, only retreating edges go from high to low in DF order.
+  \item Most surprising: all cross edges go right to left in the DFST.
+    \begin{itemize}
+    \item Assuming we add children of any node from the left.
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Example: Non-Tree Edges}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(30,40)
+      \putnode{n1}{origin}{15}{35}{\pscirclebox{1}}
+      \putnode{n2}{n1}{-15}{-15}{\pscirclebox{4}}
+      \putnode{n3}{n1}{0}{-30}{\pscirclebox{5}}
+      \putnode{n4}{n2}{30}{0}{\pscirclebox{2}}
+      \putnode{n5}{n3}{30}{0}{\pscirclebox{3}}
+
+      \ncline[nodesep=-0.9]{->}{n1}{n2}
+      \ncline[nodesep=-0.9]{->}{n1}{n4}
+      \ncline[nodesep=-0.9]{->}{n2}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n5}
+
+      \nccurve[nodesep=-0.3,angleA=-180,angleB=-180,ncurv=2]{->}{n3}{n1}
+      \nccurve[nodesep=-0.7,angleA=45,angleB=45]{->}{n5}{n4}
+      \nccurve[nodesepA=-0.7,angleA=45,angleB=0]{->}{n1}{n5}
+
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n1}{n2}
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n2}{n3}
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n1}{n4}
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n4}{n5}
+
+      \pause
+      \putnode{re}{n1}{0}{10}{Retreating}
+      \putnode{tre1}{re}{-11}{-10}{}
+      \ncline[linestyle=dashed]{->}{re}{tre1}
+      \putnode{tre2}{re}{20}{-21}{}
+      \ncline[linestyle=dashed]{->}{re}{tre2}
+
+      \pause
+      \putnode{fw}{n1}{30}{5}{Forward}
+      \putnode{tfw}{fw}{-10}{-8}{}
+      \ncline[linestyle=dashed]{->}{fw}{tfw}
+      
+      \pause
+      \putnode{ce}{n1}{10}{-40}{Cross}
+      \putnode{tce}{ce}{0}{19}{}
+      \ncline[linestyle=dashed]{->}{ce}{tce}
+      
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Roadmap}
+  \begin{itemize}[<+->]
+  \item ``Normal'' flow graphs are ``{\bf reducible}.''
+  \item ``{\bf Dominators}'' needed to explain reducibility.
+  \item In reducible flow graphs, loops are well defined,
+    retreating edges are unique (and called ``{\bf back}''
+    edges).
+  \item Leads to relationship between DF order and efficient
+    iterative algorithm.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Dominators}
+  \begin{itemize}[<+->]
+  \item Node $d$ {\bf dominates} node $n$ if every path from the
+    \bbent to $n$ goes through $d$.
+  \item \mbox{[Exercise]} A forward-intersection iterative algorithm
+    for finding dominators.
+  \item Quick observations:
+    \begin{itemize}
+    \item Every node dominates itself.
+    \item The entry dominates every node.
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Example: Dominators}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(30,40)
+      \putnode{n1}{origin}{-10}{35}{\pscirclebox{1}}
+      \putnode{n2}{n1}{-15}{-15}{\pscirclebox{4}}
+      \putnode{n3}{n1}{0}{-30}{\pscirclebox{5}}
+      \putnode{n4}{n2}{30}{0}{\pscirclebox{2}}
+      \putnode{n5}{n3}{30}{0}{\pscirclebox{3}}
+
+      \ncline[nodesep=-0.9]{->}{n1}{n2}
+      \ncline[nodesep=-0.9]{->}{n1}{n4}
+      \ncline[nodesep=-0.9]{->}{n2}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n5}
+
+      \nccurve[nodesep=-0.3,angleA=-180,angleB=-180,ncurv=2]{->}{n3}{n1}
+      \nccurve[nodesep=-0.7,angleA=45,angleB=45]{->}{n5}{n4}
+
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n1}{n2}
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n2}{n3}
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n1}{n4}
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n4}{n5}
+      \putnode{tab}{origin}{40}{35}{
+        \begin{tabular}{|c|c|} \hline
+          {\bf Node} & {\bf Dominators} \\ \hline \hline
+          1 & \onslide<2->{1} \\ \hline
+          2 & \onslide<3->{1, 2} \\ \hline
+          3 & \onslide<4->{1, 2, 3} \\ \hline
+          4 & \onslide<5->{1, 4} \\ \hline
+          5 & \onslide<6->{1, 5} \\ \hline
+        \end{tabular}}
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Common Dominator Cases}
+  \begin{itemize}[<+->]
+  \item The test of a while loop dominates all blocks in the loop
+    body.
+  \item The test of an if-then-else dominates all blocks in
+    either branch.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Back Edges}
+  \begin{itemize}[<+->]
+  \item An edge is a {\bf back edge} if its head dominates its tail.
+  \item {\bf Theorem:} Every back edge is a retreating edge in
+    every DFST of every flow graph.
+    \begin{itemize}
+    \item Proof? Discuss/Exercise
+    \item Converse almost always true, but not always.
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Example: Back Edges}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(30,40)
+      \putnode{n1}{origin}{-10}{35}{\pscirclebox{1}}
+      \putnode{n2}{n1}{-15}{-15}{\pscirclebox{4}}
+      \putnode{n3}{n1}{0}{-30}{\pscirclebox{5}}
+      \putnode{n4}{n2}{30}{0}{\pscirclebox{2}}
+      \putnode{n5}{n3}{30}{0}{\pscirclebox{3}}
+
+      \ncline[nodesep=-0.9]{->}{n1}{n2}
+      \ncline[nodesep=-0.9]{->}{n1}{n4}
+      \ncline[nodesep=-0.9]{->}{n2}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n5}
+
+      \nccurve[nodesep=-0.3,angleA=-180,angleB=-180,ncurv=2]{->}{n3}{n1}
+      \nccurve[nodesep=-0.7,angleA=45,angleB=45]{->}{n5}{n4}
+
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n1}{n2}
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n2}{n3}
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n1}{n4}
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n4}{n5}
+      \putnode{tab}{origin}{40}{35}{
+        \begin{tabular}{|c|c|} \hline
+          {\bf Node} & {\bf Dominators} \\ \hline \hline
+          1 & {1} \\ \hline
+          2 & {1, 2} \\ \hline
+          3 & {1, 2, 3} \\ \hline
+          4 & {1, 4} \\ \hline
+          5 & {1, 5} \\ \hline
+        \end{tabular}}\pause
+      \nccurve[linecolor=blue,linewidth=1,nodesep=-0.3,angleA=-180,angleB=-180,ncurv=2]{->}{n3}{n1}
+      \nccurve[linecolor=blue,linewidth=1,nodesep=-0.7,angleA=45,angleB=45]{->}{n5}{n4}
+
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Reducible Flow Graphs}
+  \begin{itemize}[<+->]
+  \item A flow graph is {\bf reducible} if every retreating edge
+    in any DFST for that flow graph is a back edge.
+  \item {\bf Testing reducibility:} Take any DFST for the flow
+    graph, remove the back edges, and check that the result is
+    acyclic.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Example: Remove Back Edges}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(30,40)
+      \putnode{n1}{origin}{-10}{35}{\pscirclebox{1}}
+      \putnode{n2}{n1}{-15}{-15}{\pscirclebox{4}}
+      \putnode{n3}{n1}{0}{-30}{\pscirclebox{5}}
+      \putnode{n4}{n2}{30}{0}{\pscirclebox{2}}
+      \putnode{n5}{n3}{30}{0}{\pscirclebox{3}}
+
+      \ncline[nodesep=-0.9]{->}{n1}{n2}
+      \ncline[nodesep=-0.9]{->}{n1}{n4}
+      \ncline[nodesep=-0.9]{->}{n2}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n5}
+
+      %\nccurve[nodesep=-0.3,angleA=-180,angleB=-180,ncurv=2]{->}{n3}{n1}
+      %\nccurve[nodesep=-0.7,angleA=45,angleB=45]{->}{n5}{n4}
+
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n1}{n2}
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n2}{n3}
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n1}{n4}
+      \ncline[linecolor=red, linewidth=1.2, offset=1, nodesep=-0.9]{-}{n4}{n5}
+      \putnode{tab}{origin}{40}{35}{
+        \begin{tabular}{|c|c|} \hline
+          {\bf Node} & {\bf Dominators} \\ \hline \hline
+          1 & {1} \\ \hline
+          2 & {1, 2} \\ \hline
+          3 & {1, 2, 3} \\ \hline
+          4 & {1, 4} \\ \hline
+          5 & {1, 5} \\ \hline
+        \end{tabular}}
+      \only<1>{\nccurve[linecolor=blue,linewidth=1,nodesep=-0.3,angleA=-180,angleB=-180,ncurv=2]{->}{n3}{n1}
+        \nccurve[linecolor=blue,linewidth=1,nodesep=-0.7,angleA=45,angleB=45]{->}{n5}{n4}}
+      \only<2->{\putnode{rem}{origin}{40}{0}{Remaining graph is acyclic.}}
+    \end{pspicture}
+  \end{center}
+  
+}
+
+\frame{
+  \frametitle{Why Reducibility?}
+  \begin{itemize}
+  \item {\bf Folk theorem:}  All flow graphs in practice are reducible.
+  \item {\bf Fact:} If you use only while-loops, for-loops,
+    repeat-loops, if-then(-else), break, and continue, then your
+    flow graph {\bf is} reducible.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Example: Nonreducible Graph}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(80,50)
+      \putnode{a0}{origin}{40}{40}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{A}}
+      \putnode{b0}{a0}{-13}{-23}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{B}}
+      \putnode{c0}{a0}{13}{-23}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{C}}
+      \ncline[nodesep=-0.5]{->}{a0}{b0}
+      \ncline[nodesep=-0.5]{->}{a0}{c0}
+      \ncline{->}{b0}{c0}
+      \nccurve[nodesep=-0.9,angleA=-135,angleB=-45]{->}{c0}{b0}
+      \putnode{bc0}{b0}{15}{0}{}
+      \putnode{bc1}{b0}{11}{-6}{}
+      \putnode{l0}{bc0}{0}{-13}{}
+      \putnode{l1}{l0}{-4}{0}{}
+      \pause
+      \putnode{lab}{b0}{13}{-20}{
+        \begin{tabular}{p{45mm}}
+          In any DFST, one of these edges will be a retreating edge.
+      \end{tabular}}
+      \ncline[linestyle=dotted,dotsep=0.3]{->}{l0}{bc0}
+      \ncline[linestyle=dotted,dotsep=0.3]{->}{l1}{bc1}
+      
+      \pause
+      \putnode{a1}{a0}{-30}{0}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{A}}
+      \putnode{b1}{a1}{0}{-13}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{B}}
+      \putnode{c1}{a1}{0}{-26}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{C}}
+      \ncline[nodesep=-0.5]{->}{a1}{b1}
+      \nccurve[nodesep=-0.1]{->}{a1}{c1}
+      \ncline{->}{b1}{c1}
+      \nccurve[nodesep=-0.1,angleA=-195,angleB=-165,
+        linecolor=red,linewidth=.3]{->}{c1}{b1}
+      \pause
+      \putnode{a2}{a0}{30}{0}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{A}}
+      \putnode{b2}{a2}{0}{-13}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{C}}
+      \putnode{c2}{a2}{0}{-26}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{B}}
+      \ncline[nodesep=-0.5]{->}{a2}{b2}
+      \nccurve[nodesep=-0.1]{->}{a2}{c2}
+      \ncline{->}{b2}{c2}
+      \nccurve[nodesep=-0.1,angleA=-195,angleB=-165,
+        linecolor=red,linewidth=.3]{->}{c2}{b2}
+\end{pspicture}
+  \end{center}
+  
+}
+
+\frame{
+  \frametitle{Why Care About Back/Retreating Edges?}
+  \begin{itemize}[<+->]
+  \item Proper ordering of nodes during iterative algorithm
+    assures number of passes limited by the number of ``nested''
+    back edges.
+  \item Depth of nested loops upper-bounds the number of nested
+    back edges.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{DF Order and Retreating Edges}
+  \begin{itemize}[<+->]
+  \item Suppose that for a RD analysis, we visit nodes during
+    each iteration in DF order.
+  \item The fact that a definition $d$ reaches a block will
+    propagate in one pass along any increasing sequence of
+    blocks.
+  \item When $d$ arrives along a retreating edge, it is too late to
+    propagate $d$ from \OUT to \IN.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Example: DF Order}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(-35,0)(60,60)
+      %\psframe(-35,0)(60,60)
+      \putnode{n1}{origin}{-10}{35}{\pscirclebox{1}}
+      \putnode{n2}{n1}{-15}{-15}{\pscirclebox{4}}
+      \putnode{n3}{n1}{0}{-30}{\pscirclebox{5}}
+      \putnode{n4}{n2}{30}{0}{\pscirclebox{2}}
+      \putnode{n5}{n3}{30}{0}{\pscirclebox{3}}
+
+      \ncline[nodesep=-0.9]{->}{n1}{n2}
+      \ncline[nodesep=-0.9]{->}{n1}{n4}
+      \ncline[nodesep=-0.9]{->}{n2}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n5}
+
+      \nccurve[nodesep=-0.3,angleA=-180,angleB=-180,ncurv=2]{->}{n3}{n1}
+      \nccurve[nodesep=-0.7,angleA=45,angleB=45]{->}{n5}{n4}
+
+      \putnode{lab}{n1}{30}{10}{%
+        \begin{tabular}{l}
+          Node 2 generates definition {\red d}. \\
+          \onslide<2->{Other nodes ``empty'' w.r.t. {\red d}.} \\
+          \onslide<3->{Does {\red d} reach node {\bf 4}?}
+      \end{tabular}}
+      \onslide<4->{\putnode{lo4}{n4}{0}{-5}{{\green d}}}
+      \onslide<5->{\putnode{li5}{n5}{0}{ 5}{{\green d}}}
+      \onslide<6->{\putnode{lo5}{n5}{0}{-5}{{\green d}}}
+      \onslide<7->{\putnode{li3}{n3}{0}{ 5}{{\green d}}}
+      \onslide<8->{\putnode{lo3}{n3}{0}{-5}{{\green d}}}
+      \onslide<9->{\putnode{li1}{n1}{0}{ 5}{{\red d}}}
+      \onslide<10->{\putnode{lo1}{n1}{0}{-5}{{\red d}}}
+      \onslide<11->{\putnode{li4}{n4}{0}{ 5}{{\red d}}}
+      \onslide<12->{\putnode{li2}{n2}{0}{ 5}{{\red d}}}
+      \onslide<13->{\putnode{lo2}{n2}{0}{-5}{{\red d}}}
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Depth of a Flow Graph}
+  \begin{itemize}[<+->]
+  \item The {\bf depth} of a flow graph is the greatest number of retreating edges along any acyclic path.
+  \item For RD, if we use DF order to visit nodes, we converge in depth+2 passes.
+    \begin{itemize}
+    \item Depth+1 passes to follow that number of increasing segments.
+    \item 1 more pass to realize we converged.
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Example: Depth = 2}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(80,30)
+      \putnode{a0}{origin}{0}{10}{ }
+      \putnode{b0}{a0}{20}{0}{ }
+      \putnode{c0}{b0}{10}{0}{ }
+      \putnode{d0}{c0}{20}{0}{ }
+      \putnode{e0}{d0}{10}{0}{ }
+      \putnode{f0}{e0}{20}{0}{ }
+      \pause
+      \ncline{->}{a0}{b0}
+      \Bput{increasing}
+      \pause
+      \ncline[linestyle=dotted,dotsep=0.3]{->}{b0}{c0}
+      \Aput{retreating}
+      \pause
+      \ncline{->}{c0}{d0}
+      \Bput{increasing}
+      \pause
+      \ncline[linestyle=dotted,dotsep=0.3]{->}{d0}{e0}
+      \Aput{retreating}
+      \pause
+      \ncline{->}{e0}{f0}
+      \Bput{increasing}
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Similarly \ldots}
+  \begin{itemize}[<+->]
+  \item AE also works in depth+2 passes.
+    \begin{itemize}
+    \item Unavailability propagates along retreat-free node
+      sequences in one pass.
+    \end{itemize}
+  \item So does LV if we use reverse of DF order.
+    \begin{itemize}
+    \item A use propagates backward along paths that do not use a
+      retreating edge in one pass.
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{In General \ldots}
+  \begin{itemize}
+  \item The depth+2 bound works for any monotone bit-vector
+    framework, as long as information only needs to propagate along
+    acyclic paths.
+    \begin{itemize}
+    \item Example: if a definition reaches a point, it does so
+      along an acyclic path.
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Why Depth+2 is Good?}
+  \begin{itemize}
+  \item Normal control-flow constructs produce reducible flow
+    graphs with the number of back edges at most the nesting
+    depth of loops.
+    \begin{itemize}
+    \item Nesting depth tends to be small.
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Example: Nested Loops}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(80,50)
+      \putnode{a2}{origin}{10}{50}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{\ \ \ }}
+      \putnode{b2}{a2}{0}{-13}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{\ \ \ }}
+      \putnode{c2}{a2}{0}{-26}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{\ \ \ }}
+      \putnode{d2}{a2}{0}{-39}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{\ \ \ }}
+      \ncline[nodesep=-0.3]{->}{a2}{b2}
+      \ncline[nodesep=-0.3]{->}{b2}{c2}
+      \ncline[nodesep=-0.3]{->}{c2}{d2}
+      \nccurve[nodesep=-0.1,angleA=-195,angleB=-165,
+        linecolor=red,linewidth=.3]{->}{d2}{c2}
+      \nccurve[nodesep=-0.1,angleA=-195,angleB=-165,
+        linecolor=red,linewidth=.3]{->}{c2}{b2}
+      \nccurve[nodesep=-0.1,angleA=-195,angleB=-165,
+        linecolor=red,linewidth=.3]{->}{b2}{a2}
+      \putnode{l2}{d2}{5}{-15}{%
+        \begin{tabular}{p{45mm}}
+          3 nested while loops.\\      \pause
+          depth = 3.
+      \end{tabular}}
+      \pause
+      \putnode{a1}{a2}{40}{0}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{\ \ \ }}
+      \putnode{b1}{a1}{0}{-13}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{\ \ \ }}
+      \putnode{c1}{a1}{0}{-26}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{\ \ \ }}
+      \putnode{d1}{a1}{0}{-39}{%
+        \pscirclebox[fillcolor=blue!20,fillstyle=solid]{\ \ \ }}
+      \ncline[nodesep=-0.3]{->}{a1}{b1}
+      \ncline[nodesep=-0.3]{->}{b1}{c1}
+      \ncline[nodesep=-0.3]{->}{c1}{d1}
+      \nccurve[nodesep=-0.1,angleA=-195,angleB=-170,
+        linecolor=red,linewidth=.3]{->}{d1}{a1}
+      \nccurve[nodesep=-0.2,angleA=-195,angleB=-155,
+        linecolor=red,linewidth=.3]{->}{c1}{a1}
+      \nccurve[nodesep=-0.3,angleA=-195,angleB=-145,
+        linecolor=red,linewidth=.3]{->}{b1}{a1}
+      \putnode{l1}{d1}{20}{-15}{%
+        \begin{tabular}{p{45mm}}
+          3 nested do-while loops.\\ \pause
+          depth = 1.
+      \end{tabular}}
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Natural Loops}
+  \begin{itemize}[<+->]
+  \item The {\bf natural loop} of a back edge $a\rightarrow b$ is
+    $\{b\}$ plus the set of nodes that can reach $a$ without
+    going through $b$.
+  \item {\bf Theorem:} two natural loops are either disjoint,
+    identical, or nested.
+  \item Proof: Discuss/Exercise
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Example: Natural Loops}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(60,30)
+      %\psframe(-35,0)(60,60)
+      \putnode{n1}{origin}{10}{35}{\pscirclebox{1}}
+      \putnode{n2}{n1}{-15}{-15}{\pscirclebox{4}}
+      \putnode{n3}{n1}{0}{-30}{\pscirclebox{5}}
+      \putnode{n4}{n2}{30}{0}{\pscirclebox{2}}
+      \putnode{n5}{n3}{30}{0}{\pscirclebox{3}}
+
+      \onslide<3->{\putnode{lp1}{n2}{17}{0}{\psovalbox[framesep=25,fillcolor=red!10,fillstyle=solid]{\rule{25mm}{0pt}\rule{0pt}{5mm}}}}
+      \onslide<2->{\putnode{lp1}{n4}{7}{-8}{\psovalbox[framesep=10,fillcolor=blue!10,fillstyle=solid]{\rule{5mm}{0pt}\rule{0pt}{8mm}}}}
+
+      \putnode{n1}{origin}{10}{35}{\pscirclebox{1}}
+      \putnode{n2}{n1}{-15}{-15}{\pscirclebox{4}}
+      \putnode{n3}{n1}{0}{-30}{\pscirclebox{5}}
+      \putnode{n4}{n2}{30}{0}{\pscirclebox{2}}
+      \putnode{n5}{n3}{30}{0}{\pscirclebox{3}}
+
+
+      \ncline[nodesep=-0.9]{->}{n1}{n2}
+      \ncline[nodesep=-0.9]{->}{n1}{n4}
+      \ncline[nodesep=-0.9]{->}{n2}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n3}
+      \ncline[nodesep=-0.9]{->}{n4}{n5}
+      \nccurve[nodesep=-0.3,angleA=-180,angleB=-180,ncurv=2]{->}{n3}{n1}
+      \nccurve[nodesep=-0.7,angleA=45,angleB=45]{->}{n5}{n4}
+      \onslide<2->{\putnode{lab5}{n5}{0}{-15}{Natural loop $3\rightarrow 2$}}
+      \onslide<3->{\putnode{lab2}{n2}{0}{-35}{Natural loop $5\rightarrow 1$}}
+
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Reading Assignment}
+  \begin{itemize}
+  \item New Dragon Book (Aho, Lam, Sethi, Ullman)
+    \begin{itemize}
+    \item Chapter 9
+    \end{itemize}
+  \end{itemize}
+}
+
+\end{document}

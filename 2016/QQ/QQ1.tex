@@ -1,0 +1,115 @@
+\documentclass[11pt,draft]{article}
+\usepackage{anysize}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{paralist}
+\usepackage{pstricks}
+\usepackage{pst-text}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{multirow}
+\usepackage{xspace}
+\usepackage{wrapfig}
+\usepackage{fancyvrb}
+
+%% Page layout
+\pagestyle{headings}
+\markboth{}{Your Name and Roll Number:}
+
+
+\begin{document}
+\noindent \rule{\textwidth}{.2mm}
+\begin{center}
+{\large {\bf Quiz-1 CS618} }
+
+Duration: 45 Minutes \hfill Max Marks: 45
+\end{center} 
+\noindent \rule{\textwidth}{.2mm}
+\begin{itemize}
+\item Write your name and roll number on the question paper and the
+  answer book.
+\item No explanations will be provided. In case of a doubt, make
+  suitable assumptions and justify.
+\end{itemize}
+\noindent \rule{\textwidth}{.2mm}
+
+\noindent\begin{tabular}{|l|@{}l}%\cline{1-1}
+\begin{minipage}[t]{.33\textwidth}
+\begin{verbatim}
+/* ------ entry ------- */
+
+    x = ... /*something*/
+    y = x + 3
+
+L2:
+    if (y > 20) goto L1
+    x = x + 2
+    y = x + 3
+    goto L2
+
+L1:
+    v = x + 3
+    w = x + 2
+
+L3:  
+    u = v + w
+    goto L5
+
+L4:
+    w = v + w
+    goto L7
+
+L5:
+    z = w
+    u = x * y
+    if (u < z) goto L4
+    goto L6
+    
+L6:
+    goto L7
+
+L7:
+
+/* ----- exit --------- */
+    
+\end{verbatim}
+\end{minipage}&
+\begin{minipage}[t]{.63\textwidth}
+  \begin{enumerate}
+  \item (10) Convert the given 3-address program to a CFG. Note that:
+    \begin{enumerate}
+    \item The basic blocks should be maximal basic blocks.
+    \item Clearly show the statements inside each basic block.
+    \item For edges corresponding to the conditional {\tt goto}-s,
+      label the true edge as {\bf T} and false edge as {\bf F}.
+    \end{enumerate}
+    
+  \item (15) Perform {\bf Very Busy Expression} analysis for the given
+    program. In particular,
+    \begin{enumerate}
+    \item Compute {\bf gen} and {\bf kill} for each basic block.
+    \item Give initial values of  {\bf IN} and {\bf OUT} for each basic block.
+    \item Give final {\bf IN} and {\bf OUT} for each basic block. You do
+      not need to show the intermediate passes.
+    \end{enumerate}
+
+  \item (20) An expression {\bf e} is {\bf Partially Available} at a
+    program point $\mathbf{\pi}$ if there is {\em some} path from {\em
+      entry} to $\mathbf{\pi}$ that contains a computation of {\bf e}
+    which is not followed by an assignment to any of its operand.
+    
+    Perform {\bf Partially Available Expression} analysis for the
+    given program. In particular,
+    \begin{enumerate}
+    \item Compute {\bf gen} and {\bf kill} for each basic block.
+    \item Give {\bf equations} for computing {\bf IN} and {\bf OUT}
+      for a basic block.
+    \item Give initial values of {\bf IN} and {\bf OUT} for each basic
+      block.
+    \item Give final {\bf IN} and {\bf OUT} for each basic block. You
+      do not need to show the intermediate passes.
+    \end{enumerate}    
+  \end{enumerate}
+\end{minipage}\\ \cline{1-1}
+\end{tabular}
+\end{document}

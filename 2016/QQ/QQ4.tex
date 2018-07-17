@@ -1,0 +1,104 @@
+\documentclass[11pt]{article}
+\usepackage{anysize}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{paralist}
+\usepackage{pstricks}
+\usepackage{pst-text}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{multirow}
+\usepackage{xspace}
+\usepackage{wrapfig}
+\usepackage{fancyvrb}
+\usepackage{bcprules}
+\usepackage{dashrule}
+\newcommand{\answer}[1]{}
+%% Page layout
+\pagestyle{headings}
+\markboth{}{Your Name and Roll Number:}
+\begin{document}
+\noindent \rule{\textwidth}{.2mm}
+\begin{center}
+{\large {\bf Quiz-4 CS618} }
+
+Duration: 45 Minutes \hfill Max Marks: 50
+\end{center} 
+\noindent \rule{\textwidth}{.2mm}
+\begin{itemize}
+\item Write your name and roll number on the question paper and the
+  answer book.
+\item No explanations will be provided. In case of a doubt, make
+  suitable assumptions and justify.
+\item There are 2 questions on 2 pages.
+\end{itemize}
+\noindent \rule{\textwidth}{.2mm}
+
+\newcommand{\tm}{\ensuremath{\mathsf t}}
+\newcommand{\ty}{\ensuremath{T}}
+\newcommand{\val}{\ensuremath{v}}
+\begin{center}{\bf Useful Definitions}
+\end{center}
+  \begin{itemize}
+  \item Simply Typed $\lambda$-terms
+    \begin{center}
+    \begin{tabular}{rcl@{\qquad}r}
+      $\tm$ & := & $x$         & {\em -- Variable}\\ 
+            & $\mid$ & $\lambda x:\ty.\ \tm$ &{\em -- Abstraction}\\
+            & $\mid$& $\tm\ \tm $     &{\em -- Application} \\
+    \end{tabular}
+    \end{center}
+  \item The Set of Values
+    \begin{center}
+      \begin{tabular}{rcl@{\qquad}l}
+        \val\ &:=& $\lambda x:\ty.\ \tm$ &{\em -- Abstraction Value}
+      \end{tabular}
+    \end{center}
+  \item The Evaluation Rules
+    \infrule[E-App1]{\tm_1 \rightarrow \tm'_1}{\tm_1\ \tm_2 \rightarrow \tm_1'\ \tm_2} 
+
+    \infrule[E-App2]{\tm_2 \rightarrow \tm'_2}{\val\ \tm_2 \rightarrow \val\ \tm'_2} 
+
+    \infax[E-AppAbs]{(\lambda x:\ty_1.\ \tm_1)\val_2 \rightarrow [x\mapsto \val_2]\tm_1}
+  \item   The Typing Rules
+  \infrule[T-Abs]{\Gamma,x:\ty_1 \vdash \tm_2:\ty_2}{\Gamma\vdash\lambda x:\ty_1.\ \tm_2 : \ty_1\rightarrow \ty_2} 
+
+  \infrule[T-Var]{x:\ty \in \Gamma}{\Gamma\vdash x:\ty} 
+
+  \infrule[T-App]{\Gamma\vdash \tm_1:\ty_1\rightarrow\ty_2\andalso\Gamma\vdash \tm_2:\ty_1}{\Gamma\vdash \tm_1\ \tm_2:\ty_2}
+
+  \end{itemize}
+\hfill
+\begin{center} (P.T.O.) \end{center}
+\clearpage
+\begin{enumerate}
+\item ({\bf 20 Marks}) For each of the term $\tm$ below, find the
+  types $\ty_1, \ty_2,$ etc. such that \tm\ has a valid type
+  \ty. If such a type can not be found, show why.\footnote{You
+    might want to use $\alpha$-renaming to avoid issues with
+    variable name reuse.}
+
+    \begin{itemize}
+    \item $\lambda x:\ty_1\ y:\ty_2.\ x\ y$
+    \item $\lambda x:\ty_1\ y:\ty_2.\ x\ y\ y$
+    \item ($\lambda x:\ty_1\ y:\ty_2.\ x\ y\ y$) ($\lambda x:\ty_3\ y:\ty_4.\ x\ y$)
+    \end{itemize}
+\newcommand{\comp}{\mbox{complete}}
+  \item ({\bf 30 Marks}) We define a $\lambda$-calculus program
+    to be {\bf COMPLETE} if it does not contain any free
+    variables (variables that are not bound by any $\lambda$ in
+    the program). 
+    \begin{enumerate}
+    \item\ [10] Complete the following analysis that checks for
+    complete $\lambda$-calculus programs.
+    \infrule[Comp-Var]{x:\ty \in \Gamma}{\Gamma\vdash \comp(x)}\ \\[3pt]
+
+    \infrule[Comp-Abs]{\hdashrule{12cm}{1pt}{1pt}}{\Gamma\vdash\comp(\lambda x:\ty_1.\ \tm_2)} \ \\[3pt]
+
+  \infrule[Comp-App]{\hdashrule{12cm}{1pt}{1pt}}{\Gamma\vdash \comp(\tm_1\ \tm_2)}\ \\[3pt]
+\item\ [10 + 10] Define {\em Progress} and {\em Preservation} specific for the  analysis rules above. Explain the intuition behind the definitions.
+  \end{enumerate}
+
+\end{enumerate}
+\end{document}
+

@@ -1,0 +1,101 @@
+\begin{center}
+  \begin{tabular}{l@{\ind\ind}l@{\ind\ind}l}
+    \begin{tabular}[t]{@{}l@{}}
+      main() \{ \\
+      \rnode{n00}{ ENTRY }\\
+      \rnode{n01}{ $c_1:$ p() }\\
+      \rnode{n21}{ \ ret p() }\\
+      \rnode{n02}{ c * d }\\
+      \rnode{n03}{ $c_2:$ q() }\\
+      \rnode{n23}{ \ ret q() }\\
+      \rnode{n04}{ EXIT }\\
+      \}
+    \end{tabular}&
+    \begin{tabular}[t]{@{}l@{}}
+      p() \{ \\
+      \rnode{n05}{ \ind ENTRY }\\
+      \rnode{n06}{ \ind a * b }\\
+      \rnode{n07}{ $c_3:$ q() } \ind \rnode{n08}{    $c_4:$ q() }\\
+      \rnode{n27}{ \ ret q()  } \ind \rnode{n28}{  \  ret   q() }\\
+      \rnode{n09}{    \ind c = 5 }\\
+      \rnode{n10}{ \ind EXIT }\\
+      \}
+    \end{tabular}&
+    \begin{tabular}[t]{@{}l@{}}
+      q() \{ \\
+      \rnode{n11}{ \ind ENTRY }\\
+      \rnode{n13}{ a = 5 } \ind \rnode{n15}{      b = 6 }\\
+      \rnode{n16}{ \ind EXIT }\\
+      \}
+    \end{tabular}
+  \end{tabular}
+
+  \ncline{->}{n00}{n01}
+  \ncline{->}{n21}{n02}
+  \ncline{->}{n02}{n03}
+  \ncline{->}{n23}{n04}
+
+  \ncline{->}{n05}{n06}
+  \ncline{->}{n06}{n07}
+  \ncline{->}{n06}{n08}
+  \ncline{->}{n27}{n09}
+  \ncline{->}{n28}{n09}
+  \ncline{->}{n09}{n10}
+
+  \ncline{->}{n11}{n13}
+  \ncline{->}{n11}{n15}
+  \ncline{->}{n13}{n16}
+  \ncline{->}{n15}{n16}
+
+  \nccurve[linestyle=dashed,angleB=90]{->}{n01}{n05}
+  \nccurve[linestyle=dashed,angleB=75]{->}{n03}{n11}
+  \nccurve[linestyle=dashed,angleB=90]{->}{n07}{n11}
+  \nccurve[linestyle=dashed,angleB=135]{->}{n08}{n11}
+  \nccurve[linestyle=dashed,angleB=-135]{<-}{n21}{n10}
+  \nccurve[linestyle=dashed,angleB=-45]{<-}{n23}{n16}
+  \nccurve[linestyle=dashed,angleB=-90]{<-}{n27}{n16}
+  \nccurve[linestyle=dashed,angleB=-135]{<-}{n28}{n16}
+
+%  \ncline{->}{n10}{n21}
+%  \nccurve[linestyle=dotted,angleA=-75]{->}{n16}{n23}
+%  \nccurve[linestyle=dotted,angleA=-90]{->}{n16}{n27}
+%  \nccurve[linestyle=dotted,angleA=-135]{->}{n16}{n28}
+
+\end{center}
+\begin{center}
+  \begin{tabular}{l|l|l|l|l} \hline
+    {\bf Pgm} & {\bf gen} & {\bf kill} & {\bf IN} & {\bf OUT}
+    \\ \hline
+    main() \{ & & & & \\ \hline
+    \ind ENTRY & & & $\lambda, 00$& $\lambda, 00$\\ \hline
+    \nline $c_1:$ call p() & & & $\lambda, 00$& $c_1, 00$\\ \hline
+    \nline \ind c * d & c*d & & $\lambda, 00$& $\lambda, 01$\\ \hline
+    \nline $c_2:$ call q() & & & $\lambda, 01$& $c_2, 01$\\ \hline
+    \ind EXIT & & & $\lambda, 01$ & $-$\\ \hline
+    \} & & & & \\ \hline & & & & \\ \hline
+    p() \{ & & & & \\ \hline
+    \ind ENTRY & & & $c_1, 00$&$c_1, 00$ \\ \hline
+    \nline   \ind a * b & a*b & & $c_1, 00$&$c_1, 10$ \\ \hline
+    \ind if(\ldots) then & & & $c_1, 10$&$c_1, 10$ \\ \hline
+    \nline   $c_3:$ \ind call q() & & & $c_1, 10$&$c_1c_3, 10$ \\ \hline
+    \ind else & & & $-$ & $-$ \\ \hline
+    \nline    $c_4:$ \ind call q() & & & $c_1, 10$&$c_1c_4, 10$ \\ \hline
+    \nline    \ind c = 5 & & c*d & $c_1, 00;\ c_1, 00$&$c_1, 00$ \\ \hline
+    \ind EXIT & & & $c_1, 00$&$\lambda, 00$ \\ \hline
+    \} & & & & \\ \hline & & & & \\ \hline
+    q() \{ & & & & \\ \hline
+    \ind ENTRY & & & $c_1c_3, 10$; $c_1c_4, 10$; $c_2, 01$ & $c_1c_3, 10$; $c_1c_4, 10$; $c_2, 01$ \\ \hline
+    \ind if(\ldots) then & & & $c_1c_3, 10$; $c_1c_4, 10$; $c_2, 01$& $c_1c_3, 10$; $c_1c_4, 10$; $c_2, 01$ \\ \hline
+    \nline     \ind\ind a = 5 & & a*b & $c_1c_3, 10$; $c_1c_4, 10$; $c_2, 01$& $c_1c_3, 00$; $c_1c_4, 00$; $c_2, 01$ \\ \hline
+    \ind else & & & & \\ \hline
+    \nline     \ind\ind b = 6 & & a*b & $c_1c_3, 10$; $c_1c_4, 10$; $c_2, 01$& $c_1c_3, 00$; $c_1c_4, 00$; $c_2, 01$ \\ \hline
+    \ind EXIT & & & $c_1c_3, 00$; $c_1c_4, 00$; $c_2, 01$  & $c_1, 00$; $c_1, 00$; $\lambda, 01$  \\ \hline
+    \} & & & & \\ \hline
+  \end{tabular}
+
+bit1 bit2: bit1 represents availability of a*b, bit2 of c*d
+you can also initialize boundary with $\bot$ instead of 0. Meet at
+each point, ignoring call string part will give the
+availability.
+ 
+\end{center}

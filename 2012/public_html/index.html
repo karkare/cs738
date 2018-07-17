@@ -1,0 +1,222 @@
+<html>
+	<head> 
+		<!--<link rel="stylesheet" href="mystyle.css" type="text/css"> -->
+		<meta name="author" content="Amey Karkare,Saurabh Joshi,Pritesh Agarwal">
+		<meta name="keywords" content="CS738, CS 738, Compiler, Optimizations">
+	</head>
+	<title> CS 738: Advanced Compiler Optimizations</title>
+	<body>
+<h1 id="cs-738---advanced-compiler-optimization-2011-12-ii-semester">CS 738 - Advanced Compiler Optimization (2011-12 II Semester)</h1>
+<hr />
+<ul>
+<li><strong>Instructor</strong>: <a href="http://www.cse.iitk.ac.in/users/karkare">Amey Karkare</a> (<script type="text/javascript">
+<!--
+h='&#x63;&#x73;&#x65;&#46;&#x69;&#x69;&#116;&#x6b;&#46;&#x61;&#x63;&#46;&#x69;&#110;';a='&#64;';n='&#x6b;&#x61;&#114;&#x6b;&#x61;&#114;&#x65;';e=n+a+h;
+document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'">'+'<code>'+e+'</code>'+'<\/'+'a'+'>');
+// -->
+</script><noscript>&#x6b;&#x61;&#114;&#x6b;&#x61;&#114;&#x65;&#32;&#x61;&#116;&#32;&#x63;&#x73;&#x65;&#32;&#100;&#x6f;&#116;&#32;&#x69;&#x69;&#116;&#x6b;&#32;&#100;&#x6f;&#116;&#32;&#x61;&#x63;&#32;&#100;&#x6f;&#116;&#32;&#x69;&#110;</noscript>)</li>
+<li><strong>TAs</strong> : <a href="http://www.cse.iitk.ac.in/users/sbjoshi">Saurabh Joshi</a> (<script type="text/javascript">
+<!--
+h='&#x63;&#x73;&#x65;&#46;&#x69;&#x69;&#116;&#x6b;&#46;&#x61;&#x63;&#46;&#x69;&#110;';a='&#64;';n='&#x73;&#98;&#106;&#x6f;&#x73;&#104;&#x69;';e=n+a+h;
+document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'">'+'<code>'+e+'</code>'+'<\/'+'a'+'>');
+// -->
+</script><noscript>&#x73;&#98;&#106;&#x6f;&#x73;&#104;&#x69;&#32;&#x61;&#116;&#32;&#x63;&#x73;&#x65;&#32;&#100;&#x6f;&#116;&#32;&#x69;&#x69;&#116;&#x6b;&#32;&#100;&#x6f;&#116;&#32;&#x61;&#x63;&#32;&#100;&#x6f;&#116;&#32;&#x69;&#110;</noscript>), <a href="http://www.cse.iitk.ac.in/users/pritesh">Pritesh Agarwal</a> (<script type="text/javascript">
+<!--
+h='&#x63;&#x73;&#x65;&#46;&#x69;&#x69;&#116;&#x6b;&#46;&#x61;&#x63;&#46;&#x69;&#110;';a='&#64;';n='&#112;&#114;&#x69;&#116;&#x65;&#x73;&#104;';e=n+a+h;
+document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'">'+'<code>'+e+'</code>'+'<\/'+'a'+'>');
+// -->
+</script><noscript>&#112;&#114;&#x69;&#116;&#x65;&#x73;&#104;&#32;&#x61;&#116;&#32;&#x63;&#x73;&#x65;&#32;&#100;&#x6f;&#116;&#32;&#x69;&#x69;&#116;&#x6b;&#32;&#100;&#x6f;&#116;&#32;&#x61;&#x63;&#32;&#100;&#x6f;&#116;&#32;&#x69;&#110;</noscript>)</li>
+<li><strong>Timings</strong> : Wed,Fri: 2:00PM - 3:20PM</li>
+</ul>
+<hr />
+<p>This course aims to teach advanced topics in compiler optimizations.</p>
+<ul>
+<li><a href="#ethics">Code of Ethics</a></li>
+<li><a href="#announcements">Announcements</a></li>
+<li><a href="#outline">Course Outline</a></li>
+<li><a href="#handouts">Topics covered and handouts</a></li>
+<li><a href="#assignments">Assignments</a></li>
+<li><a href="#project">Course Project</a></li>
+<li><a href="#support">Supporting Material</a></li>
+<li><a href="#research">Research Material</a></li>
+<li><a href="#reference">Recommended References</a></li>
+</ul>
+<h2 id="performance">Performance</h2>
+<p><i>NEW:</i> Check your performance <a href="http://karkare.cse.iitk.ac.in/~cs738/grades/">HERE</a></p>
+<h2 id="code-of-ethics">Code of Ethics <a id="ethics"/></h2>
+<p>Any report/program/assignment you submit must <strong>clearly distinguish</strong> your contribution from others (webpages, softwares, report, discussions with other students). <font color="red">The penalty for copying in any form will be severe</font>.</p>
+<h2 id="announcements">Announcements <a id="announcements"/></h2>
+<p><font color="red">Important</font> : All emails either to the instructor or the TAs should begin with subject line &quot;<strong>[CS738]</strong>&quot; -- without any spaces in the course code (and without quotes). Email not complying to this rule <strong>will NOT be entertained</strong>. Dates following the announcement corresponds to the date when the announcement was made. <strong>DO NOT</strong> confuse it with submission deadlines. Keep checking the announcement section regularly.</p>
+<ul>
+<li>Deadline for final project report submission is <del>17 April 2012 23:59:59</del>. Click <a href="#project">here</a> for more details.</li>
+<li>Assignment 4 uploaded. Deadline <del>30 Mar 2012 11:59:59PM</del>.(16 Mar 2012)</li>
+<li>Paper Critique submission deadline <del>23 Mar 2012 11:59:59PM</del>. Check <a href="https://piazza.com/class#winter2012/cs738">Piazza</a> announcement for details. (07 Mar 2012)</li>
+<li>Assignment 3 uploaded. <del>Deadline 14 Mar 2012 11:59:59PM</del>.(20 Feb 2012)</li>
+<li>E-mail your choice for paper critique to the instructor as well as TAs by <del>25th Feb 2012 11:59:59PM</del>. Details are <a href="papercritique/cs738_papers.html">here</a>.(17 Feb 2012)</li>
+<li>E-mail your detailed project proposal to the instructor as well as TAs. The subject of the mail should be <strong>&quot;[CS738] Project&quot;</strong>. Deadline for submission is <del>15 Feb 2012 11:59:59PM</del>. Post any related queries on Piazza. (04 Feb 2012)</li>
+<li>Assignment 2 uploaded. <del>Deadline 29 Jan 2012</del>.(23 Jan 2012)</li>
+<li>Project groups finalized.(17 Jan 2012)</li>
+<li>Slides for lecture 2 &amp; 3 are uploaded.(11 Jan 2012)</li>
+<li>E-mail your project group, language/infrastructure you plan to use, project idea (if you have some), and any other relevant information to the instructor as well as TAs. The subject of the mail should be <strong>&quot;[CS738] Project&quot;</strong>. Deadline for submitting this information is <del>13 Jan 2012 11:59:59PM</del> .(11 Jan 2012)</li>
+<li>Everyone taking the course <strong>must register</strong> on <a href="https://piazza.com/class#winter2012/cs738">Piazza</a>. (11 Jan 2012)</li>
+<li>Assignment 1 uploaded.(5 Jan 2012)</li>
+<li>Course project can de done individually or in a grup of two.(5 Jan 2012)</li>
+<li>Slides for introductory lectures uploaded.(5 Jan 2012)</li>
+</ul>
+<h2 id="course-outline">Course Outline <a id="outline"/></h2>
+<p>The course will mainly cover topics from the following list (not necessarily in the same order). Not all topics listed below will be covered, and depending on class feedback, new topics may be added.</p>
+<ul>
+<li>Introduction, compiler architecture, intermediate representations</li>
+<li>Control flow analysis, control-flow graphs, basic blocks</li>
+<li>Dataflow analysis</li>
+<li>SSA form</li>
+<li>Classical optimizations (constant folding, CSE, PRE)</li>
+<li>Loop optimizations</li>
+<li>Register allocation</li>
+<li>Pointer and alias analysis</li>
+<li>Interprocedural analysis</li>
+<li>Advanced Topics: Garbage Collection, Dynamic (JIT) compilation, Program Synthesis</li>
+</ul>
+<h3 id="evaluation">Evaluation</h3>
+<table>
+<col width="62%" />
+<col width="13%" />
+<tbody>
+<tr class="odd">
+<td align="left">Assignments</td>
+<td align="center">5%</td>
+</tr>
+<tr class="even">
+<td align="left">Paper presentation and critique</td>
+<td align="center">20%</td>
+</tr>
+<tr class="odd">
+<td align="left">Course Project</td>
+<td align="center">40%</td>
+</tr>
+<tr class="even">
+<td align="left">--Proposal(5%)+Report(20%) +Presentation(15%)</td>
+<td align="center"></td>
+</tr>
+<tr class="odd">
+<td align="left">End semester exam</td>
+<td align="center">30%</td>
+</tr>
+<tr class="even">
+<td align="left">Class Discussions</td>
+<td align="center">5%</td>
+</tr>
+</tbody>
+</table>
+<h2 id="topics-covered-and-slides">Topics Covered and Slides <a id="handouts"/></h2>
+<p>The slides are not suitable for taking prints as there is lot of redundancy due to overlays. Use handouts if you really need a print.</p>
+<hr />
+<ol style="list-style-type: decimal">
+<li>Introduction [<a href="lecturenotes/01IntroductionHandout.pdf">handouts</a>] [<a href="lecturenotes/01Introduction.pdf">slides</a>]</li>
+<li>Optimization Overview [<a href="lecturenotes/02OptimizationOverviewHandout.pdf">handouts</a>] [<a href="lecturenotes/02OptimizationOverview.pdf">slides</a>]</li>
+<li>Dataflow Analysis [<a href="lecturenotes/03DataFlowAnalysisHandout.pdf">handouts</a>] [<a href="lecturenotes/03DataFlowAnalysis.pdf">slides</a>]</li>
+<li>... (contd) [<a href="lecturenotes/04DataFlowAnalysisHandout.pdf">handouts</a>] [<a href="lecturenotes/04DataFlowAnalysis.pdf">slides</a>]</li>
+<li>Foundations of Data Flow Analysis [<a href="lecturenotes/05FoundationsDataFlowAnalysisHandout.pdf">handouts</a>] [<a href="lecturenotes/05FoundationsDataFlowAnalysis.pdf">slides</a>]</li>
+<li>... (contd) [<a href="lecturenotes/06FoundationsDataFlowAnalysisHandout.pdf">handouts</a>] [<a href="lecturenotes/06FoundationsDataFlowAnalysis.pdf">slides</a>]</li>
+<li>Flow Graph Theory [<a href="lecturenotes/07FlowGraphTheoryHandout.pdf">handouts</a>] [<a href="lecturenotes/07FlowGraphTheory.pdf">slides</a>] (Reading Assignment)</li>
+<li>Constant Propagation [<a href="lecturenotes/08ConstantPropagationHandout.pdf">handouts</a>] [<a href="lecturenotes/08ConstantPropagation.pdf">slides</a>]</li>
+<li>Static Single Assignment Form [<a href="lecturenotes/09SSAHandout.pdf">handouts</a>] [<a href="lecturenotes/09SSA.pdf">slides</a>] [<a href="http://dl.acm.org/citation.cfm?id=115320">paper</a>]</li>
+<li>... (contd) [<a href="lecturenotes/10SsaOptsHandout.pdf">handouts</a>] [<a href="lecturenotes/10SsaOpts.pdf">slides</a>]</li>
+<li>Conditional Constant Propagation [<a href="lecturenotes/11CondConstPropHandout.pdf">handouts</a>] [<a href="lecturenotes/11CondConstPropSlides.pdf">slides</a>] [<a href="http://dl.acm.org/citation.cfm?id=103136">paper</a>]</li>
+<li>SSA PRE [<a href="lecturenotes/12SSAPREHandout.pdf">handouts</a>] [<a href="lecturenotes/12SSAPRESlides.pdf">slides</a>] [<a href="http://dl.acm.org/citation.cfm?id=319348">paper</a>]</li>
+<li>... (contd) [<a href="lecturenotes/13SsaPreExampleHandout.pdf">handouts</a>] [<a href="lecturenotes/13SsaPreExampleSlides.pdf">slides</a>]</li>
+<li>Interprocedural Analysis [<a href="lecturenotes/14InterProcHandout.pdf">handouts</a>] [<a href="lecturenotes/14InterProcSlides.pdf">slides</a>]</li>
+<li>... (Functional Approach) [<a href="lecturenotes/15InterProcHandout.pdf">handouts</a>] [<a href="lecturenotes/15InterProcSlides.pdf">slides</a>]</li>
+<li>... (Call Strings Approach) [<a href="lecturenotes/16ip-dfa4in1.pdf">handouts</a>] [<a href="lecturenotes/16ip-dfa.pdf">slides</a>] (Prof Uday Khedker's notes)</li>
+<li>Pointer Analysis [<a href="lecturenotes/17PointerAnalysisHandout.pdf">handouts</a>] [<a href="lecturenotes/17PointerAnalysisSlides.pdf">slides</a>] [<a href="http://dl.acm.org/citation.cfm?id=237727">Streensgaard</a>] [<a href="http://www-ti.informatik.uni-tuebingen.de/~behrend/PaperSeminar/Program%20Analysis%20and%20SpecializationPhD.pdf">Anderson</a>]</li>
+<li>... (contd)</li>
+<li>Heap Reference Analysis [<a href="lecturenotes/19HRAHandout.pdf">handouts</a>] [<a href="lecturenotes/19HRASlides.pdf">slides</a>] [<a href="http://dl.acm.org/citation.cfm?id=1290521">paper</a>]</li>
+<li>... (contd)</li>
+<li>... (contd)</li>
+</ol>
+<hr />
+<h2 id="assignments">Assignments <a id="assignments"/></h2>
+<p>There will be short assignments to give you a chance to apply the lecture material. Assignments will have some written and some programming tasks.</p>
+<ul>
+<li><a href="assignments/asgn4/asgn4.pdf">Assignment 4</a> : <del>Deadline 30th Mar 2012</del></li>
+<li><a href="assignments/asgn3/asgn3.pdf">Assignment 3</a> : <del>Deadline 14th Mar 2012</del></li>
+<li><a href="assignments/asgn2/asgn2.pdf">Assignment 2</a> : <del>Deadline 29th Jan 2012</del></li>
+<li><a href="assignments/asgn1/asgn1.pdf">Assignment 1</a> : <del>Deadline 11th Jan 2012</del>
+<ul>
+<li>Submitted reports. [<a href="assignments/asgn1/asgn1_submit.html">here</a>]</li>
+</ul></li>
+</ul>
+<h2 id="course-project">Course Project<a id="project"/></h2>
+<p>The course project gives you a chance to explore a specific area of compiler implementation in more depth. You will be required to <strong>implement</strong> some compiler feature, and perform an <strong>experimental evaluation</strong> of your implementation. You may do your implementation within any freely-available compiler infrastructure (e.g. <a href="http://www.sable.mcgill.ca/soot">Soot</a>, <a href="http://jikesrvm.sourceforge.net/">JikesRVM</a>, <a href="http://llvm.org/">LLVM</a>, <a href="http://gcc.gnu.org/">gcc</a>, <a href="http://www.eclipse.org">Eclipse</a>, <a href="http://frama-c.com/">Frama-C</a>, etc.) (Some <a href="InfraDetails.html">Details about each infrastructure.</a>)</p>
+<p>You will report on your project in a paper in the style of a PLDI research paper (approx. 10 pages), and give a presentation/demo of your project to the class. <a href="http://www.sigplan.org/authorInformation.htm">LaTeX and MS Word templates for the PLDI paper format are available from SIGPLAN.</a></p>
+<ul>
+<li>Project can be done individually or in a group of two.</li>
+<li>Final project groups and titles [<a href="projects/pgroup.html">here</a>]</li>
+<li>Deadline for final project report submission is <del>17 April 2012 23:59:59</del>. This first submission is <strong>compulsory</strong>.
+<ul>
+<li>One resubmission will allowed before 20 April 2012 23:59:59 to let project groups fix minor mistakes and accommodate changes suggested during the demo.</li>
+<li>No new features should be added or major changes should be done between the first and the second submission. These changes will <strong>NOT</strong> carry any weight.</li>
+<li>Project report carrier <strong>20%</strong> weight. Hence, project groups are advised to put in their earnest efforts.</li>
+</ul></li>
+</ul>
+<h2 id="supporting-material">Supporting Material <a id="support"/></h2>
+<h5 id="most-of-the-following-softwares-are-available-from-package-repositories-of-linux-distributions.-it-is-recommended-to-use-these-repositories-and-install-than-to-build-them-from-source.">Most of the following softwares are available from package repositories of linux distributions. It is recommended to use these repositories and install than to build them from source.</h5>
+<ul>
+<li><a href="http://darcs.net">darcs</a> : A very good version control system</li>
+<li><a href="http://cscope.sourceforge.net">cscope</a> and <a href="http://ctags.sourceforge.net">ctags</a> : Code browing utilities</li>
+<li><a href="http://www.eclipse.org">Eclipse</a> : A Java based Integrated Development Environment</li>
+<li><a href="http://www.latex-project.org">LaTeX</a> : A document preparation system
+<ul>
+<li><a href="SupportMaterial/latexdocs.tar">Here</a> are some LaTeX related documents</li>
+</ul></li>
+</ul>
+<h2 id="research-material">Research Material <a id="research"/></h2>
+<ul>
+<li>Journals
+<ul>
+<li>International Journal of Parallel Programming</li>
+<li>Journal of the ACM</li>
+<li>Communications of the ACM</li>
+<li>ACM Transactions on Programming Languages</li>
+<li>IEEE Software</li>
+<li>IEEE Computer</li>
+<li>IEEE Transactions on Computers</li>
+<li>IEEE Transactions on Parallel and Distributed Systems</li>
+<li>IEEE Transactions on Software Engineering</li>
+<li>IBM Journal of Research and Development</li>
+<li>IBM Systems Journal</li>
+<li>SIAM Jounal of Computing</li>
+<li>SIGPLAN Notices</li>
+<li>ACTA INFORMATICA</li>
+</ul></li>
+<li>Conference Proceedings
+<ul>
+<li>International Conferences on Parallel Processing (ICPP)</li>
+<li>Proceedings of International Conf on Software Engineering (ICSE)</li>
+<li>Lecture Notes in Computer Science series.</li>
+<li>Proceedings of SIGPLAN conference on Programming Language Design and Implementation (PLDI)</li>
+<li>ACM Transactions on Programming Languages and Systemes (TOPLAS)</li>
+<li>ACM Symposium on Principles of Programming Languages (POPL)</li>
+<li>Proceedings SIGPLAN Simposium on Compiler Construction (CC)</li>
+<li>Annual International Symposium on Computer Architecture (ISCA)</li>
+<li>Proc. International Conference on Architectural Support for Programming Languages and Operating Systems (IEEE) (ASPLOS)</li>
+<li>International Parallel Processing Symposium, IEEE Computer Society.</li>
+<li>International Static Analysis Symposium (SAS)</li>
+<li>and many more ...</li>
+</ul></li>
+</ul>
+<h2 id="recommended-references">Recommended References <a id="reference"/></h2>
+<ul>
+<li>Appel, A., <strong>Modern Compiler Implementation in Java</strong> (or ML, or C), Cambridge University Press, 2002.</li>
+<li>Cooper, K., Torczon, L., <strong>Engineering a Compiler</strong>, Morgan Kaufmann, 2004</li>
+<li>Muchnick, S., <strong>Advanced Compiler Design and Implementation</strong>, Morgan Kaufmann, 1997.</li>
+<li>Aho, A., Lam, M., Sethi, R., Ullman, J., <strong>Compilers: Principles, Techniques, &amp; Tools</strong>, Addison Wesley, 2007.</li>
+<li>Y. N. Srikant, Priti Shankar, <strong>The Compiler Design Handbook: Optimizations and Machine Code Generation</strong>, CRC Press, 2008</li>
+<li>Randy Allen, Ken Kennedy,<strong>Optimizing Compilers for Modern Architectures: A Dependence-based Approach</strong>, Morgan Kaufmann, 2001</li>
+</ul>
+<hr />
+<h3 id="take-me-home">Take me <a href="http://www2.cse.iitk.ac.in/karkare/cs738">Home</a></h3>
+<h6 id="powered-by-pandoc">powered by <a href="http://johnmacfarlane.net/pandoc/">Pandoc</a></h6>
+<p>Last Modified at : Fri Nov 2 22:23:56 IST 2012</p>
+</body>
+</html>

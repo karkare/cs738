@@ -1,0 +1,214 @@
+\mode<presentation>
+{
+  \usetheme{umbc4}
+%  \setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{etex}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{bcprules}
+\usepackage{graphicx}
+\newcommand{\change}[1]{{\red #1}}
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[Types]{\ \\{\LARGE Simply Typed Lambda Calculus}}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\frame{
+  \frametitle{Reference Book}
+  Types and Programming Languages by Benjamin C. Pierce
+}
+\newcommand{\tm}{\ensuremath{\mathsf t}}
+\newcommand{\ty}{\ensuremath{T}}
+\newcommand{\bool}{\mbox{Bool}}
+\newcommand{\nat}{\mbox{Nat}}
+\frame{
+  \frametitle{Simple Types over \bool}
+  \begin{tabular}{rcl@{\qquad}r}
+    $\ty$ & := &          &-- Types\\ \pause
+    & & \bool &-- Boolean Type\\ \pause
+    & & $\ty \rightarrow\ \ty $     &-- Function Type\\ \pause
+  \end{tabular}
+
+{\em type constructor} $\rightarrow$ is right-associative, i.e., $\ty_1\rightarrow \ty_2 \rightarrow \ty_3$ stands for  $\ty_1\rightarrow (\ty_2 \rightarrow \ty_3)$
+}
+
+\frame{
+  \frametitle{Examples}
+  For each of the type below, write a function (in your favourite programming language) that has the required type:
+  \begin{itemize}[<+->]
+  \item $\bool\rightarrow\bool$
+  \item $\bool\rightarrow\bool\rightarrow\bool$
+  \item $(\bool\rightarrow\bool)\rightarrow\bool$
+  \item $(\bool\rightarrow\bool)\rightarrow\bool\rightarrow\bool$
+  \item $(\bool\rightarrow\bool\rightarrow\bool)\rightarrow\bool$
+  \item $(\bool\rightarrow\bool\rightarrow\bool)\rightarrow\bool$
+  \item $((\bool\rightarrow\bool)\rightarrow\bool)\rightarrow\bool$
+  \end{itemize}
+}
+
+\newcommand{\uif}{\mbox{\tt if}}
+\newcommand{\uthen}{\mbox{\tt then}}
+\newcommand{\uelse}{\mbox{\tt else}}
+\newcommand{\usucc}{\mbox{\tt succ}}
+\newcommand{\upred}{\mbox{\tt pred}}
+\newcommand{\uiszero}{\mbox{\tt iszero}}
+\newcommand{\utrue}{\mbox{\tt true}}
+\newcommand{\ufalse}{\mbox{\tt false}}
+\frame{
+  \frametitle{The Abstract Syntax}
+  Simply Typed $\lambda$-terms with conditions and Booleans
+  \begin{tabular}{rcl@{\qquad}r}
+    $\tm$ & := & $x$         & {\em -- Variable}\\ \pause
+    & $\mid$ & $\lambda x:\ty.\ \tm$ &{\em -- Abstraction}\\ \pause
+    & $\mid$& $\tm\ \tm $     &{\em -- Application} \\ \pause
+    & $\mid$&\utrue & {\em -- constant true} \\ \pause
+    & $\mid$&\ufalse & {\em -- constant false} \\ \pause
+    & $\mid$&\uif\ \tm\ \uthen\ \tm\ \uelse\ \tm & {\em -- conditional} \\
+  \end{tabular}
+}
+
+\newcommand{\val}{\ensuremath{v}}
+\frame{
+  \frametitle{Recap: The Set of Values}
+  \begin{tabular}{rclp{.4\textwidth}l}
+    \val\ &:=& & {\em -- values} \\
+    && $\lambda x:\ty.\ \tm$ &{\em -- Abstraction Value}\\ \pause
+    & $\mid$ & \utrue & {\em -- value true} \\\pause
+    & $\mid$ & \ufalse & {\em -- value false} \\\
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Evaluation}
+  \infrule[E-App1]{\tm_1 \rightarrow \tm'_1}{\tm_1\ \tm_2 \rightarrow \tm_1'\ \tm_2} \pause
+
+  \infrule[E-App2]{\tm_2 \rightarrow \tm'_2}{\val\ \tm_2 \rightarrow \val\ \tm'_2} \pause
+
+  \infax[E-AppAbs]{(\lambda x:\ty_1.\ \tm_1)\val_2 \rightarrow [x\mapsto \val_2]\tm_1}
+}
+
+\frame{
+  \frametitle{The Typing Relation}
+  \begin{itemize}[<+->]
+  \item A {\em Typing Context} or {\em Type Environment}, $\Gamma$, is a sequence of variables with their types
+  \item $\Gamma, x:\ty$ denotes extending $\Gamma$ with a new variable $x$ having type $\ty$
+    \begin{itemize}
+    \item The name $x$ is assumed to be distinct from any
+      existing names in $\Gamma$
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{The Typing Relation}
+  \infrule[T-Abs]{\Gamma,x:\ty_1 \vdash \tm_2:\ty_2}{\Gamma\vdash\lambda x:\ty_1.\ \tm_2 : \ty_1\rightarrow \ty_2} \pause
+
+  \infrule[T-Var]{x:\ty \in \Gamma}{\Gamma\vdash x:\ty} \pause
+
+  \infrule[T-App]{\Gamma\vdash \tm_1:\ty_1\rightarrow\ty_2\andalso\Gamma\vdash \tm_2:\ty_1}{\Gamma\vdash \tm_1\ \tm_2:\ty_2}
+}
+
+\frame{
+  \frametitle{Inversion of the Typing Relation}
+  \begin{itemize}[<+->]
+  \item If $\Gamma \vdash x : R$, then $x:R \in \Gamma$.
+  \item If $\Gamma \vdash \lambda x:\ty_1.\ \tm_2 : R$, then $R = \ty_1\rightarrow R_2$ for some $R_2$ with $\Gamma,x:\ty_1\vdash \tm_2:R_2$.
+  \item If $\Gamma \vdash \tm_1\ \tm_2 : R$, then
+    $\exists\ty_1\ s.t.\ \Gamma\vdash \tm_1:\ty_1\rightarrow R$ and
+    $\Gamma\vdash\tm_2:\ty_1$.
+  \item If $\Gamma \vdash \utrue : R$, then $R = \bool$.
+  \item If $\Gamma \vdash \ufalse : R$, then $R = \bool$.
+  \item If $\Gamma \vdash \uif\ \tm_1\ \uthen\ \tm_2\ \uelse\ \tm_3 : R$, then
+    \begin{itemize}
+    \item $\Gamma\vdash \tm_1 : \bool$
+    \item $\Gamma\vdash \tm_2 : R$
+    \item $\Gamma\vdash \tm_3 : R$
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Exercises}
+  \begin{itemize}[<+->]
+  \item For each of the term $\tm$ below, find context $\Gamma$ and type $\ty$ such that \[\Gamma\vdash\tm : \ty\]
+    \begin{itemize}
+    \item $\tm$ is $\lambda x.\ x$
+    \item $\tm$ is $(\ (x\ z)\ (y\ z)\ )$
+    \item $\tm$ is $\lambda y.\ x$
+    \item $\tm$ is $x\ x$
+    \end{itemize}
+  \end{itemize}
+}
+
+
+\frame{
+  \frametitle{Uniqueness of Types}
+  \begin{itemize}[<+->]
+  \item In a given type context $\Gamma$, A term $\tm$, such that
+    the free variables of $\tm$ are in $\Gamma$, has at most one
+    type.
+  \item If $\tm$ is typeable, then its type is unique. 
+  \item Moreover, there is just one derivation of this typing
+    built from the inference rules.
+  \end{itemize}
+}
+
+
+\frame{
+  \frametitle{Some Properties}
+  \begin{itemize}[<+->] 
+  \item {\bf Permutation:} If $\Gamma\vdash \tm:\ty$ and $\Delta$ is a permutation of $\Gamma$, then $\Delta\vdash \tm:\ty$.
+    \begin{itemize}
+    \item The derivation with $\Delta$ has the same depth as the
+      derivation with $\Gamma$.
+    \end{itemize}
+  \item {\bf Weakening:} If $\Gamma\vdash \tm:\ty$ and $x \not\in \mbox{domain}(\Gamma)$, then $\Gamma, x:S \vdash \tm:\ty$.
+    \begin{itemize}
+    \item The derivation with $\Gamma, x:S$ has the same depth as the
+      derivation with $\Gamma$.
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Progress}
+  \begin{itemize}[<+->]
+  \item {\bf Progress:} A well-typed term is not stuck.
+    \begin{itemize}
+    \item If $\vdash \tm:\ty$, then $\tm$ is either a value or
+      there exists some $\tm'$ such that $\tm\rightarrow\tm'$.
+    \end{itemize}
+  \end{itemize}
+}
+\frame{
+  \frametitle{Preservation}
+  \begin{itemize}[<+->]
+  \item {\bf Preservation of Types under Substitution:} 
+    If  $\Gamma, x:S \vdash \tm:\ty$ and $\Gamma \vdash s:S$, then
+    $\Gamma \vdash [x\mapsto s]\tm : \ty$.
+  \item {\bf Preservation:} If a well-typed term takes a step of
+    evaluation, then the resulting term is also well-typed.
+    \begin{itemize}
+    \item If $\Gamma \vdash \tm:\ty$ and $\tm\rightarrow\tm'$, then
+      $\Gamma \vdash \tm' : \ty$.
+    \end{itemize}
+  \end{itemize}
+}
+\end{document}

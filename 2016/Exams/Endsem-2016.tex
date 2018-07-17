@@ -1,0 +1,682 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{anysize}
+\usepackage{fancyhdr}
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+
+\setlength{\headheight}{15pt}
+\pagestyle{fancyplain}
+\lhead{\fancyplain{}{{\em Page \#\/}\thepage}}
+\chead{CS618}
+\rhead{\fancyplain{}{\textit{Roll No:}\rule{30mm}{0pt}}}
+\lfoot{}
+\cfoot{}
+\rfoot{}
+
+\newcommand{\tbd}[1]{{\red #1}}
+\newcommand{\answer}[1]{{{\blue #1}}}
+%\renewcommand{\answer}[1]{\mbox{}}
+\newcommand{\symbox}[2]{S#1\psframebox{#2}\phantom{S#1}}
+\newcommand{\rsymbox}[2]{\phantom{S#1}\psframebox{#2} S#1}
+
+
+%% \textwidth 7in
+%% \addtolength{\oddsidemargin}{-1in}
+%% \textheight 9.5in
+%% \addtolength{\topmargin}{-1in}
+%% \setlength{\parindent}{0pt}
+%% \setlength{\parskip}{0.5cm}
+%% \topskip 0.0in
+\thispagestyle{empty}
+
+\begin{document}
+
+{\Large\bf NAME: \hspace*{3in} ROLL NO:}
+
+\begin{center}
+CS618: Program Analysis \\
+End Semester Examination, 2016-17 I\\
+Max Time: 3 Hours  \hfill Max Marks: \tbd{160} \\
+
+{\bf NOTE: }
+\begin{itemize}
+\item There are total {\bf 6} questions on {\bf 5 pages}.
+\item Write your name and roll number on the question paper and the
+  answer book.
+\item Presenting your answers properly is your
+  responsibility. You lose credit if you can not present your
+  ideas clearly, and in proper form. Please DO NOT come back
+  for re-evaluation saying, ``What I actually meant was
+  \ldots''.
+\item Be precise and write clearly. Remember that somebody
+  has to read it to evaluate!
+\item {\bf IMPORTANT: Some questions have to be answered on the
+  sheet provided at the end of the question paper. Write you Name
+  and Roll Number, and return it along with the answer book.}
+
+\end{itemize}
+\hrule
+\end{center}
+
+
+\newcommand{\pt}{\ensuremath{\pi}}
+\newcommand{\fgentry}{{\sf Entry}}
+\newcommand{\fgexit}{{\sf Exit}}
+\begin{center}
+  \Large\bf Notations
+\end{center}
+\newcommand{\indef}[2]{\ensuremath{{\sf BeforeIN}(#1, #2)}}
+\newcommand{\outdef}[2]{\ensuremath{{\sf BeforeOut}(#1, #2)}}
+\newcommand{\inuse}[2]{\ensuremath{{\sf AfterIN}(#1, #2)}}
+\newcommand{\outuse}[2]{\ensuremath{{\sf AfterOut}(#1, #2)}}
+\newcommand{\inacc}[2]{\ensuremath{{\sf AccIN}(#1, #2)}}
+\newcommand{\outacc}[2]{\ensuremath{{\sf AccOUT}(#1, #2)}}
+\newcommand{\inaccset}[2]{\ensuremath{{\sf AccSetIN}(#1, #2)}}
+\newcommand{\outaccset}[2]{\ensuremath{{\sf AccSetOUT}(#1, #2)}}
+\newcommand{\IN}[1]{\ensuremath{{\sf IN}(#1)}}
+\newcommand{\OUT}[1]{\ensuremath{{\sf OUT}(#1)}}
+\newcommand{\Pred}[1]{\ensuremath{{\sf PRED}(#1)}}
+\newcommand{\Succ}[1]{\ensuremath{{\sf SUCC}(#1)}}
+\newcommand{\cpath}{\ensuremath{\stackrel{+}{\longrightarrow}}}
+\newcommand{\idfp}{\ensuremath{\mbox{DF}^+}}
+
+\begin{itemize}
+\item CFG stands for control flow graph.
+\item \IN{S} denotes the program point before the statement
+  $S$. \OUT{S} denotes the program point after
+  the statement of $S$.
+\item \Pred{S} denotes the set of predecessors, and \Succ{S}
+  denotes the set of successors of $S$. %in the CFG.
+\item In a CFG, $x \cpath y$ denotes a path from
+  node $x$ to node $y$, having one or more edges. Both $x$ and
+  $y$ are considered to be a part of the path.
+\item \idfp($\varphi$) denotes the Iterated Dominance Frontier of
+  the set of CFG nodes $\varphi$.
+\end{itemize}
+\clearpage
+
+\begin{enumerate}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item\label{ques1} $[15+20]$ {\bf Access Range of A Variable.} A
+  program point $\pt$ is in the {\em access range} of a variable
+  $v$ if {\bf both} the following conditions hold:
+\begin{itemize}
+\item There is an access (definition or use) of $v$ on some path
+  from \fgentry\/ to \pt\ \\[5pt] {\bf AND}
+\item There is an access of $v$ on some path from \pt\ to
+  \fgexit.
+\end{itemize} 
+
+Figure~\ref{fig:accessrange} shows the CFG for an example program having variables A, B and C.
+\begin{figure}[h!]
+\centering
+%\includegraphics*[scale=0.59]{AccessRange.eps}
+\begin{center}
+\psset{xunit=1mm,yunit=.6mm}
+\begin{pspicture}(0,10)(150,-130)
+  %\psframe(0,10)(150,-160)
+  \putnode{b0}{origin}{75}{5}{\symbox{0}{\fgentry}}
+  \putnode{b1}{b0}{0}{-20}{\symbox{1}{$A = \ldots$}}
+  \putnode{b2}{b1}{0}{-20}{\rsymbox{2}{$A = \ldots$}}
+  \putnode{b3}{b2}{0}{-20}{\rsymbox{3}{$B = \ldots$}}
+  \putnode{b4}{b3}{-20}{-20}{\rsymbox{4}{$\ldots = B$}}
+  \putnode{b5}{b3}{20}{-20}{\symbox{5}{$\ldots = A$ }}
+  \putnode{b6}{b5}{0}{-20}{\symbox{6}{$C = \ldots$}}
+  \putnode{b7}{b6}{0}{-20}{\symbox{7}{$\ldots = C$}}
+  \putnode{b8}{b7}{0}{-20}{\symbox{8}{\fgexit}}
+
+  \ncline{->}{b0}{b1}
+  \ncline{->}{b1}{b2}
+  \ncline{->}{b2}{b3}
+  \ncline{->}{b3}{b4}
+  \ncline{->}{b3}{b5}
+  \ncline{->}{b5}{b6}
+  \ncline{->}{b6}{b7}
+  \ncline{->}{b7}{b8}
+  \nccurve[angleA=215,angleB=155,nodesep=0,ncurv=1.2]{->}{b4}{b2}
+\end{pspicture}
+\end{center}
+
+\caption{An Example Program\label{fig:accessrange}}
+\end{figure}
+
+\begin{enumerate}
+\item Complete the Table~\ref{table:acc-range} (on the last page) to
+show the program points in the access ranges of variables $A$,
+$B$ and $C$ for the CFG in Figure~\ref{fig:accessrange}.
+
+\item {\bf Define data flow equations to compute \inacc{S}{v} and \outacc{S}{v}}, where
+\begin{itemize}
+\item \inacc{S}{v} is true if \IN{S} is in the access range of a variable $v$.  
+\item \outacc{S}{v} is true if \OUT{S}
+  is in the access range of a variable $v$.
+\end{itemize}
+
+You might find it easy to define the equations for the following
+auxiliary data flow quantities and then define \inacc{S}{v} and
+\outacc{S}{v} in terms of these auxiliary quantities (this is not
+compulsory though!):
+\begin{itemize}
+\item \indef{v}{S} is true if there is an access to variable $v$
+  before \IN{S}.  \outdef{v}{S} is true if there is an access to
+  the variable $v$ before \OUT{S}.
+\item \inuse{v}{S} is true if there is an access to variable $v$
+  after \IN{S}. \outuse{v}{S} is true if there is a access to
+  variable $v$ after \OUT{S}.
+\end{itemize}
+\answer{
+
+\[\begin{array}{r@{\ }c@{\ }l}
+  \outdef{v}{S} &=& \left\{\renewcommand{\arraystretch}{1.1}
+  \begin{array}{@{}l}
+    \mbox{true, if $S$ has an access (def or use) of $v$}\\
+    \indef{v}{S},\  \mbox{otherwise}
+  \end{array}\right. \\ \\ \\
+  \indef{v}{S} &=& \left\{\renewcommand{\arraystretch}{1.1}
+  \begin{array}{@{}l}
+    \mbox{false, if $S$ is \fgentry\ block}\\
+    \bigvee\limits_{P \in \Pred{S}}%  \hspace*{-5mm}
+    \outdef{v}{P},\ \mbox{otherwise}
+  \end{array}\right. \\ \\ \\
+  \inuse{v}{S} &=& \left\{\renewcommand{\arraystretch}{1.1}
+  \begin{array}{@{}l}
+    \mbox{true, if $S$ has an access (def or use) of $v$}\\
+    \outuse{v}{S},\  \mbox{otherwise}
+  \end{array}\right. \\ \\ \\
+  \outuse{v}{S} &=& \left\{\renewcommand{\arraystretch}{1.1}
+  \begin{array}{@{}l}
+    \mbox{false, if $S$ is \fgexit\ block}\\
+    \bigvee\limits_{BS \in \Succ{S}} %\hspace*{-5mm}
+    \inuse{v}{BS},\ \mbox{otherwise}
+  \end{array}\right.
+\end{array}\]
+
+\[
+\begin{array}{@{}r@{}c@{}l}
+\inacc{v}{S} &=& \indef{v}{S} \bigwedge \inuse{v}{S} \\ \\ \\
+\outacc{v}{S} &=& \outdef{v}{S} \bigwedge \outuse{v}{S}
+\end{array}\]
+
+}
+\end{enumerate}
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\vset}{\ensuremath{\varphi}}
+\item $[15+10]$  {\bf Access Range of a Set of Variables:} A program point \pt\ is in the access range of a set of variables, \vset, if both the following conditions hold:
+  \begin{itemize}
+  \item  There is an access to a variable $v \in \vset$ on a path from \fgentry\ to \pt \\[5pt] {\bf AND}
+  \item There is an access to a variable $v' \in \vset$ on a path from \pt\ to \fgexit. 
+  \end{itemize}
+Note that $v$ and $v'$ may or may not be the same variable in \vset.
+\begin{enumerate}
+\item Complete the Table~\ref{table:acc-range-set} (on the last
+  page) to show the program points in the access ranges of given
+  sets of variables for the CFG in Figure~\ref{fig:accessrange}.
+\item {\bf Define equations to compute \inaccset{S}{\vset} and \outaccset{S}{\vset}}, where
+\begin{itemize}
+\item \inaccset{S}{\vset} is true if \IN{S} is in the access range of the set of variable $\vset$.  
+\item \outaccset{S}{\vset} is true if \OUT{S}
+  is in the access range of the set of variables $\vset$.
+\end{itemize}
+\end{enumerate}
+{\bf You can reuse any quantities defined in Question~\ref{ques1}.}
+\answer{
+\[
+\begin{array}{@{}r@{}c@{}l}
+\inaccset{\varphi}{S} &=& (\bigvee\limits_{v \in \varphi} \indef{v}{S}) \bigwedge (\bigvee\limits_{v \in \varphi} \inuse{v}{S}) \\
+\outaccset{\varphi}{S} &=& (\bigvee\limits_{v \in \varphi} \outdef{v}{S}) \bigwedge (\bigvee\limits_{v \in \varphi} \outuse{v}{S}) 
+\end{array}\]
+{\color{red}
+Note that these {\em simple} definitions {\bf do not work}:
+\[\begin{array}{@{}r@{}c@{}l}
+\rnode{x0}{}\qquad\inaccset{\varphi}{S}  &=& \bigvee\limits_{v \in \varphi}\inacc{v}{S}\qquad \rnode{x1}{}\\
+\rnode{x2}{}\quad\outaccset{\varphi}{S} &=& \bigvee\limits_{v \in \varphi}\outacc{v}{S}\quad\rnode{x3}{}\\
+\end{array}\]
+
+\ncline[linecolor=lightgray]{-}{x0}{x3}
+\ncline[linecolor=lightgray]{-}{x1}{x2}
+For example, \OUT{S5} is in the access range for the set $\{C, A\}$. but it is neither in the access range of $A$, nor that of $C$
+}}
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item $[10]$ Prove the following statement:
+
+  For any non-null path $p\!\!\!:\!\! X\!\!\cpath Z$ in a CFG, there exists a node \linebreak
+  $X' \in \{X\} \cup \idfp(\{X\})$ on $p$ that dominates
+  $Z$. Moreover, unless $X$ dominates every node on p, the node
+  $X'$ can be chosen in $\idfp(\{X\})$.
+
+\answer{
+  \begin{enumerate}
+  \item {\bf $X$ dominates every node in $p$}. Clearly $X$
+    dominates $Z$.
+  \item {\bf $X$ does not dominate every node in $p$}. Suppose the sequence of nodes in the path $p$ is $n_0 (=X), n_1, n_2, \ldots, n_k (=Z)$. Since $X$ does not dominate all nodes in $p$, some of the nodes in $p$ will be in $\idfp(\{X\})$ {\bf (WHY?)}. Let $n_j$ be the node in $\idfp(\{X\})$ such that it has the highest value of $j$. We claim that $X' = n_j$, i.e., $n_j$ dominates $Z$.
+  Suppose $n_j$ does not dominate $Z = (n_k)$. Then, $\exists i, j < i \leq k$ such that $n_j$ does not dominate $n_i$. Choose smallest such $i$. We have, parent of $n_i$ dominated by $n_j$, but $n_i$ is not (strictly) dominated by $n_j$. This gives us:
+  \begin{eqnarray*}
+    &&n_i \in \mbox{DF}(\{n_j\})\\
+       &\Rightarrow& n_i \in \idfp(\{n_j\})\\
+       &\Rightarrow& n_i \in \idfp(\{X\})
+  \end{eqnarray*}
+But this contradicts the fact that $j$ is the largest index such that $n_j \in \idfp(\{X\}).$
+  \end{enumerate}
+}
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item $[10 + 25]$ Perform {\bf Flow Sensitive May Points-to}
+  analysis for the program below. 
+  \begin{enumerate}
+  \item Give Local Data Flow information for each block
+    in terms of May sets. [Do not write the
+      generic equation, but instantiate it for the current
+      statement.] 
+  \item Show result of each iteration of the analysis
+    (Maximum $\mathbf{3}$ iterations only).
+  \end{enumerate}
+  Assume conservative {\em Must} information for Kill.
+\begin{center}
+\scalebox{0.95}{
+  \psset{unit=.8mm}
+  \begin{pspicture}(0,10)(65,-70)
+    %\psframe(0,10)(65,-70)
+    \putnode{b1}{origin}{25}{10}{1\psframebox{b = \&d}}
+    \putnode{b2}{b1}{0}{-15}{2\psframebox{c = b}}
+    \putnode{b3}{b2}{-15}{-15}{3\psframebox{a = \&b}}
+    \putnode{b4}{b3}{0}{-15}{4\psframebox{*a = a}}
+    \putnode{b5}{b2}{15}{-22}{5\psframebox{a = \&c}}
+    \putnode{b6}{b4}{15}{-15}{6\psframebox{a = *a}}
+    \putnode{b7}{b6}{0}{-15}{7\psframebox{*b = c}}
+    \ncline{->}{b1}{b2}
+    \ncline{->}{b2}{b3}
+    \ncline{->}{b2}{b5}
+    \ncline{->}{b3}{b4}
+    \ncline{->}{b4}{b6}
+    \ncline{->}{b5}{b6}
+    \ncloop[angleA=-90,angleB=90,loopsize=-30,arm=5,linearc=.2,offset=1]
+           {->}{b6}{b5}
+    \ncline{->}{b6}{b7}
+  \end{pspicture}
+}
+\end{center}
+%
+\answer{
+\begin{center}
+\vspace*{-10mm}\renewcommand{\arraystretch}{1.15}
+\hspace*{-25mm}\begin{tabular}{|c||l|l||} \hline
+  {\bf \#} & {\bf $May_{GEN}$} & {\bf $May_{KILL}$} \\ \hline \hline
+  & & \\
+  & $b\rightarrow d$ & $b\rightarrow any$ \\
+  1 & \rule{38mm}{0pt}& \rule{38mm}{0pt} \\ \hline
+  & & \\
+  & $c\rightarrow p$ & $c\rightarrow any$ \\
+  2 & $| b\rightarrow p \in MayIN$ &  \\ \hline
+  & & \\
+  & $a\rightarrow b$ & $a\rightarrow any$ \\
+  3 & & \\ \hline
+  & $p \rightarrow p'$ & \\
+  & $| a\rightarrow p \in MayIN$& \\
+  4 & $| a\rightarrow p' \in MayIN$& \\ \hline
+  & & \\
+  & $a\rightarrow c$ & $a\rightarrow any$ \\
+  5 & & \\ \hline
+  & $a\rightarrow p$ & $a\rightarrow any$ \\
+  & $| a\rightarrow p' \in MayIN$ & \\ 
+  6 & $| p'\rightarrow p \in MayIN$ &  \\ \hline
+  & $p \rightarrow p'$ & \\
+  & $| b\rightarrow p \in MayIN$& \\ 
+  7 & $| c\rightarrow p' \in MayIN$& \\ \hline
+\multicolumn{3}{c}{    Local Data Flow Information}
+\end{tabular}
+\end{center}
+%\clearpage
+\begin{center}
+  \renewcommand{\arraystretch}{1.3}
+  \hspace*{-25mm}\begin{tabular}{|c||c|c||} \hline
+    {\bf \#} & {\bf $May_{IN}$} & {\bf $May_{OUT}$} \\ \hline \hline
+    1 & $\phi$ & $b\rightarrow d$\\ \hline
+    2 & $b\rightarrow d$ & $b\rightarrow d, c \rightarrow d$ \\ \hline
+    3 & $b\rightarrow d, c \rightarrow d$ & $a   \rightarrow b, b\rightarrow d,    c \rightarrow d$ \\ \hline
+    4 & $a \rightarrow b, b\rightarrow d,    c \rightarrow d$ & $a \rightarrow b, b\rightarrow bd,    c \rightarrow d$ \\ \hline
+    5 & $ b\rightarrow d,    c \rightarrow d$ & $a \rightarrow c, b\rightarrow d,    c \rightarrow d$ \\ \hline
+    6 & $a \rightarrow b c, b\rightarrow b d,    c \rightarrow d$ & $a \rightarrow b d, b\rightarrow b d,    c \rightarrow d$ \\ \hline
+    7 & $a \rightarrow b d, b\rightarrow b d,    c \rightarrow d$ & $a \rightarrow b d, b\rightarrow b d,    c \rightarrow d, d \rightarrow d$ \\ \hline
+    \multicolumn{3}{c}{  Result of Analysis for Iteration No. 1 }
+  \end{tabular}
+\end{center}
+
+\begin{center}
+  \renewcommand{\arraystretch}{1.3}
+  \hspace*{-25mm}\begin{tabular}{|c||c|c||c|c|} \hline
+    {\bf \#} & {\bf $May_{IN}$} & {\bf $May_{OUT}$} \\ \hline \hline
+    1 & $\phi$ & $b\rightarrow d$\\ \hline
+    2 & $b\rightarrow d$ & $b\rightarrow d, c \rightarrow d$ \\ \hline
+    3 & $b\rightarrow d, c \rightarrow d$ & $a
+   \rightarrow b, b\rightarrow d,
+    c \rightarrow d$ \\ \hline
+    4 & $a \rightarrow b, b\rightarrow d,
+    c \rightarrow d$ & $a \rightarrow b, b\rightarrow bd,
+    c \rightarrow d$ \\ \hline
+    5 & $\mathbf{a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d}$ & $\mathbf{a \rightarrow c, b\rightarrow b d,
+    c \rightarrow d}$ \\ \hline 
+    6 & $a \rightarrow b c, b\rightarrow b d,
+    c \rightarrow d$ & $a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d$ \\ \hline
+    7 & $a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d$ & $a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d, d \rightarrow d$ \\ \hline
+    \multicolumn{3}{c}{  Result of Analysis for Iteration
+      No. 2, Changes shown in bold}
+  \end{tabular}
+\end{center}
+
+\begin{center}
+  \renewcommand{\arraystretch}{1.3}
+  \hspace*{-25mm}\begin{tabular}{|c||c|c||c|c|} \hline
+    {\bf \#} & {\bf $May_{IN}$} & {\bf $May_{OUT}$} \\ \hline \hline
+    1 & $\phi$ & $b\rightarrow d$\\ \hline
+    2 & $b\rightarrow d$ & $b\rightarrow d, c \rightarrow d$ \\ \hline
+    3 & $b\rightarrow d, c \rightarrow d$ & $a
+   \rightarrow b, b\rightarrow d,
+    c \rightarrow d$ \\ \hline
+    4 & $a \rightarrow b, b\rightarrow d,
+    c \rightarrow d$ & $a \rightarrow b, b\rightarrow bd,
+    c \rightarrow d$ \\ \hline
+    5 & ${a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d}$ & ${a \rightarrow c, b\rightarrow b d,
+    c \rightarrow d}$ \\ \hline 
+    6 & $a \rightarrow b c, b\rightarrow b d,
+    c \rightarrow d$ & $a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d$ \\ \hline
+    7 & $a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d$ & $a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d,d \rightarrow d$ \\ \hline
+    \multicolumn{3}{c}{  Result of Analysis for Iteration
+      No. 3 = No. 2}
+  \end{tabular}
+\end{center}
+}
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item $[10+20]$ Consider a simple programming language with only two
+  primitive types: {\bf int} and {\bf bool}. The language
+  specification does not require a variable to be declared
+  before use. However, the language requires that for a
+  program to be valid, every variable must be assigned a {\em
+    unique} type during compilation.
+
+  The following table describes the operations permitted by
+  the language, the corresponding type restrictions on the
+  argument variables and the result of the operation.
+  \begin{center}
+    \begin{tabular}{|c|c|l|l|}\hline
+      {\bf Operation} & {\bf Example} & {\bf Type Restrictions
+        on Args} & {\bf Result Type} \\\hline\hline
+      == & x == y & x and y have to be of the same type & bool \\
+                      & & (int or bool) & \\\hline
+      +  & x + y & x and y both are int & int \\\hline
+      cint & cint(x) &  cast to int: x can be of any type & int \\\hline
+      cbool & cbool(x) &  cast to bool: x can be of any type & bool \\\hline
+    \end{tabular}
+  \end{center}
+  The language has following constants (each constant has a fixed type):
+  \begin{center}
+    \begin{tabular}{|c|c|c|} \hline
+      {\bf Const Class} & {\bf Constants} & {\bf Type} \\ \hline \hline
+      int\_constant & $-\infty\ldots -2, -1, 0, 1, 2, \ldots
+      \infty$ & int \\ \hline 
+      bool\_constant & false, true & bool \\ \hline
+    \end{tabular}
+  \end{center}
+ The language has the following constructs and the restrictions:
+ \begin{itemize}
+ \item {\em assignment} statements: Both sides of an assignment
+   must be of the {\em same} type.
+ \item Conditionals ({\em if-else}): The condition of the {\em
+     if-else} is a single variable of type bool.
+ \end{itemize}
+ Here are couple of sample programs, one valid and other invalid.
+\begin{verbatim}
+   // PROGRAM 1                     // PROGRAM 2
+   c = n == e;                      c = n==e;
+   e = 5;                           e = false;
+   if (c) {                         if (c) {
+     d = e + 3;                       d  = c + 3;
+   } else {                         } else { 
+     d = cint(c) - 5;                 d  = cint(e) - 5;
+   }                                }
+   // c: bool                      // invalid program
+   // n, d, e: int                 // c has to be both bool and int! 
+                                   // n, e: bool    d: int 
+\end{verbatim}
+
+ \begin{enumerate}
+ \item Design a simple (as-simple-as-possible for you) syntax
+   (context free grammar) for the language described.
+ \item Design a {\bf flow-insensitive} type system to
+   infer (or validate) types of variables for programs
+   written in the above syntax.
+ \end{enumerate}
+\answer{Many variations possible.}
+\clearpage
+\item $[10+5+15+5]$ Perform {\em
+  Interprocedural Available Expressions} analysis for the
+  following program. 
+  
+\newcommand{\ind}{$\qquad$}
+  \renewcommand{\arraystretch}{1.5}
+\begin{center}
+  \begin{tabular}{|l@{\ind\ind}|l@{\ind\ind}|l|}\hline
+    \begin{tabular}[t]{@{}l@{}}
+      main() \{ \\
+      \ind call p() \\
+      \ind c * d \\
+      \ind call q() \\
+      \}
+    \end{tabular}&
+    \begin{tabular}[t]{@{}l@{}}
+      p() \{ \\
+      \ind a * b \\
+      \ind if(\ldots) then \\
+      \ind\ind call q() \\
+      \ind else \\
+      \ind\ind call q() \\
+      \ind c = 5 \\
+      \}
+    \end{tabular}&
+    \begin{tabular}[t]{@{}l@{}}
+      q() \{ \\
+      \ind if(\ldots) then \\
+      \ind\ind a = 5 \\
+      \ind else \\
+      \ind\ind b = 6 \\
+      \}
+    \end{tabular}\\\hline
+  \end{tabular}
+\end{center}
+Show the following steps to arrive at the answer:
+\begin{enumerate}
+\item Draw the inter-procedural flow graph (any one of the two representations discussed in class). Clearly label the nodes, and distinguish the $E^0$ (intra-procedural) and $E^1$ (inter-procedural) edges.
+\item For each procedure $p$, show the constraints for $\phi(r_p, n_p)$ for each node $n_p$ in the CFG of the procedure. Recall that $r_p$ is the entry node for procedure $p$. Assume the existence of flow functions $f_0, f_1, id$ etc for the underlying data flow framework.
+\item Give the fixed-point solution for $\phi(r_p, n_p)$.
+\item List the program points where each of the expressions
+  {\tt a * b} and {\tt c * d} is available.
+\end{enumerate}
+
+\answer{
+%\clearpage
+\noindent{\bf (a) Inter-Procedural FG:} 
+\begin{center}
+  \begin{tabular}{l@{\ind\ind}l@{\ind\ind}l}
+    \begin{tabular}[t]{@{}l@{}}
+      main() \{ \\
+      \rnode{n00}{ $r_{m}$ }\\
+      \rnode{n01}{ $m_1.$ call p()%
+      } \\
+      \rnode{n02}{ $m_2.$ c * d\rnode{n21}{} } \\
+      \rnode{n03}{ $m_3.$ call q()%
+      } \\
+      \rnode{n04}{ $e_{m}$\rnode{n23}{} }\\
+      \}
+    \end{tabular}&
+    \begin{tabular}[t]{@{}l@{}}
+      p() \{ \\
+      \rnode{n05}{ $r_p$ }\\
+      \rnode{n06}{ $p_1.$ a * b }\\
+      \rnode{n07}{ $p_2.$ call q()}
+      \ind \rnode{n08}{  $p_3.$  call q()}\\
+      \rnode{n09}{ $p_4.$ c = 5\rnode{n27}{}\rnode{n28}{} }\\
+      \rnode{n10}{ $e_p$ }\\
+      \}
+    \end{tabular}&
+    \begin{tabular}[t]{@{}l@{}}
+      q() \{ \\
+      \rnode{n11}{ $r_q$ }\\
+      \rnode{n13}{ $q_1.$ a = 5 } \ind \rnode{n15}{  $q_2.$ b = 6 }\\
+      \rnode{n16}{ $e_q$ }\\
+      \}
+    \end{tabular}
+  \end{tabular}
+
+  \ncline{->}{n00}{n01}
+  \ncline{->}{n02}{n03}
+
+  \ncline{->}{n05}{n06}
+  \ncline{->}{n06}{n07}
+  \ncline{->}{n06}{n08}
+  \ncline{->}{n09}{n10}
+
+  \ncline{->}{n11}{n13}
+  \ncline{->}{n11}{n15}
+  \ncline{->}{n13}{n16}
+  \ncline{->}{n15}{n16}
+
+  \nccurve[linestyle=dashed,angleB=90]{->}{n01}{n05}
+  \nccurve[linestyle=dashed,angleB=75]{->}{n03}{n11}
+  \nccurve[linestyle=dashed,angleB=90]{->}{n07}{n11}
+  \nccurve[linestyle=dashed,angleB=135]{->}{n08}{n11}
+  \nccurve[linestyle=dashed,angleB=-135,angleA=0,offsetA=.3]{<-}{n21}{n10}
+  \nccurve[linestyle=dashed,angleB=-450,offsetA=.2]{<-}{n23}{n16}
+  \nccurve[linestyle=dashed,angleB=-90,offsetA=.3]{<-}{n27}{n16}
+  \nccurve[linestyle=dashed,angleB=-135,offsetA=.4]{<-}{n28}{n16}
+  Solid lines are $E^0$ edges, dashed lines are $E^1$ edges.
+\end{center}
+\newcommand{\pair}[1]{\ensuremath{\langle #1 \rangle}}
+
+Since we are tracking {\bf two} expressions, all data flow values will be pairs. The first component of the pair is for $a*b$ and the second for $c*d$. composition of function pairs will be pairwise composition, i.e.:
+\[\pair{f_1, g_1} \circ \pair{f_2, g_2} \equiv \pair{f_1 \circ g_1, f_2 \circ g_2}\]
+\begin{minipage}{.60\textwidth}
+\noindent{\bf (b) Constraints:} 
+\begin{eqnarray*}
+  \phi(r_m, m_1) & = & \pair{id_L, id_L} \\
+  \phi(r_m, m_2) & = & \phi(r_p, e_p)\circ\phi(r_m, m_1) \\
+  \phi(r_m, m_3) & = & \pair{id_L, f_1}\circ\phi(r_m, m_2) \\
+  \phi(r_m, e_m) & = & \phi(r_q, e_q)\circ\phi(r_m, m_3)\\
+  \\
+  \phi(r_p, p_1) & = & \pair{id_L, id_L} \\
+  \phi(r_p, p_2) & = & \pair{f_1, id_L}\circ\phi(r_p, p_1)\\
+  \phi(r_p, p_3) & = & \pair{f_1, id_L}\circ\phi(r_p, p_1)\\
+  \phi(r_p, p_4) & = & \phi(r_q, e_q)\circ\phi(r_p, p_2)\bigwedge\phi(r_q, e_q)\circ\phi(r_p, p_3)\\
+  \phi(r_p, e_p) & = & \pair{id_L,f_0}\circ\phi(r_p, p_4)\\
+  \\
+  \phi(r_q, q_1) & = & \pair{id_L, id_L} \\
+  \phi(r_q, q_2) & = & \pair{id_L, id_L} \\
+  \phi(r_q, e_q) & = & \pair{f_0, id_L}\circ\phi(r_q, q_1) \bigwedge \pair{f_0, id_L}\circ\phi(r_q, q_2)\\
+\end{eqnarray*}
+\end{minipage}
+\begin{minipage}[t]{.05\textwidth}
+  \ 
+\end{minipage}
+\begin{minipage}{.25\textwidth}
+\noindent{\bf (c) Solutions:} 
+\begin{eqnarray*}
+  \phi(r_m, m_1) & = & \pair{id, id} \\
+  \phi(r_m, m_2) & = & \pair{f_0, f_0}\\
+  \phi(r_m, m_3) & = & \pair{f_0, f_1}\\
+  \phi(r_m, e_m) & = & \pair{f_0, f_1}\\
+  \\
+  \phi(r_p, p_1) & = & \pair{id, id} \\
+  \phi(r_p, p_2) & = & \pair{f_1, id}\\
+  \phi(r_p, p_3) & = & \pair{f_1, id}\\
+  \phi(r_p, p_4) & = & \pair{f_0, id}\\
+  \phi(r_p, e_p) & = & \pair{f_0,f_0}\\
+  \\
+  \phi(r_q, q_1) & = & \pair{id, id} \\
+  \phi(r_q, q_2) & = & \pair{id, id} \\
+  \phi(r_q, e_q) & = & \pair{f_0, id}\\
+\end{eqnarray*}
+\end{minipage}
+
+\noindent{\bf (d) Availability:} 
+\begin{itemize}
+\item {\bf $a*b$:} \OUT{p_1}, \IN{p_2}, \IN{p_3}
+\item {\bf $c*d$:} \OUT{m_2}, \IN{m_3}, \OUT{m_3}
+\end{itemize}
+}
+\end{enumerate}
+\hrule
+%\[ T~H~E \qquad E~N~D \]
+%{\centering(Detach the next page and submit with your answer book.)}
+%\clearpage
+%\thispagestyle{empty}\mbox{}
+\clearpage
+\lhead{\fancyplain{}{{\em Name:}}}
+\vspace*{-15mm}
+\begin{table}[h!]
+  \caption{Access Ranges for Variables.
+    {\bf T} denotes true, {\bf F} denotes false.
+    \label{table:acc-range}}
+\centering
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{|r|c|c|c|}
+  \hline 
+  Program Point & \multicolumn{3}{c|}{Is \pt\ In Access Range Of} \\ 
+  \pt& Variable A? & Variable B& Variable C\\
+  \hline\hline
+  \IN{S1}  & F&F&F  \\\hline
+  \OUT{S1} & T&F&F  \\\hline
+  \IN{S2}  & \answer{T}&\answer{T}&\answer{F}  \\\hline
+  \OUT{S2} & \answer{T}&\answer{T}&\answer{F}  \\\hline
+  \IN{S3}  & \answer{T}&\answer{T}&\answer{F}  \\\hline
+  \OUT{S3} & \answer{T}&\answer{T}&\answer{F}  \\\hline
+  \IN{S4}  & \answer{T}&\answer{T}&\answer{F}  \\\hline
+  \OUT{S4} & \answer{T}&\answer{T}&\answer{F}  \\\hline
+  \IN{S5}  & \answer{T}&\answer{F}&\answer{F}  \\\hline
+  \OUT{S5} & \answer{F}&\answer{F}&\answer{F}  \\\hline
+  \IN{S6}  & \answer{F}&\answer{F}&\answer{F}  \\\hline
+  \OUT{S6} & \answer{F}&\answer{F}&\answer{T}  \\\hline
+  \hline
+\end{tabular}
+\end{table}
+\begin{table}[h!]
+\centering
+\caption{Access Ranges for Sets of Variables. {\bf
+      T} denotes true, {\bf F} denotes false.
+    \label{table:acc-range-set}}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{|r|c|c|c|}
+  \hline 
+  Program Point & \multicolumn{3}{c|}{Is \pt\ In Access Range Of} \\ 
+  \pt& Set \{A, B\}? & Set \{B, C\} & Set \{C, A\} \\
+  \hline\hline
+  \IN{S1}  & F&F&F  \\\hline
+  \OUT{S1} & T&F&T  \\\hline
+  \IN{S2}  & \answer{T}&\answer{T}&\answer{T}  \\\hline
+  \OUT{S2} & \answer{T}&\answer{T}&\answer{T}  \\\hline
+  \IN{S3}  & \answer{T}&\answer{T}&\answer{T}  \\\hline
+  \OUT{S3} & \answer{T}&\answer{T}&\answer{T}  \\\hline
+  \IN{S4}  & \answer{T}&\answer{T}&\answer{T}  \\\hline
+  \OUT{S4} & \answer{T}&\answer{T}&\answer{T}  \\\hline
+  \IN{S5}  & \answer{T}&\answer{T}&\answer{T}  \\\hline
+  \OUT{S5} & \answer{F}&\answer{T}&\answer{T}  \\\hline
+  \IN{S6}  & \answer{F}&\answer{T}&\answer{T}  \\\hline
+  \OUT{S6} & \answer{F}&\answer{T}&\answer{T}  \\\hline 
+  \hline
+\end{tabular}
+\end{table}
+\noindent{\bf Write your roll number at the top of this page and submit along with the answer-sheet.}
+\end{document}
+

@@ -1,0 +1,142 @@
+\documentclass[a4paper,11pt]{article}%
+\addtolength{\oddsidemargin}{-.5in}
+\addtolength{\evensidemargin}{-.5in}
+\addtolength{\textwidth}{1in}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{moreverb}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{anysize}
+\usepackage{pst-rel-points}
+\usepackage{pstricks}
+\usepackage{pst-node}
+%----------------------------------------------------------
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+%\renewcommand{\chaptername}{Experiment}
+
+%----------------------------------------------------------
+\begin{document}
+%\frontmatter
+\title{CS738: Assignment \# 4}
+\author{}
+\date{Due date: {\red 30 March 2012, 23:59:59 Hours}}
+\maketitle
+\section*{Submission Instructions}
+\begin{itemize}
+\item Create a single pdf file named
+  \psframebox[linestyle=none,fillcolor=yellow,fillstyle=solid]{{\tt assign4\_<your roll
+     number>.pdf}}
+\item Send it by email to instructor (karkare@cse) and copy
+  to both TAs (sbjoshi@cse, pritesh@cse)
+\item The subject of the email should be
+  \psframebox[linestyle=none,fillcolor=yellow,fillstyle=solid]{{\tt
+      [CS738] Assignment 4}}
+\item There will be {\bf 20\% penalty} per day for late
+  submission. In case the assignment is not submitted within
+  {\bf 5 days} of deadline, the penalty will be carried over to the
+  next assignment. 
+\end{itemize}
+\section{May \& Must Points-to Analysis}
+Perform {\bf Flow Sensitive May and Must Points-to} analysis for
+each of the following programs. Show each iteration of the
+analysis in the tabular form as described below. Show only the first
+$\mathbf{4}$ iterations of the analysis, in case the fix-point is
+not reached in 4 iterations.
+
+Format for the iterations:
+
+\begin{center}
+  \renewcommand{\arraystretch}{1.5}
+  \begin{tabular}{|c|c|c|c|c|} \hline
+    {\bf \#} & {\bf $May_{IN}$} & {\bf $May_{OUT}$} & {\bf
+      $Must_{IN}$} & {\bf $Must_{OUT}$}  \\ \hline \hline
+    1 & \rule{25mm}{0pt}& \rule{25mm}{0pt}& \rule{25mm}{0pt}& \rule{25mm}{0pt}\\ \hline
+    2 & & & & \\ \hline
+    3 & & & & \\ \hline
+    4 & & & & \\ \hline
+    5 & & & & \\ \hline
+    6 & & & & \\ \hline
+    7 & & & & \\ \hline
+  \end{tabular}
+
+  \ \\
+  Result of Analysis for Iteration No. \ldots
+\end{center}
+\vfill\hfill (P.T.O)
+
+\begin{enumerate}
+\hrule
+\item\ % Prog 1
+  
+  \psset{unit=1mm}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,10)(65,-80)
+%    \psframe(0,10)(65,-75)
+    \putnode{b1}{origin}{25}{5}{1\psframebox{b = \&a}}
+    \putnode{b2}{b1}{0}{-15}{2\psframebox{c = b}}
+    \putnode{b3}{b2}{-15}{-15}{3\psframebox{a = \&b}}
+    \putnode{b4}{b2}{15}{-15}{5\psframebox{a = \&c}}
+    \putnode{b5}{b4}{-15}{-15}{6\psframebox{a = *a}}
+    \putnode{b6}{b5}{0}{-15}{7\psframebox{*b = c}}
+    \ncline{->}{b1}{b2}
+    \ncline{->}{b2}{b3}
+    \ncline{->}{b2}{b4}
+    \ncline{->}{b3}{b5}
+    \ncline{->}{b4}{b5}
+    \ncline{->}{b5}{b6}
+    \ncloop[angleA=-90,angleB=90,loopsize=-30,arm=5,linearc=.2,offset=1]
+           {->}{b5}{b2}
+
+  \end{pspicture}
+\hrule
+\item\ % Prog 2
+
+  \psset{unit=1mm}
+  \begin{pspicture}(0,10)(65,-80)
+%    \psframe(0,10)(65,-75)
+    \putnode{b1}{origin}{25}{5}{1\psframebox{b = \&d}}
+    \putnode{b2}{b1}{0}{-15}{2\psframebox{c = b}}
+    \putnode{b3}{b2}{-15}{-15}{3\psframebox{a = \&b}}
+    \putnode{b4}{b3}{0}{-15}{4\psframebox{*a = a}}
+    \putnode{b5}{b2}{15}{-22}{5\psframebox{a = \&c}}
+    \putnode{b6}{b4}{15}{-15}{6\psframebox{a = *a}}
+    \putnode{b7}{b6}{0}{-15}{7\psframebox{*b = c}}
+    \ncline{->}{b1}{b2}
+    \ncline{->}{b2}{b3}
+    \ncline{->}{b2}{b5}
+    \ncline{->}{b3}{b4}
+    \ncline{->}{b4}{b6}
+    \ncline{->}{b5}{b6}
+    \ncloop[angleA=-90,angleB=90,loopsize=-30,arm=5,linearc=.2,offset=1]
+           {->}{b6}{b2}
+    \ncline{->}{b6}{b7}
+  \end{pspicture}
+\end{enumerate}
+\vfill
+\hrule
+
+\end{document}

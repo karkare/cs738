@@ -1,0 +1,95 @@
+1. A Practical Escape and Effect Analysis for Building
+Lightweight Method Summaries.  Sigmund Cherem and Radu
+Rugina.  In 16th International Conference on Compiler
+Construction (CC 2007), Braga, Portugal, March 2007.
+
+2. Obfuscating Java: the Most Pain for the Least Gain 
+ Michael Batchelder, Laurie Hendren (McGill University) 
+ In 16th International Conference on Compiler
+Construction (CC 2007), Braga, Portugal, March 2007.
+
+3. Ashwin Prasad, Jayvant Anantpur, R. Govindarajan:
+Automatic compilation of MATLAB programs for synergistic
+execution on heterogeneous processors. PLDI 2011: 152-163 
+
+4. Thomas B. Jablin, Prakash Prabhu, James A. Jablin, Nick
+P. Johnson, Stephen R. Beard, David I. August: Automatic
+CPU-GPU communication management and optimization. PLDI 2011:
+142-151
+
+5. Hucheng Zhou, Wenguang Chen, Fred C. Chow:
+An SSA-based algorithm for optimal speculative code motion
+under an execution profile. 98-108 
+
+6. Manu Jose, Rupak Majumdar: Bug-Assist: Assisting Fault
+Localization in ANSI-C Programs. CAV 2011: 504-509 
+
+7. Manu Jose, Rupak Majumdar: Cause clue clauses: error
+localization using maximum satisfiability. PLDI 2011: 437-446 
+
+8. Zhen Cao, Yuan Dong and Shengyuan Wang. Compiler Backend
+Generation for Application Specific Instruction Set
+Processors. APLAS 2011
+
+9. "Optimizing MATLAB through Just-In-Time Specialization"
+Maxime Chevalier-Boisvert, McGill University, Canada
+Laurie Hendren, McGill University, Canada
+Clark Verbrugge, McGill University, Canada
+CC 2010
+
+10. "Mining Opportunities for Code Improvement in a
+Just-In-Time Compiler" Adam Jocksch, University of Alberta,
+Canada Marcel Mitran, IBM Toronto Software Laboratory, Canada
+Joran Siu, IBM Toronto Software Laboratory, Canada Nikola
+Grcevski, IBM Toronto Software Laboratory, Canada Jose Nelson
+Amaral, University of Alberta, Canada CC 2010
+
+11. "Automatic C-to-CUDA Code Generation for Affine Programs"
+Muthu Manikandan Baskaran, The Ohio State University, United States
+J Ramanujam, Louisiana State University, United States
+P Sadayappan, The Ohio State University, United States
+CC 2010
+
+12. Oracle-guided component-based program synthesis, Jha, S.;
+Gulwani, S.;   Seshia, S.A.;   Tiwari, A.;  ICSE 2010
+
+13. From program verification to program synthesis; 
+Saurabh Srivastava 	University of Maryland, College Park,
+College Park, MD, USA; Sumit Gulwani 	Microsoft Research,
+Redmond, WA, USA; Jeffrey S. Foster 	University of
+Maryland, College Park, College Park, MD, USA; POPL 2010
+
+14. An intelligent Maths tutoring System (Project Only)
+    Details with Instructor (Multiple projects possible)
+
+15. Optimizing Data Layouts for Parallel Computation on
+Multicores, Yuanrui Zhang (Penn State), Wei Ding (Penn
+State), Jun Liu (Penn State), and Mahmut Kandemir (Penn
+State); PACT 2011
+
+16. Simon Holm Jensen, Anders Moller and Peter
+Thiemann. Interprocedural Analysis with Lazy Propagation ;
+SAS 2010
+
+17. Rupesh Nasre and Ramaswamy Govindarajan. Points-to
+Analysis as a System of Linear Equations; SAS 2010
+
+18. Renato Cherini, Lucas Rearte and Javier Blanco. A Shape
+Analysis for Non-linear Data Structures; SAS 2010
+
+19. Elvira Albert, Puri Arenas, Samir Genaim, German Puebla
+and Diana Vanessa Ramirez Deantes. From Object Fields to
+Local Variables: a Practical Approach to Field-Sensitive
+Analysis; SAS 2010
+
+20. Prakash Prabhu and Priti Shankar
+Field Flow Sensitive Pointer and Escape Analysis for Java
+using Heap Array SSA; SAS 2008
+
+21. Guoqing (Harry) Xu, Atanas Rountev, Manu Sridharan: Scaling
+CFL-Reachability-Based Points-To Analysis Using Context-Sensitive
+Must-Not-Alias Analysis. ECOOP 2009: 98-122
+
+22. Manu Sridharan, Rastislav Bodík: Refinement-based
+context-sensitive points-to analysis for Java. PLDI 2006: 387-400
+

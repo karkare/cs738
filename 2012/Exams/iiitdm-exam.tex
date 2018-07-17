@@ -1,0 +1,491 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{anysize}
+\usepackage{fancyhdr}
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+
+\setlength{\headheight}{15pt}
+\pagestyle{fancyplain}
+\lhead{\fancyplain{}{{\em Page \#\/}\thepage}}
+\chead{Compiler Optimizations}
+\rhead{\fancyplain{}{\textit{Roll No:}\rule{30mm}{0pt}}}
+\lfoot{}
+\cfoot{}
+\rfoot{}
+
+\newcommand{\tbd}[1]{{\red #1}}
+\newcommand{\answer}[1]{{{\blue #1}}}
+%\renewcommand{\answer}[1]{\mbox{}}
+
+%% \textwidth 7in
+%% \addtolength{\oddsidemargin}{-1in}
+%% \textheight 9.5in
+%% \addtolength{\topmargin}{-1in}
+%% \setlength{\parindent}{0pt}
+%% \setlength{\parskip}{0.5cm}
+%% \topskip 0.0in
+\thispagestyle{empty}
+
+\begin{document}
+
+{\Large\bf NAME: \hspace*{3in} ROLL NO:}
+
+\begin{center}
+Compiler Optimizations \\
+End of Course Examination, 2012\\
+Max Time: 1.5 Hours  \hfill Max Marks: {80} \\
+
+{\bf NOTE: }
+\begin{itemize}
+
+\item There is no separate answer script. {\bf Write down the
+  answers in the space provided on the question paper.} There
+  is enough space for rough work too, so do not ask for extra
+  sheets. \\
+
+\item Presenting your answers properly is your
+  responsibility. You lose credit if you can not present your
+  ideas clearly, and in proper form. Please DO NOT come back
+  for re-evaluation saying, ``What I actually meant was
+  \ldots''.
+
+\item Be precise and write clearly. Remember that somebody
+  has to read it to evaluate!
+
+\item {\bf ONE} A4 size {\em cheat-sheet} is allowed. Sharing
+  of cheat-sheet or any other exam material is {\bf not
+    allowed}.
+\end{itemize}
+
+
+
+\vspace*{4mm}
+
+{\Large
+\begin{tabular}{|c|c|c|}\hline
+Question No. & Max Marks & Marks Obtained \\\hline
+1 & 20 & \\\hline
+2 & 20 & \\\hline
+3 & 40 & \\\hline
+Total & \bf{80} & \\\hline
+\end{tabular}
+}
+\end{center}
+
+\vspace*{4mm} I pledge my honour as a gentleman/lady that
+during the examination I have neither given assistance nor
+received assistance.
+
+\vspace*{1cm}
+Signature
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\begin{enumerate}
+\item Perform available expressions analysis, i.e. compute
+  gen, kill, in and out for each block for the given flow
+  graph. \hfill[20]
+\begin{center}
+\psset{unit=1mm}
+\begin{pspicture}(0,0)(150,-100)
+  \psframe(0,0)(150,-100)
+  \putnode{be}{origin}{75}{-5}{\psframebox{ENTRY}}
+  \putnode{b1}{be}{0}{-15}{\psframebox{1: u + v}}
+
+  \putnode{b2}{b1}{-20}{-15}{\psframebox{2: w = u}}
+  \putnode{b3}{b2}{0}{-15}{\psframebox{3: \ldots}}
+  \putnode{b4}{b3}{0}{-15}{\psframebox{4: w + u}}
+
+  \putnode{b5}{b1}{20}{-15}{\psframebox{5: a * b}}
+
+  \putnode{b6}{b5}{-15}{-15}{\psframebox{6: a = c}}
+  \putnode{b7}{b5}{15}{-15}{\psframebox{7: \ldots }}
+
+  \putnode{b8}{b6}{15}{-15}{\psframebox{8: a * b}}
+
+  \putnode{b9}{b4}{25}{-15}{\psframebox{9: u + v}}
+
+  \putnode{bx}{b9}{0}{-15}{\psframebox{EXIT}}
+
+  \ncline{->}{be}{b1}
+
+  \ncline{->}{b1}{b2}
+  \ncline{->}{b1}{b5}
+
+  \ncline{->}{b2}{b3}
+
+  \ncline{->}{b3}{b4}
+  \ncline{->}{b3}{b9}
+%  \nccurve[angleA=-90,angleB=90,nodesep=-.2,ncurv=0.1]{->}{b3}{b9}
+
+  \nccurve[angleA=-135,angleB=135,nodesep=-.2,ncurv=1.8]{->}{b4}{b3}
+
+  \ncline{->}{b5}{b6}
+  \ncline{->}{b5}{b7}
+
+  \ncline{->}{b6}{b8}
+  \ncline{->}{b7}{b8}
+
+  \ncline{->}{b8}{b9}
+
+  \ncline{->}{b9}{bx}
+
+\end{pspicture}
+\end{center}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    {\bf Block} & {\bf Gen}\rule{5cm}{0pt} & {\bf
+      Kill}\rule{5cm}{0pt} \\ \hline \hline
+    1 & & \\ \hline
+    2 & & \\ \hline
+    3 & & \\ \hline
+    4 & & \\ \hline
+    5 & & \\ \hline
+    6 & & \\ \hline
+    7 & & \\ \hline
+    8 & & \\ \hline
+    9 & & \\ \hline
+  \end{tabular}
+\end{center}
+\clearpage
+{\bf PASS: }
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    {\bf Block} & {\bf IN }\rule{5cm}{0pt} & {\bf
+      OUT }\rule{5cm}{0pt} \\ \hline \hline
+    Entry & & \\ \hline
+    1 & & \\ \hline
+    2 & & \\ \hline
+    3 & & \\ \hline
+    4 & & \\ \hline
+    5 & & \\ \hline
+    6 & & \\ \hline
+    7 & & \\ \hline
+    8 & & \\ \hline
+    EXIT & & \\ \hline
+  \end{tabular}
+\end{center}
+{\bf PASS: }
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    {\bf Block} & {\bf IN }\rule{5cm}{0pt} & {\bf
+      OUT }\rule{5cm}{0pt} \\ \hline \hline
+    Entry & & \\ \hline
+    1 & & \\ \hline
+    2 & & \\ \hline
+    3 & & \\ \hline
+    4 & & \\ \hline
+    5 & & \\ \hline
+    6 & & \\ \hline
+    7 & & \\ \hline
+    8 & & \\ \hline
+    EXIT & & \\ \hline
+  \end{tabular}
+\end{center}
+\clearpage
+{\bf PASS: }
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    {\bf Block} & {\bf IN }\rule{5cm}{0pt} & {\bf
+      OUT }\rule{5cm}{0pt} \\ \hline \hline
+    Entry & & \\ \hline
+    1 & & \\ \hline
+    2 & & \\ \hline
+    3 & & \\ \hline
+    4 & & \\ \hline
+    5 & & \\ \hline
+    6 & & \\ \hline
+    7 & & \\ \hline
+    8 & & \\ \hline
+    EXIT & & \\ \hline
+  \end{tabular}
+\end{center}
+{\bf PASS: }
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    {\bf Block} & {\bf IN }\rule{5cm}{0pt} & {\bf
+      OUT }\rule{5cm}{0pt} \\ \hline \hline
+    Entry & & \\ \hline
+    1 & & \\ \hline
+    2 & & \\ \hline
+    3 & & \\ \hline
+    4 & & \\ \hline
+    5 & & \\ \hline
+    6 & & \\ \hline
+    7 & & \\ \hline
+    8 & & \\ \hline
+    EXIT & & \\ \hline
+  \end{tabular}
+\end{center}
+\clearpage
+\mbox{}
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item Perform reaching definition analysis, i.e. compute
+  gen, kill, in and out for each block for the given flow
+  graph.\hfill[20]
+\begin{center}
+\psset{unit=1mm}
+\begin{pspicture}(0,0)(150,-100)
+  \psframe(0,0)(150,-100)
+  \putnode{be}{origin}{75}{-5}{\psframebox{ENTRY}}
+  \putnode{b1}{be}{0}{-15}{\psframebox{1: u = v}}
+
+  \putnode{b2}{b1}{-20}{-15}{\psframebox{2: w = u + v}}
+  \putnode{b3}{b2}{0}{-15}{\psframebox{3: u = 7}}
+  \putnode{b4}{b3}{0}{-15}{\psframebox{4: w = 10}}
+
+  \putnode{b5}{b1}{20}{-15}{\psframebox{5: v = u}}
+
+  \putnode{b6}{b5}{-15}{-15}{\psframebox{6: u = u+ w}}
+  \putnode{b7}{b5}{15}{-15}{\psframebox{7: v = w + v}}
+
+  \putnode{b8}{b6}{15}{-15}{\psframebox{8: \ldots}}
+
+  \putnode{b9}{b4}{25}{-15}{\psframebox{9: \ldots}}
+
+  \putnode{bx}{b9}{0}{-15}{\psframebox{EXIT}}
+
+  \ncline{->}{be}{b1}
+
+  \ncline{->}{b1}{b2}
+  \ncline{->}{b1}{b5}
+
+  \ncline{->}{b2}{b3}
+
+  \ncline{->}{b3}{b4}
+  \ncline{->}{b3}{b9}
+%  \nccurve[angleA=-90,angleB=90,nodesep=-.2,ncurv=0.1]{->}{b3}{b9}
+
+  \nccurve[angleA=-135,angleB=135,nodesep=-.2,ncurv=1.8]{->}{b4}{b3}
+
+  \ncline{->}{b5}{b6}
+  \ncline{->}{b5}{b7}
+
+  \ncline{->}{b6}{b8}
+  \ncline{->}{b7}{b8}
+
+  \ncline{->}{b8}{b9}
+
+  \ncline{->}{b9}{bx}
+
+\end{pspicture}
+\end{center}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    {\bf Block} & {\bf Gen}\rule{5cm}{0pt} & {\bf
+      Kill}\rule{5cm}{0pt} \\ \hline \hline
+    1 & & \\ \hline
+    2 & & \\ \hline
+    3 & & \\ \hline
+    4 & & \\ \hline
+    5 & & \\ \hline
+    6 & & \\ \hline
+    7 & & \\ \hline
+    8 & & \\ \hline
+    9 & & \\ \hline
+  \end{tabular}
+\end{center}
+\clearpage
+{\bf PASS: }
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    {\bf Block} & {\bf IN }\rule{5cm}{0pt} & {\bf
+      OUT }\rule{5cm}{0pt} \\ \hline \hline
+    Entry & & \\ \hline
+    1 & & \\ \hline
+    2 & & \\ \hline
+    3 & & \\ \hline
+    4 & & \\ \hline
+    5 & & \\ \hline
+    6 & & \\ \hline
+    7 & & \\ \hline
+    8 & & \\ \hline
+    EXIT & & \\ \hline
+  \end{tabular}
+\end{center}
+{\bf PASS: }
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    {\bf Block} & {\bf IN }\rule{5cm}{0pt} & {\bf
+      OUT }\rule{5cm}{0pt} \\ \hline \hline
+    Entry & & \\ \hline
+    1 & & \\ \hline
+    2 & & \\ \hline
+    3 & & \\ \hline
+    4 & & \\ \hline
+    5 & & \\ \hline
+    6 & & \\ \hline
+    7 & & \\ \hline
+    8 & & \\ \hline
+    EXIT & & \\ \hline
+  \end{tabular}
+\end{center}
+\clearpage
+{\bf PASS: }
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    {\bf Block} & {\bf IN }\rule{5cm}{0pt} & {\bf
+      OUT }\rule{5cm}{0pt} \\ \hline \hline
+    Entry & & \\ \hline
+    1 & & \\ \hline
+    2 & & \\ \hline
+    3 & & \\ \hline
+    4 & & \\ \hline
+    5 & & \\ \hline
+    6 & & \\ \hline
+    7 & & \\ \hline
+    8 & & \\ \hline
+    EXIT & & \\ \hline
+  \end{tabular}
+\end{center}
+{\bf PASS: }
+\begin{center}
+\renewcommand{\arraystretch}{1.8}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    {\bf Block} & {\bf IN }\rule{5cm}{0pt} & {\bf
+      OUT }\rule{5cm}{0pt} \\ \hline \hline
+    Entry & & \\ \hline
+    1 & & \\ \hline
+    2 & & \\ \hline
+    3 & & \\ \hline
+    4 & & \\ \hline
+    5 & & \\ \hline
+    6 & & \\ \hline
+    7 & & \\ \hline
+    8 & & \\ \hline
+    EXIT & & \\ \hline
+  \end{tabular}
+\end{center}
+\clearpage
+\mbox{}
+\clearpage
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item {\bf Sign Analysis} :
+
+  Consider a simple programming language with only integer
+  variables and two operations:  {\bf multiplication
+    ($\times$)} and {\bf addition ($+$)}, where the operations
+  have their natural meaning. 
+
+  The language has {\em Positive Constants} (including Zero) and
+  {\em Negative Constants}, i.e.:
+  \begin{center}
+    \begin{tabular}{|c|c|c|} \hline
+      {\bf Constant} & {\bf Sign} \\ \hline \hline
+      $0, 1, 2, 3, \ldots$ & Positive \\ \hline
+      $-1, -2, -3, \ldots$ & Negative \\ \hline
+    \end{tabular}
+  \end{center}
+
+  The language obviously contains basic constructs like
+  {\em assignment} statements, simple branches and while loops
+  (all the cases as discussed in class).
+  
+  We want to compute at each program point the {\bf POSITIVE}
+  set of variables, i.e. variables that have values
+  {\bf definitely $\geq 0$}. Note that we do not want to compute
+  the values of variables.
+
+  The basic rules, in English, are:
+  \begin{enumerate}
+  \item All Positive constants are always POSITIVE.
+  \item  For $x = y$ (y is a constants or a variable), the
+    variable ``x'' is POSITIVE at OUT if ``y'' is POSITIVE at
+    IN of the statement.
+  \item For $x = y + z$ (each of y and z is a  constant or a
+    variable), ``x'' is POSITIVE at OUT if {\bf both} ``y'' and ``z''
+    are POSITIVE at IN.
+  \item For $x = y \times z$ (each of y and z is a  constant or a
+    variable), ``x'' is POSITIVE at OUT if {\bf both} ``y'' and ``z''
+    are POSITIVE at IN.
+  \item Any variable other than ``x'' is unaffected by the
+    assignment $x = \ldots$.
+  \item Initially, all variables are considered  not  POSITIVE.
+  \end{enumerate}
+
+For example
+\begin{verbatim}
+   // STATEMENT    // PROPERTIES  
+   x = 5;      // x is POSITIVE at OUT
+   y = -1 * x; // x is POSITIVE, y is not POSITIVE at OUT
+   z = y * y;  // x POSITIVE, y not, z POSITIVE
+
+   if (something) {
+       w = y; // w not POSITIVE
+   } else {
+       w = x; // w POSITIVE
+   }
+   // at this point w is NOT POSITIVE because it is 
+   // positive along one path, but not other.
+
+\end{verbatim}
+
+We want to design an {\bf intraprocedural flow-insensitive} data flow
+analysis  to infer signs of variables for programs
+written in the above language. Answer the following questions.
+\begin{enumerate}
+\item Define the gen and kill constraints for each type of
+  basic statement (x = y, x = y + z, x = y $\times$
+  z). \hfill[12]
+  
+\item Describe the gen and kill constraints for each type of
+  structure in the program (sequence of statements,
+  if-branch, while loop). \hfill[12]
+  
+\item Is your Analysis {\em Forward} or {\em Backward}?
+  Justify your answer. Also describe the {\em BoundaryInfo},
+  the initialization information at the boundary (ENTRY or EXIT)
+  of the flow  graph. \hfill[2+3] 
+  
+\item What is the optimistic value (top) and the pessimistic
+  value (bot) for this analysis?\linebreak\mbox{ }  \hfill[5]
+  
+\item Consider the rule for $x = y \times z$. Suppose we
+  change the rule as follows:\\
+{\em
+  For $x = y \times z$ (each of y and z is a
+  constant or a variable), ``x'' is POSITIVE at OUT if ``y''
+  and ``z'' are either {\bf both} POSITIVE or {\bf both} NOT
+  POSITIVE.
+}\\
+Is this rule correct? If yes, prove it. If no, give an
+ example program where we get incorrect results. \hfill[6]
+\end{enumerate}
+\clearpage
+\mbox{}
+\clearpage
+\mbox{}
+\clearpage
+\mbox{}
+\clearpage
+\end{enumerate}
+\end{document}
+
