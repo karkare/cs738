@@ -14,7 +14,7 @@ LN=/bin/ln
 
 SLIDES:=$(TGT)Slides
 HANDOUTS:=$(TGT)Handout
-OUTPUTDIR:=output
+OUTPUTDIR:=../lecturenotes
 LATEXOPTS:=-pdfps -output-directory=$(OUTPUTDIR)
 LATEX:=latexmk $(LATEXOPTS)
 # To please Emacs, if it cannot infer latex mode
