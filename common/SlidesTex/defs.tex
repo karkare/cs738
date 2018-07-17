@@ -1,0 +1,38 @@
+\newcommand{\bbent}{{\it Entry}\xspace}
+\newcommand{\bbext}{{\it Exit}\xspace}
+
+\newcommand{\IN}{{\sf IN}\xspace}
+\newcommand{\OUT}{{\sf OUT}\xspace}
+
+\newcommand{\Pred}{{\sf PRED}\xspace}
+\newcommand{\Succ}{{\sf SUCC}\xspace}
+
+\newcommand{\Kill}{{\sf KILL}\xspace}
+\newcommand{\Gen}{{\sf GEN}\xspace}
+
+\newcommand{\cmt}[1]{{}}
+\newcommand{\meet}{\ensuremath{\bigwedge}\xspace}
+\newcommand{\join}{\ensuremath{\bigvee}\xspace}
+\newcommand{\glb}{{\sf glb}\xspace}
+\newcommand{\lub}{{\sf lub}\xspace}
+
+%% Framed minipage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newsavebox\TestBox
+\newenvironment{frmminipage}[2][]
+{\begin{lrbox}{\TestBox}\begin{minipage}[#1]{#2}}
+{\end{minipage}\end{lrbox}\fbox{\usebox{\TestBox}}}
+
+
+\newcommand{\mylabbox}[2]{{\small #1}\psframebox{#2}\phantom{\small #1}}
+
+\newcommand{\tossa}{%
+  \ensuremath{\stackrel{SSA\quad\ }{\scalebox{3}{$\Rightarrow$}}}}
+
+\newcommand{\jstfy}{\mbox{\phantom{XX}}}
+
+\newcommand{\dom}{\operatorname{dom}}
+\newcommand{\sdom}{\operatorname{sdom}}
+\newcommand{\idom}{\operatorname{idom}}
+
+\newcommand{\DOM}{\operatorname{DOM}}
+\newcommand{\DF}{\operatorname{DF}}

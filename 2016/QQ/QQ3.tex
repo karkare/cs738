@@ -1,0 +1,118 @@
+\documentclass[11pt]{article}
+\usepackage{anysize}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{paralist}
+\usepackage{pstricks}
+\usepackage{pst-text}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{multirow}
+\usepackage{xspace}
+\usepackage{wrapfig}
+\usepackage{fancyvrb}
+\newcommand{\answer}[1]{}
+%% Page layout
+\pagestyle{headings}
+\markboth{}{Your Name and Roll Number:}
+\begin{document}
+\noindent \rule{\textwidth}{.2mm}
+\begin{center}
+{\large {\bf Quiz-3 CS618} }
+
+Duration: 45 Minutes \hfill Max Marks: 50
+\end{center} 
+\noindent \rule{\textwidth}{.2mm}
+\begin{itemize}
+\item Write your name and roll number on the question paper and the
+  answer book.
+\item No explanations will be provided. In case of a doubt, make
+  suitable assumptions and justify.
+\item There are 2 questions on 2 pages.
+\end{itemize}
+\noindent \rule{\textwidth}{.2mm}
+
+\begin{enumerate}
+\item ({\bf 15 Marks}) Perform {\bf Flow insensitive Subset-based} and {\bf
+  Flow insensitive Equality-based} points-to analysis for
+  each of the programs. Show only the {\em final} points-to
+  information as points-to graphs.
+\hrule
+  \begin{verbatim}
+(a)  if(...)
+        p = &x;
+     else
+        p = &y;
+
+      x = &a;
+      y = &b;
+     *p = &c;
+     *y = &a;
+
+
+(b)  if(...)
+      y = &b;
+     else
+     *y = &a;
+
+      p = &x;
+      p = &y;
+      x = &a;
+     *p = &c;
+  \end{verbatim}
+\vfill\mbox{}
+\begin{center} (P.T.O.) \end{center}
+%\hrule
+\clearpage
+\item ({\bf 35 Marks}) In this problem, you have to perform the
+  steps given below for {\em Inter-procedural Available
+    Expressions} analysis for the expression {\tt a * b} for the
+  following program. Assume m() is the main function.
+  \newcounter{cline}\setcounter{cline}{0} \newcommand{\nline}{%
+    \addtocounter{cline}{1} \thecline.\ } \renewcommand{\nline}{}
+  
+  \newcommand{\ind}{$\qquad$}
+  \renewcommand{\arraystretch}{1.5}
+  \begin{center}
+    \begin{tabular}{@{}l@{\ind\ind}l@{\ind\ind}l}
+      \begin{tabular}[t]{@{}l@{}}
+        m() \{ \\ 
+        \nline \ind call v() \\
+        \nline \ind call u() \\
+        \}
+      \end{tabular}&
+      \begin{tabular}[t]{@{}l@{}}
+        u() \{ \\
+        \nline   \ind a * b \\
+        \ind if(\ldots) then \\
+        \nline   \ind\ind call v() \\
+        \ind else \\
+        \nline    \ind\ind call u() \\
+        \}
+      \end{tabular}&
+      \begin{tabular}[t]{@{}l@{}}
+        v() \{ \\
+        \ind if(\ldots) then \{\\
+        \nline     \ind\ind b = 6 \\
+        \nline     \ind\ind a * b \\
+        \ind \}\\
+        \}
+      \end{tabular}
+    \end{tabular}
+  \end{center}
+  Show the following steps to arrive at the answer:
+  \begin{enumerate}
+\item Draw the inter-procedural flow graph (any one of the two representations discussed in class). Clearly label the nodes, and distinguish the $E^0$ (intra-procedural) and $E^1$ (inter-procedural) edges.
+\item For each procedure $p$, show the constraints for $\phi(r_p, n_p)$ for each node $n_p$ in the CFG of the procedure. Recall that $r_p$ is the entry node for procedure $p$. Assume the existence of flow functions $f_0, f_1, id$ etc for the underlying data flow framework.
+\item Give the fixed-point solution for $\phi(r_p, n_p)$.
+\item List the program points where the expression
+  {\tt a * b} is available for the program.
+\end{enumerate}
+\hfill[Marks Distribution: 5+15+10+5]
+
+\answer{ 
+  \input{answer4.tex}
+}
+\end{enumerate}
+\end{document}
+

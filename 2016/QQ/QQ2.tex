@@ -1,0 +1,90 @@
+\documentclass[11pt]{article}
+\usepackage{anysize}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{paralist}
+\usepackage{pstricks}
+\usepackage{pst-text}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{multirow}
+\usepackage{xspace}
+\usepackage{wrapfig}
+\usepackage{fancyvrb}
+
+%% Page layout
+\pagestyle{headings}
+\markboth{}{Your Name and Roll Number:}
+\begin{document}
+\noindent \rule{\textwidth}{.2mm}
+\begin{center}
+{\large {\bf Quiz-2 CS618} }
+
+Duration: 45 Minutes \hfill Max Marks: 50
+\end{center} 
+\noindent \rule{\textwidth}{.2mm}
+\begin{itemize}
+\item Write your name and roll number on the question paper and the
+  answer book.
+\item No explanations will be provided. In case of a doubt, make
+  suitable assumptions and justify.
+\end{itemize}
+\noindent \rule{\textwidth}{.2mm}
+
+\noindent Consider the  CFG below. All  variables are undefined to begin with (have {\rm undef} value in {\em entry}).
+    \begin{enumerate}
+    \item (10) Show the {\bf Dominator Tree} for the CFG. 
+    \item (15) Show the {\bf Dominance Frontier} for every node. 
+    \item (15) Show {\bf Iterated Dominance Frontier} for the nodes conaining the definitions of:
+      \begin{center}
+        \mbox{}\hfill(a)  variable x\hfill (b)  variable y\hfill (c) variable z\hfill\mbox{}
+      \end{center}
+    \item (10) Show the final CFG in SSA form.
+    \end{enumerate}
+
+\newcommand{\bb}[1]{{\small\bf B#1}}
+\newcommand{\pp}[1]{{\phantom{\small\bf B#1}}}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,0)(0,0)
+    %\psframe(0,0)(65,80)
+    \putnode{b1}{origin}{60}{-10}{\bb{1}
+      \psframebox{\begin{tabular}{c}
+                    {\em /*entry*\!/} \\
+                    x = {\rm undef} \\
+                    y = {\rm undef} \\
+                    z = {\rm undef}
+                  \end{tabular}
+                }\pp{1}}
+    \putnode{b2}{b1}{0}{-25}{\bb{2}\psframebox{z = 1}\pp{2}}
+    \putnode{b3}{b2}{-15}{-15}{\bb{3}\psframebox{\begin{tabular}{c}
+                                              x = 1\\
+                                              z = 2
+                                            \end{tabular}
+                                          }\pp{3}}
+    \putnode{b4}{b2}{15}{-15}{\bb{4}\psframebox{x = 2}\pp{4}}
+    \putnode{b5}{b3}{0}{-15}{\bb{5}\psframebox{y = x + 1}\pp{5}}
+    \putnode{b6}{b4}{0}{-25}{\bb{6}\psframebox{\begin{tabular}{c}
+                                              z = x + 3\\
+                                              x = 4 + z
+                                            \end{tabular}
+                                          }\pp{6}}
+    \putnode{b7}{b6}{0}{-15}{\bb{7}\psframebox{z = x + 7}\pp{7}}
+    \putnode{b8}{b7}{-15}{-15}{\bb{8}\psframebox{
+        \begin{tabular}{c}
+          {\rm print} x, y, z\\
+          {\em /*exit*\!/}
+        \end{tabular}}\pp{8}}
+    \ncline{->}{b1}{b2}
+    \ncline{->}{b2}{b3}
+    \ncline{->}{b2}{b4}
+    \ncline{->}{b3}{b5}
+    \ncline{->}{b3}{b6}
+    \ncline{->}{b4}{b5}
+    \ncline{->}{b4}{b6}
+    \ncloop[angleA=-90,angleB=90,loopsize=20,arm=5,linearc=.2,
+    offset=1]{->}{b5}{b3}
+    \ncline{->}{b5}{b8}
+    \ncline{->}{b6}{b7}
+    \ncline{->}{b7}{b8}
+  \end{pspicture}
+\end{document}

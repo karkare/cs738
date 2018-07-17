@@ -1,0 +1,894 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{anysize}
+\usepackage{fancyhdr}
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+
+\setlength{\headheight}{15pt}
+\pagestyle{fancyplain}
+\lhead{\fancyplain{}{{\em Page \#\/}\thepage}}
+\chead{CS738}
+\rhead{\fancyplain{}{\textit{Roll No:}\rule{30mm}{0pt}}}
+\lfoot{}
+\cfoot{}
+\rfoot{}
+
+\newcommand{\tbd}[1]{{\red #1}}
+\newcommand{\answer}[1]{{{\blue #1}}}
+%\renewcommand{\answer}[1]{\mbox{}}
+
+%% \textwidth 7in
+%% \addtolength{\oddsidemargin}{-1in}
+%% \textheight 9.5in
+%% \addtolength{\topmargin}{-1in}
+%% \setlength{\parindent}{0pt}
+%% \setlength{\parskip}{0.5cm}
+%% \topskip 0.0in
+\thispagestyle{empty}
+
+\begin{document}
+
+{\Large\bf NAME: \hspace*{3in} ROLL NO:}
+
+\begin{center}
+CS738: Advanced Compiler Optimizations \\
+End Semester Examination, 2011-12\\
+Max Time: 3 Hours  \hfill Max Marks: 180 \\
+
+{\bf NOTE: }
+\begin{itemize}
+
+\item There is no separate answer script. {\bf Write down the
+  answers in the space provided on the question paper.} There
+  is enough space for rough work too, so do not ask for extra
+  sheets. \\
+
+\item Presenting your answers properly is your
+  responsibility. You lose credit if you can not present your
+  ideas clearly, and in proper form. Please DO NOT come back
+  for re-evaluation saying, ``What I actually meant was
+  \ldots''.
+
+\item Be precise and write clearly. Remember that somebody
+  has to read it to evaluate!
+
+\item {\bf ONE} A4 size {\em cheat-sheet} is allowed. Sharing
+  of cheat-sheet or any other exam material is {\bf not
+    allowed}. 
+
+\item Last page (\#24) contains reproduction of Figures for
+  Ques 4, 5 and 6 to ease cross referencing while writing the
+  answers. You can tear off that page {\bf ONLY after writing
+    your roll number on top of the page.} 
+\end{itemize}
+
+
+
+\vspace*{4mm}
+
+{\Large
+\begin{tabular}{|c|c|c|}\hline
+Question No. & Max Marks & Marks Obtained \\\hline
+1 & 10 & \\\hline
+2 & 10 & \\\hline
+3 & 45 & \\\hline
+4 & 35 & \\\hline
+5 & 45 & \\\hline
+6 & 35 & \\\hline
+Total & \bf{180} & \\\hline
+\end{tabular}
+}
+\end{center}
+
+\vspace*{4mm} I pledge my honour as a gentleman/lady that
+during the examination I have neither given assistance nor
+received assistance.
+
+\vspace*{1cm}
+Signature
+
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\thispagestyle{empty} \vspace{-5mm}
+%\includegraphics[angle=90,scale=.99]{Endsem-2011.Q2.eps}
+\clearpage
+\begin{enumerate}
+\item Let $(S, \wedge)$ be a semilattice. Let $f: S
+  \rightarrow S$ be a function. Prove that the following
+  two definitions for {\em monotonicity} of  $f$ are
+  equivalent:
+  $$\forall x,y \in S: f(x \wedge y) \leq f(x) \wedge
+  f(y)$$
+  \begin{center} and \end{center}
+  $$\forall x,y \in S: x\leq y \Rightarrow f(x) \leq f(y) $$
+  \hfill[10]
+\answer{
+  \begin{itemize}
+  \item $\Rightarrow$: Let $x \leq y$. Then:\\
+    $\begin{array}{rcl}
+    x \wedge y = x &\Rightarrow& f(x \wedge y) = f(x) \\
+    & \Rightarrow & f(x) \leq f(x) \wedge f(y) \\
+    & \Rightarrow & f(x) \leq f(y) \qquad\qquad \mbox{// Recall properties of
+      } \wedge
+  \end{array}$
+  \item $\Leftarrow$: \\
+    $\begin{array}{rcl}
+    x \wedge y \leq x &\Rightarrow& f(x \wedge y) \leq f(x) \\
+    x \wedge y \leq y &\Rightarrow& f(x \wedge y) \leq f(y) \\
+    \mbox{Combine the above} & \Rightarrow & f(x \wedge y) \wedge f(x \wedge y) \leq f(x) \wedge f(y) \\
+    & \Rightarrow & f(x \wedge y) \leq f(x) \wedge f(y) 
+  \end{array}$
+  \end{itemize}
+}
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item Consider a flow graph G with a unique entry node ENTRY
+  that dominates all nodes of G. Prove that every node in G
+  except ENTRY has a unique {\em immediate dominator}. 
+  \hfill[10]
+\answer{
+  \begin{itemize}
+  \item Every node except ENTRY has at least one strict
+    dominator. Consider a node Z that has more than one
+    strict dominators. Consider two such dominators X and Y. Then,
+    it can be proved that either X dominates Y or Y dominates
+    X (*proof below). Thus, it possible to find {\em least} element among
+    all strict dominators of Z. This element is the desired
+    immediate dominator.
+  \item * Consider a cycle free path from
+    ENTRY$\rightarrow$Z. Because both X and Y strictly
+    dominate Z, they must occur on this path. WLOG, assume
+    that X occurs before Y in this path.  Thus the path is:
+    Entry $\rightarrow$ X $\rightarrow$ Y $\rightarrow$ Z. We
+    will prove that X must dominate Y.
+
+    Assume the contrary (X does not dominate Y). Then, we
+    have a path Entry $\Rightarrow Y$ free of X. But then,
+    Entry $\Rightarrow$ Y $\rightarrow$ Z is a path to Z free
+    of X. But that also contradicts the fact that X dominates
+    Z.
+  \end{itemize}
+}
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item Consider a simple programming language with only two
+  primitive types: {\bf int} and {\bf bool}. The language
+  specification does not require a variable to be declared
+  before use. However, the language requires that for a
+  program to be valid, every variable must be assigned a {\em
+    unique} type during compilation.
+
+  The following table describes the operations permitted by
+  the language, the corresponding type restrictions on the
+  argument variables and the result of the operation.
+  \begin{center}
+    \begin{tabular}{|c|c|l|l|}\hline
+      {\bf Operation} & {\bf Example} & {\bf Type Restrictions
+        on Args} & {\bf Result Type} \\\hline\hline
+      == & x == y & x and y have to be of the same type (int
+      or bool) & bool \\\hline
+      +  & x + y & x and y both are int & int \\\hline
+      \&\& & x \&\& y &  x and y both are bool & bool \\\hline
+    \end{tabular}
+  \end{center}
+  Note that the type of argument on RHS may still be
+  un-inferred when the statement is processed. Further,
+  nested operations are {\bf not allowed} on RHS.
+
+  The language has
+  following constants (each constant has a fixed type):
+  \begin{center}
+    \begin{tabular}{|c|c|c|} \hline
+      {\bf Const Class} & {\bf Constants} & {\bf Type} \\ \hline \hline
+      int\_constant & $-\infty\ldots -2, -1, 0, 1, 2, \ldots
+      \infty$ & int \\ \hline 
+      bool\_constant & false, true & bool \\ \hline
+    \end{tabular}
+  \end{center}
+ The language obviously contains basic constructs like
+ {\em assignment} statements, {\em goto} statements, and conditionals
+ ({\em if-else}). Following typing restrictions apply:
+ \begin{itemize}
+ \item Both sides of an assignment must be of the {\em same}
+   type.
+ \item The condition of the {\em if-else} should be a single
+   variable of type bool.
+ \end{itemize}
+ Here are couple of sample programs, one valid and other invalid.
+\begin{verbatim}
+   // PROGRAM 1                     // PROGRAM 2
+   c = n == 0;                      c = n==0;
+   if (c) {                         if (c) {
+     d = e + 3;                       d  = c + 3;
+   } else {                         } else { 
+     d = e - 5;                       d  = e - 5;
+   }                                }
+   // c: bool                      // invalid program
+   // n, d, e: int                 // c has to be both bool and int! 
+                                   // n, d, e: int
+\end{verbatim}
+
+Design an {\bf intraprocedural flow-insensitive} data flow
+analysis framework to infer types of variables for programs
+written in the above language. In particular,
+\begin{enumerate}
+\item Draw the component lattice for the
+  framework.\hfill[10]
+\item Describe the meet operator ($\wedge$) in a tabular
+  form.\hfill[5]
+\item Describe intuitively the meaning of the top and the
+  bottom elements. \hfill[5]
+\item Define the flow functions for each type of
+  statement. \hfill[20]
+\item Is your framework {\em Forward} or {\em Backward}?
+  Justify your answer. Also describe the {\em BoundaryInfo}
+  (initialization information at the boundary of the flow
+  graph). \hfill[2+3]
+\end{enumerate}
+\answer{
+\begin{enumerate}
+\item Lattice:
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(50,50)
+      %\psframe(0,0)(50,50)
+      \putnode{b0}{origin}{25}{45}{$\top$}
+      \putnode{b1}{b0}{-20}{-20}{int}
+      \putnode{b2}{b0}{20}{-20}{bool}
+      \putnode{b3}{b0}{0}{-40}{$\bot$}        
+      \ncline{b0}{b1}
+      \ncline{b0}{b2}
+      \ncline{b2}{b3}
+      \ncline{b1}{b3}      
+    \end{pspicture}
+  \end{center}
+\item meet: 
+  \begin{center}
+    \begin{tabular}{c||c|c|c|c}
+      $\wedge$ & $\top$ & int    & bool   & $\bot$ \\ \hline \hline
+      $\top$   & $\top$ & int    & bool   & $\bot$ \\ \hline
+      int      & int    & int    & $\bot$ & $\bot$ \\ \hline
+      bool     & bool   & $\bot$ & bool   & $\bot$ \\ \hline
+      $\bot$   & $\bot$ & $\bot$ & $\bot$ & $\bot$ \\ \hline
+    \end{tabular}
+  \end{center}
+\item $\top$ represents no type inferred yet. $\bot$
+  represents conflicting types inferred (more than one type
+  for a variable).
+\item Flow functions. (This is one of the many possible solutions)
+  \begin{enumerate}
+  \item z = x == y:
+    \begin{eqnarray*}
+      Out(z) &=& In(z) \wedge bool \\
+      Out(x) &=& In(x) \wedge In(y) \\
+      Out(y) &=& In(x) \wedge In(y) 
+    \end{eqnarray*}
+
+  \item z = x + y:
+    \begin{eqnarray*}
+      Out(z) &=& In(z) \wedge int \\
+      Out(x) &=& In(x) \wedge int \\
+      Out(y) &=& In(y) \wedge int 
+    \end{eqnarray*}
+
+  \item z = x \&\& y:
+    \begin{eqnarray*}
+      Out(z) &=& In(z) \wedge bool \\
+      Out(x) &=& In(x) \wedge bool \\
+      Out(y) &=& In(y) \wedge bool
+    \end{eqnarray*}
+
+  \item z = int\_constant:
+    \begin{eqnarray*}
+      Out(z) &=& In(z) \wedge int \\
+    \end{eqnarray*}
+
+  \item z = bool\_constant:
+    \begin{eqnarray*}
+      Out(z) &=& In(z) \wedge bool \\
+    \end{eqnarray*}
+
+  \item z = x:
+    \begin{eqnarray*}
+      Out(z) &=& In(z) \wedge In(x)  \\
+      Out(x) &=& In(z) \wedge In(x)  \\
+    \end{eqnarray*}
+  \end{enumerate}
+\item My framework is forward (but yours could be backward,
+  depends on the flow functions!). Out is computed in terms
+  of In. 
+    \begin{eqnarray*}
+      \mbox{\em BoundaryInfo} &=& BI, \mbox{ s.t. } BI(x) =
+      \top\       \forall x \\
+    \end{eqnarray*} 
+\end{enumerate}
+}
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item Use call-strings approach to perform {\em
+  Interprocedural Available Expressions} analysis for the
+  following program. Here $c_i$ denotes the $i^{th}$ call
+  site. 
+\newcounter{cline}\setcounter{cline}{0}
+\newcommand{\nline}{%
+  \addtocounter{cline}{1}
+  \thecline.\ 
+}
+\renewcommand{\nline}{}
+  
+\newcommand{\ind}{$\qquad$}
+  \renewcommand{\arraystretch}{1.5}
+\begin{center}
+  \begin{tabular}{@{}l@{\ind\ind}l@{\ind\ind}l}
+    \begin{tabular}[t]{@{}l@{}}
+      main() \{ \\
+      \ind ENTRY \\
+      \nline $c_1:$ call p() \\
+      \nline \ind c * d \\
+      \nline $c_2:$ call q() \\
+      \ind EXIT \\
+      \}
+    \end{tabular}&
+    \begin{tabular}[t]{@{}l@{}}
+      p() \{ \\
+      \ind ENTRY \\
+      \nline   \ind a * b \\
+      \ind if(\ldots) then \\
+      \nline   $c_3:$ \ind call q() \\
+      \ind else \\
+      \nline    $c_4:$ \ind call q() \\
+      \nline    \ind c = 5 \\
+      \ind EXIT \\
+      \}
+    \end{tabular}&
+    \begin{tabular}[t]{@{}l@{}}
+      q() \{ \\
+      \ind ENTRY \\
+      \ind if(\ldots) then \\
+      \nline     \ind\ind a = 5 \\
+      \ind else \\
+      \nline     \ind\ind b = 6 \\
+      \ind EXIT \\
+      \}
+    \end{tabular}
+  \end{tabular}
+\end{center}
+Show the following steps to arrive at the answer:
+\begin{enumerate}
+\item Supergraph distinguishing the intra- and inter-
+  procedural edges.
+\item Local information (gen and kill) for each block
+\item IN and OUT at each program point. The information
+  coming along different call stack should be kept separate.
+\item List the program points where each of the expressions
+  {\tt a * b} and {\tt c * d} is available.
+\end{enumerate}
+\hfill[10+5+15+5]
+
+\answer{ 
+  \input{answer4.tex}
+}
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item Consider the following flow graph:
+
+\begin{center}
+\newcommand{\symbox}[2]{#1.\psframebox{#2}\phantom{#1.}}
+
+\psset{unit=1mm}
+\begin{pspicture}(0,0)(150,-160)
+  \psframe(0,0)(150,-160)
+  \putnode{b1}{origin}{75}{-10}{\symbox{1}{ENTRY}}
+  \putnode{b2}{b1}{0}{-20}{\symbox{2}{x = 2}}
+  \putnode{b3}{b2}{-30}{-20}{\symbox{3}{y = 3}}
+  \putnode{b4}{b2}{30}{-20}{\symbox{4}{x = x + 1}}
+  \putnode{b5}{b3}{-15}{-20}{\symbox{5}{z = x + y}}
+  \putnode{b6}{b3}{15}{-20}{\symbox{6}{\phantom{w = y + 3}}}
+  \putnode{b7}{b4}{-15}{-20}{\symbox{7}{y = y + 1}}
+  \putnode{b8}{b4}{15}{-20}{\symbox{8}{\phantom{y = y + 1}}}
+  \putnode{b9}{b5}{15}{-20}{\symbox{9}{\phantom{w = 2 * x}}}
+  \putnode{b10}{b6}{15}{-20}{\symbox{10}{ x = z - 1}}
+  \putnode{b11}{b7}{15}{-20}{\symbox{11}{y = y + x}}
+  \putnode{b12}{b10}{0}{-20}{\symbox{12}{\phantom{y = y + 1}}}
+  \putnode{b13}{b12}{-20}{-20}{\symbox{13}{\phantom{x = 5 + 6}}}
+  \putnode{b14}{b12}{20}{-20}{\symbox{14}{\phantom{y = 7 + 8}}}
+  \putnode{b15}{b13}{20}{-20}{\symbox{15}{EXIT}}
+
+  \ncline{->}{b1}{b2}
+  \ncline{->}{b2}{b3}
+  \ncline{->}{b2}{b4}
+  \ncline{->}{b3}{b5}
+  \ncline{->}{b3}{b6}
+  \ncline{->}{b4}{b7}
+  \ncline{->}{b4}{b8}
+  \ncline{->}{b5}{b9}
+  \ncline{->}{b6}{b9}
+  \ncline{->}{b6}{b10}
+  \ncline{->}{b7}{b10}
+  \ncline{->}{b8}{b11}
+  \ncline{->}{b9}{b13}
+  \ncline{->}{b10}{b12}
+  \ncline{->}{b11}{b12}
+  \ncline{->}{b12}{b13}
+  \ncline{->}{b12}{b14}
+  \ncline{->}{b13}{b15}
+  \ncline{->}{b14}{b15}
+
+  \nccurve[angleA=-155,angleB=135,nodesep=-.1,ncurv=2]{->}{b5}{b3}
+  \nccurve[angleA=-35,angleB=25,nodesep=-.1,ncurv=1.2]{->}{b14}{b11}
+\end{pspicture}
+\end{center}
+
+\begin{enumerate}
+\item Draw the dominator tree for the graph. \hfill[5]
+\item Calculate the dominance frontier for each
+  block. \hfill[15] 
+\item Convert the flow graph to minimal SSA form. Show the
+  important steps in conversion. \hfill[25]
+\end{enumerate}
+
+\answer{
+\clearpage
+  Dominator Tree:
+\begin{center}
+\newcommand{\symbox}[2]{\pscirclebox{#1}}
+
+\psset{unit=1mm}
+\begin{pspicture}(0,0)(150,-90)
+  %\psframe(0,0)(150,-90)
+  \putnode{b1}{origin}{75}{-5}{\symbox{1}{ENTRY}}
+  \putnode{b2}{b1}{0}{-20}{\symbox{2}{x = 2}}
+  \ncline{->}{b1}{b2}
+
+  \putnode{b3}{b2}{-50}{-20}{\symbox{3}{y = 3}}
+  \putnode{b4}{b3}{20}{0}{\symbox{4}{x = x + 1}}
+  \putnode{b10}{b4}{20}{0}{\symbox{10}{ x = z - 1}}
+  \putnode{b11}{b10}{20}{0}{\symbox{11}{y = y + x}}
+  \putnode{b12}{b11}{20}{0}{\symbox{12}{\phantom{y = y + 1}}}
+  \putnode{b13}{b12}{20}{0}{\symbox{13}{\phantom{x = 5 + 6}}}
+  \putnode{b15}{b13}{20}{0}{\symbox{15}{EXIT}}
+  \ncline{->}{b2}{b3}
+  \ncline{->}{b2}{b4}
+  \ncline{->}{b2}{b10}
+  \ncline{->}{b2}{b11}
+  \ncline{->}{b2}{b12}
+  \ncline{->}{b2}{b13}
+  \ncline{->}{b2}{b15}
+
+  \putnode{b5}{b3}{-35}{-20}{\symbox{5}{z = x + y}}
+  \putnode{b6}{b5}{15}{0}{\symbox{6}{\phantom{w = y + 3}}}
+  \putnode{b9}{b6}{15}{0}{\symbox{9}{\phantom{w = 2 * x}}}
+  \ncline{->}{b3}{b5}
+  \ncline{->}{b3}{b6}
+  \ncline{->}{b3}{b9}
+
+  \putnode{b7}{b4}{-10}{-20}{\symbox{7}{y = y + 1}}
+  \putnode{b8}{b7}{20}{0}{\symbox{8}{\phantom{y = y + 1}}}
+  \ncline{->}{b4}{b7}
+  \ncline{->}{b4}{b8}
+
+  \putnode{b14}{b12}{0}{-20}{\symbox{14}{\phantom{y = 7 + 8}}}
+  \ncline{->}{b12}{b14}
+\end{pspicture}
+\end{center}
+
+Dominance Frontier:
+%\begin{center}
+  \begin{tabular}{r|l}
+    Node & DF \\ \hline \hline
+     1 & \{\} \\ \hline
+     2 & \{\} \\ \hline
+     3 & \{3,10,13\} \\ \hline
+     4 & \{10,11\} \\ \hline
+     5 & \{3,9\} \\ \hline
+     6 & \{9,10\} \\ \hline
+     7 & \{10\} \\ \hline
+     8 & \{11\} \\ \hline
+     9 & \{13\} \\ \hline
+    10 & \{12\} \\ \hline
+    11 & \{12\} \\ \hline
+    12 & \{11,13,15\} \\ \hline
+    13 & \{15\} \\ \hline
+    14 & \{11,15\} \\ \hline
+    15 & \{\} \\ \hline
+  \end{tabular}
+%\end{center}
+
+\begin{center}
+  ENTRY node (1) contains implicit definitions of x, y, z.
+
+  \begin{tabular}{c|c|l} \hline
+  Var & Defs & Iterated Dom Frontier of Defs \\ \hline \hline
+  x & 1, 2, 4, 10 & \{ 10, 11, 12, 13, 15 \} \\ \hline
+  y & 1, 3, 7, 11 & \{  3, 10, 11, 12, 13, 15 \} \\ \hline
+  z & 1, 5 &        \{  3,  9, 10, 11, 12, 13, 15 \} \\ \hline
+  \end{tabular}
+\end{center}
+\begin{center}
+\newcommand{\symbox}[2]{#1.\psframebox{#2}\phantom{#1.}}
+
+\psset{unit=1mm}
+\begin{pspicture}(0,0)(150,-160)
+  \psframe(0,0)(150,-160)
+  \putnode{b1}{origin}{75}{-10}{\symbox{1}{ENTRY [x, y, z]}}
+  \putnode{b2}{b1}{0}{-20}{\symbox{2}{x = 2}}
+  \putnode{b3}{b2}{-30}{-20}{\symbox{3}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z = $\phi$(z, z) \\
+        y = $\phi$(y, y) \\
+        y = 3 \\
+      \end{tabular}
+  }}
+  \putnode{b4}{b2}{30}{-20}{\symbox{4}{x = x + 1}}
+  \putnode{b5}{b3}{-15}{-20}{\symbox{5}{z = x + y}}
+  \putnode{b6}{b3}{15}{-20}{\symbox{6}{\phantom{w = y + 3}}}
+  \putnode{b7}{b4}{-15}{-20}{\symbox{7}{y = y + 1}}
+  \putnode{b8}{b4}{15}{-20}{\symbox{8}{\phantom{y = y + 1}}}
+  \putnode{b9}{b5}{15}{-20}{\symbox{9}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z = $\phi$(z, z)
+      \end{tabular}
+  }}
+  \putnode{b10}{b6}{15}{-20}{\symbox{10}{ 
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z = $\phi$(z, z) \\
+        y = $\phi$(y, y) \\
+        x = $\phi$(x, x) \\
+        x = z - 1 \\
+      \end{tabular}
+  }}
+  \putnode{b11}{b7}{15}{-20}{\symbox{11}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z = $\phi$(z, z) \\
+        y = $\phi$(y, y) \\
+        x = $\phi$(x, x) \\
+        y = y + x \\
+      \end{tabular}
+  }}
+  \putnode{b12}{b10}{0}{-20}{\symbox{12}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z = $\phi$(z, z) \\
+        y = $\phi$(y, y) \\
+        x = $\phi$(x, x) \\
+      \end{tabular}
+  }}
+  \putnode{b13}{b12}{-20}{-20}{\symbox{13}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z = $\phi$(z, z) \\
+        y = $\phi$(y, y) \\
+        x = $\phi$(x, x) \\
+      \end{tabular}
+  }}
+  \putnode{b14}{b12}{20}{-20}{\symbox{14}{\phantom{y = 7 + 8}}}
+  \putnode{b15}{b13}{20}{-20}{\symbox{15}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z = $\phi$(z, z) \\
+        y = $\phi$(y, y) \\
+        x = $\phi$(x, x) \\
+        EXIT \\
+      \end{tabular}
+  }}
+
+  \ncline{->}{b1}{b2}
+  \ncline{->}{b2}{b3}
+  \ncline{->}{b2}{b4}
+  \ncline{->}{b3}{b5}
+  \ncline{->}{b3}{b6}
+  \ncline{->}{b4}{b7}
+  \ncline{->}{b4}{b8}
+  \ncline{->}{b5}{b9}
+  \ncline{->}{b6}{b9}
+  \ncline{->}{b6}{b10}
+  \ncline{->}{b7}{b10}
+  \ncline{->}{b8}{b11}
+  \ncline{->}{b9}{b13}
+  \ncline{->}{b10}{b12}
+  \ncline{->}{b11}{b12}
+  \ncline{->}{b12}{b13}
+  \ncline{->}{b12}{b14}
+  \ncline{->}{b13}{b15}
+  \ncline{->}{b14}{b15}
+
+  \nccurve[angleA=-155,angleB=135,nodesep=-.1,ncurv=2]{->}{b5}{b3}
+  \nccurve[angleA=-35,angleB=25,nodesepB=-3,ncurv=1.2]{->}{b14}{b11}
+\end{pspicture}
+\end{center}
+
+\begin{center}
+\newcommand{\symbox}[2]{#1.\psframebox{#2}\phantom{#1.}}
+
+\psset{unit=1mm}
+\begin{pspicture}(0,0)(150,-160)
+  \psframe(0,0)(150,-160)
+  \putnode{b1}{origin}{75}{-10}{\symbox{1}{ENTRY [x0, y0, z0]}}
+  \putnode{b2}{b1}{0}{-20}{\symbox{2}{x1 = 2}}
+  \putnode{b3}{b2}{-30}{-20}{\symbox{3}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z1 = $\phi$(z2, z0) \\
+        y1 = $\phi$(y2, y0) \\
+        y2 = 3 \\
+      \end{tabular}
+  }}
+  \putnode{b4}{b2}{30}{-20}{\symbox{4}{x2 = x1 + 1}}
+  \putnode{b5}{b3}{-15}{-20}{\symbox{5}{z2 = x1 + y2}}
+  \putnode{b6}{b3}{15}{-20}{\symbox{6}{\phantom{w = y + 3}}}
+  \putnode{b7}{b4}{-15}{-20}{\symbox{7}{y3 = y0 + 1}}
+  \putnode{b8}{b4}{15}{-20}{\symbox{8}{\phantom{y = y + 1}}}
+  \putnode{b9}{b5}{10}{-20}{\symbox{9}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z3 = $\phi$(z2, z1)
+      \end{tabular}
+  }}
+  \putnode{b10}{b6}{15}{-20}{\symbox{10}{ 
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z4 = $\phi$(z1, z0) \\
+        y4 = $\phi$(y2, y3) \\
+        x3 = $\phi$(x1, x2) \\
+        x4 = z4 - 1 \\
+      \end{tabular}
+  }}
+  \putnode{b11}{b7}{20}{-20}{\symbox{11}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z5 = $\phi$(z0, z6) \\
+        y5 = $\phi$(y0, y7) \\
+        x5 = $\phi$(x2, x6) \\
+        y6 = y5 + x5 \\
+      \end{tabular}
+  }}
+  \putnode{b12}{b10}{0}{-20}{\symbox{12}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z6 = $\phi$(z4, z5) \\
+        y7 = $\phi$(y4, y6) \\
+        x6 = $\phi$(x4, x5) \\
+      \end{tabular}
+  }}
+  \putnode{b13}{b12}{-20}{-20}{\symbox{13}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z7 = $\phi$(z3, z6) \\
+        y8 = $\phi$(y2, y7) \\
+        x7 = $\phi$(x1, x6) \\
+      \end{tabular}
+  }}
+  \putnode{b14}{b12}{20}{-20}{\symbox{14}{\phantom{y = 7 + 8}}}
+  \putnode{b15}{b13}{20}{-20}{\symbox{15}{
+      \renewcommand{\arraystretch}{.1}
+      \begin{tabular}{@{}l@{}}
+        z8 = $\phi$(z7, z6) \\
+        y9 = $\phi$(y8, y7) \\
+        x8 = $\phi$(x7, x6) \\
+        EXIT \\
+      \end{tabular}
+  }}
+
+  \ncline{->}{b1}{b2}
+  \ncline{->}{b2}{b3}
+  \ncline{->}{b2}{b4}
+  \ncline{->}{b3}{b5}
+  \ncline{->}{b3}{b6}
+  \ncline{->}{b4}{b7}
+  \ncline{->}{b4}{b8}
+  \ncline{->}{b5}{b9}
+  \ncline{->}{b6}{b9}
+  \ncline{->}{b6}{b10}
+  \ncline{->}{b7}{b10}
+  \ncline{->}{b8}{b11}
+  \ncline{->}{b9}{b13}
+  \ncline{->}{b10}{b12}
+  \ncline[nodesepA=-1]{->}{b11}{b12}
+  \ncline{->}{b12}{b13}
+  \ncline{->}{b12}{b14}
+  \ncline{->}{b13}{b15}
+  \ncline{->}{b14}{b15}
+
+  \nccurve[angleA=-155,angleB=135,nodesep=-.1,ncurv=2]{->}{b5}{b3}
+  \nccurve[angleA=-35,angleB=45,nodesepB=-.2,ncurv=1.4]{->}{b14}{b11}
+\end{pspicture}
+\end{center}
+
+}
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\vspace*{-15mm}\item Perform {\bf Flow Sensitive May and Must Points-to}
+  analysis for the program. 
+  \begin{enumerate}
+  \item Give Local Data Flow information for each block
+    in terms of May and Must sets. [Do not write the
+      generic equation, but instantiate it for the current
+      statement.] 
+  \item Show result of each iteration of the analysis
+    (Maximum $\mathbf{3}$ iterations only).
+  \end{enumerate}
+  The final answer should be given in the tables provided
+  below.  \hfill[10 + 25] 
+\begin{center}
+\scalebox{0.95}{
+  \psset{unit=.8mm}
+  \begin{pspicture}(0,10)(65,-70)
+    %\psframe(0,10)(65,-70)
+    \putnode{b1}{origin}{25}{10}{1\psframebox{b = \&d}}
+    \putnode{b2}{b1}{0}{-15}{2\psframebox{c = b}}
+    \putnode{b3}{b2}{-15}{-15}{3\psframebox{a = \&b}}
+    \putnode{b4}{b3}{0}{-15}{4\psframebox{*a = a}}
+    \putnode{b5}{b2}{15}{-22}{5\psframebox{a = \&c}}
+    \putnode{b6}{b4}{15}{-15}{6\psframebox{a = *a}}
+    \putnode{b7}{b6}{0}{-15}{7\psframebox{*b = c}}
+    \ncline{->}{b1}{b2}
+    \ncline{->}{b2}{b3}
+    \ncline{->}{b2}{b5}
+    \ncline{->}{b3}{b4}
+    \ncline{->}{b4}{b6}
+    \ncline{->}{b5}{b6}
+    \ncloop[angleA=-90,angleB=90,loopsize=-30,arm=5,linearc=.2,offset=1]
+           {->}{b6}{b5}
+    \ncline{->}{b6}{b7}
+  \end{pspicture}
+}
+\end{center}
+%
+\answer{
+\begin{center}
+\vspace*{-10mm}\renewcommand{\arraystretch}{1.15}
+\hspace*{-25mm}\begin{tabular}{|c||l|l||l|l|} \hline
+  {\bf \#} & {\bf $May_{GEN}$} & {\bf $May_{KILL}$} & {\bf
+    $Must_{GEN}$} & {\bf $Must_{KILL}$}  \\ \hline \hline
+  & & & & \\
+  & $b\rightarrow d$ & $b\rightarrow any$ & $b\rightarrow d$ &
+  $b\rightarrow any$  \\
+  1 & \rule{38mm}{0pt}& \rule{38mm}{0pt}& \rule{38mm}{0pt}& \rule{38mm}{0pt}\\ \hline
+  & & & & \\
+  & $c\rightarrow p$ &
+  $c\rightarrow any$ & $c\rightarrow p$ & $c\rightarrow any$\\
+  2 & $| b\rightarrow p \in MayIN$ & &  $| b\rightarrow p \in MustIN$& \\ \hline
+  & & & & \\
+  & $a\rightarrow b$ & $a\rightarrow any$ & $a\rightarrow b$ & $a\rightarrow any$ \\
+  3 & & & & \\ \hline
+  & $p \rightarrow p'$ & $p \rightarrow any$ & $p \rightarrow p'$ & $p \rightarrow any$ \\
+  & $| a\rightarrow p \in MayIN$& $| a\rightarrow p \in
+  MustIn$ & $| a\rightarrow p \in MustIN$& $| a\rightarrow p \in
+  MayIn$\\
+  4 & $| a\rightarrow p' \in MayIN$& & $| a\rightarrow p' \in MustIN$& \\ \hline
+  & & & & \\
+  & $a\rightarrow c$ & $a\rightarrow any$ & $a\rightarrow c$ & $a\rightarrow any$ \\
+  5 & & & & \\ \hline
+  & $a\rightarrow p$ & $a\rightarrow any$ & $a\rightarrow
+  p$ & $a\rightarrow any$ \\
+  & $| a\rightarrow p' \in MayIN$ & & $| a\rightarrow p' \in MustIN$ & \\ 
+  6 & $| p'\rightarrow p \in MayIN$ & & $| p'\rightarrow p
+  \in MustIN$ & \\ \hline
+  & $p \rightarrow p'$ & $p \rightarrow any$ & $p \rightarrow p'$ & $p \rightarrow any$ \\
+  & $| b\rightarrow p \in MayIN$& $| b\rightarrow p \in
+  MustIn$ & $| b\rightarrow p \in MustIN$& $| b\rightarrow p \in
+  MayIn$\\
+  7 & $| c\rightarrow p' \in MayIN$& & $| c\rightarrow p' \in MustIN$& \\ \hline
+\multicolumn{5}{c}{    Local Data Flow Information}
+\end{tabular}
+\end{center}
+%\clearpage
+\begin{center}
+  \renewcommand{\arraystretch}{1.3}
+  \hspace*{-25mm}\begin{tabular}{|c||c|c||c|c|} \hline
+    {\bf \#} & {\bf $May_{IN}$} & {\bf $May_{OUT}$} & {\bf
+      $Must_{IN}$} & {\bf $Must_{OUT}$}  \\ \hline \hline
+    1 & $\phi$ & $b\rightarrow d$& $\phi$ & $b\rightarrow
+    d$\\ \hline
+    2 & $b\rightarrow d$ & $b\rightarrow d, c \rightarrow d$ & $b\rightarrow
+    d$ & $b\rightarrow d, c \rightarrow d$ \\ \hline
+    3 & $b\rightarrow d, c \rightarrow d$ & $a
+   \rightarrow b, b\rightarrow d,
+    c \rightarrow d$ & $b\rightarrow d, c \rightarrow d$ & $a
+   \rightarrow b, b\rightarrow d, c \rightarrow d$ \\ \hline
+    4 & $a \rightarrow b, b\rightarrow d,
+    c \rightarrow d$ & $a \rightarrow b, b\rightarrow b,
+    c \rightarrow d$ & $a \rightarrow b, b\rightarrow d,
+    c \rightarrow d$ & $a \rightarrow b, b\rightarrow b,
+    c \rightarrow d$ \\ \hline
+    5 & $ b\rightarrow d,
+    c \rightarrow d$ & $a \rightarrow c, b\rightarrow d,
+    c \rightarrow d$ & $b\rightarrow d,
+    c \rightarrow d$ &$a \rightarrow c, b\rightarrow d,
+    c \rightarrow d$  \\ \hline
+    6 & $a \rightarrow b c, b\rightarrow b d,
+    c \rightarrow d$ & $a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d$ & $c \rightarrow d$ & $c \rightarrow d$ \\ \hline
+    7 & $a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d$ & $a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d $ & $c \rightarrow d$ & $c \rightarrow d$\\
+    & & $d \rightarrow d$ & &  \\ \hline
+    \multicolumn{5}{c}{  Result of Analysis for Iteration
+      No. 1 }
+  \end{tabular}
+\end{center}
+
+\begin{center}
+  \renewcommand{\arraystretch}{1.3}
+  \hspace*{-25mm}\begin{tabular}{|c||c|c||c|c|} \hline
+    {\bf \#} & {\bf $May_{IN}$} & {\bf $May_{OUT}$} & {\bf
+      $Must_{IN}$} & {\bf $Must_{OUT}$}  \\ \hline \hline
+    1 & $\phi$ & $b\rightarrow d$& $\phi$ & $b\rightarrow
+    d$\\ \hline
+    2 & $b\rightarrow d$ & $b\rightarrow d, c \rightarrow d$ & $b\rightarrow
+    d$ & $b\rightarrow d, c \rightarrow d$ \\ \hline
+    3 & $b\rightarrow d, c \rightarrow d$ & $a
+   \rightarrow b, b\rightarrow d,
+    c \rightarrow d$ & $b\rightarrow d, c \rightarrow d$ & $a
+   \rightarrow b, b\rightarrow d, c \rightarrow d$ \\ \hline
+    4 & $a \rightarrow b, b\rightarrow d,
+    c \rightarrow d$ & $a \rightarrow b, b\rightarrow b,
+    c \rightarrow d$ & $a \rightarrow b, b\rightarrow d,
+    c \rightarrow d$ & $a \rightarrow b, b\rightarrow b,
+    c \rightarrow d$ \\ \hline
+    5 & $\mathbf{a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d}$ & $\mathbf{a \rightarrow c, b\rightarrow b d,
+    c \rightarrow d}$ & $\mathbf{c \rightarrow d}$ &$\mathbf{a \rightarrow c, c
+    \rightarrow d}$  \\ \hline 
+    6 & $a \rightarrow b c, b\rightarrow b d,
+    c \rightarrow d$ & $a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d$ & $c \rightarrow d$ & $c \rightarrow d$ \\ \hline
+    7 & $a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d$ & $a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d $ & $c \rightarrow d$ & $c \rightarrow d$\\
+    & & $d \rightarrow d$ & &  \\ \hline
+    \multicolumn{5}{c}{  Result of Analysis for Iteration
+      No. 2}
+  \end{tabular}
+\end{center}
+
+\begin{center}
+  \renewcommand{\arraystretch}{1.3}
+  \hspace*{-25mm}\begin{tabular}{|c||c|c||c|c|} \hline
+    {\bf \#} & {\bf $May_{IN}$} & {\bf $May_{OUT}$} & {\bf
+      $Must_{IN}$} & {\bf $Must_{OUT}$}  \\ \hline \hline
+    1 & $\phi$ & $b\rightarrow d$& $\phi$ & $b\rightarrow
+    d$\\ \hline
+    2 & $b\rightarrow d$ & $b\rightarrow d, c \rightarrow d$ & $b\rightarrow
+    d$ & $b\rightarrow d, c \rightarrow d$ \\ \hline
+    3 & $b\rightarrow d, c \rightarrow d$ & $a
+   \rightarrow b, b\rightarrow d,
+    c \rightarrow d$ & $b\rightarrow d, c \rightarrow d$ & $a
+   \rightarrow b, b\rightarrow d, c \rightarrow d$ \\ \hline
+    4 & $a \rightarrow b, b\rightarrow d,
+    c \rightarrow d$ & $a \rightarrow b, b\rightarrow b,
+    c \rightarrow d$ & $a \rightarrow b, b\rightarrow d,
+    c \rightarrow d$ & $a \rightarrow b, b\rightarrow b,
+    c \rightarrow d$ \\ \hline
+    5 & ${a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d}$ & ${a \rightarrow c, b\rightarrow b d,
+    c \rightarrow d}$ & ${c \rightarrow d}$ &${a \rightarrow c, c
+    \rightarrow d}$  \\ \hline 
+    6 & $a \rightarrow b c, b\rightarrow b d,
+    c \rightarrow d$ & $a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d$ & $c \rightarrow d$ & $c \rightarrow d$ \\ \hline
+    7 & $a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d$ & $a \rightarrow b d, b\rightarrow b d,
+    c \rightarrow d $ & $c \rightarrow d$ & $c \rightarrow d$\\
+    & & $d \rightarrow d$ & &  \\ \hline
+    \multicolumn{5}{c}{  Result of Analysis for Iteration
+      No. 3 = No. 2}
+  \end{tabular}
+\end{center}
+}
+\clearpage
+\end{enumerate}
+\end{document}
+

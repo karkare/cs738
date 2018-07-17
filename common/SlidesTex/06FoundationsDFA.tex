@@ -1,0 +1,277 @@
+\mode<presentation>
+{
+  \usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{xspace}
+
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[]{\ \\{\LARGE Foundations of Data Flow Analysis}\\}
+
+\input{defs.tex}
+\begin{document}
+
+\frame{\titlepage}
+\frame{
+  \frametitle{Agenda}
+  \begin{itemize}
+  \item Poset, Lattice, and Data Flow Frameworks: Review 
+  \item Connecting Tarski Lemma with Data Flow Analysis
+  \item Soutions of Data Flow Analysis constraints
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Knaster-Tarski Fixed Point Theorem}
+  \begin{itemize}
+  \item Let $f$ be a monotonic function on a complete lattice $(S,\meet,\join)$. Define
+    \begin{itemize}
+    \item ${\sf red}(f) = \{v \mid v \in S, f(v) \leq v\}$, pre fix-points
+    \item ${\sf ext}(f) = \{v \mid v \in S, f(v) \geq v\}$, post fix-points
+    \item ${\sf fix}(f) = \{v \mid v \in S, f(v) = v\}$, fix-points
+    \end{itemize}
+    Then,
+    \begin{itemize}
+    \item $\meet {\sf red}(f) \in {\sf fix}(f)$. Further, $\meet {\sf red}(f) = \meet {\sf fix}(f)$
+    \item $\join {\sf ext}(f) \in {\sf fix}(f)$. Further, $\join {\sf ext}(f) = \meet {\sf fix}(f)$
+    \item ${\sf fix}(f)$ is a complete lattice 
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Application of Fixed Point Theorem}
+  \begin{itemize}
+  \item $f: S\rightarrow S$ is a {\bf monotonic} function
+  \item $(S, \meet)$ is a {\bf finite height} semilattice
+  \item $\top$ is the top element of $(S, \meet)$
+  \item Notation: $f^0(x) = x, f^{i+1}(x) = f(f^i(x)), \forall i \geq 0$
+  \item The greatest fixed point of $f$ is
+    \[ f^k(\top), \mbox{ where } f^{k+1}(\top) = f^k(\top) \]
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Fixed Point Algorithm}
+  \texttt{// monotonic function f on a meet semilattice \\
+    x := $\top$;\\
+    while (x $\neq$ f(x)) x := f(x);\\
+    return x;\\
+  }
+}
+
+\frame{
+  \frametitle{Resemblance to Iterative Algorithm (Forward)}
+  \texttt{
+    \begin{tabbing}
+      $\OUT[\bbent] = {\tt Info}_\bbent$;\\ \pause
+      for (other blocks $B$) $\OUT[B] = \top$;\\ \pause
+      whil\=e (changes to any $\OUT$) \{\\ \pause
+        \>for \=(each block $B$) \{\\ \pause
+        \>\>$\IN(B) = \meet_{P\in\Pred(B)}\OUT(P)$;\\ \pause
+        \>\>$\OUT(B) = f_B(\IN(B))$;\\
+        \>\}\\
+      \}
+    \end{tabbing}
+  }
+}
+
+\frame{
+  \frametitle{Iterative Algorithm}
+  \begin{itemize}[<+->]
+  \item $f_B(X) = X - \Kill(B) \cup \Gen(B)$
+  \item Backward:
+    \begin{itemize}
+    \item Swap \IN and \OUT everywhere
+    \item Replace \bbent by \bbext
+    \item Replace predecessors by successors
+    \end{itemize}
+  \item In other words: just ``invert'' the flow graph!!
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Acknowledgement}
+  Rest of the slides based on the material at  \url{http://infolab.stanford.edu/~ullman/dragon/w06/} \url{w06.html}
+}
+
+
+\frame{
+  \frametitle{Solutions}
+  \begin{itemize}[<+->]
+  \item {\bf IDEAL solution} = meet over all executable paths
+    from entry to a point (ignore unrealizable paths)
+  \item {\bf MOP} = meet over all paths from entry to a given point, of the transfer function along that path applied to ${\sf Info}_\bbent$.
+  \item {\bf MFP} {\em (maximal fixedpoint)} = result of iterative algorithm.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Maximum Fixedpoint}
+  \begin{itemize}[<+->]
+  \item {\bf Fixedpoint} = solution to the equations used in the iteration:
+    \[\IN(B) = \meet_{P\in\Pred(B)}\OUT(P)\]
+    \[\OUT(B) = f_B(\IN(B))\]
+  \item {\bf Maximum Fixedpoint} = any other solution is $\leq$
+    the result if the iterative algorithm (MFP)
+  \item $\leq$: carries less information.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{MOP and IDEAL}
+  \begin{itemize}[<+->]
+  \item All solutions are really meets of the result of starting
+    with ${\sf Info}_\bbent$ and following some set of paths to the point
+    in question.
+  \item If we don't include {\bf at least the IDEAL paths}, we
+    have an error.
+  \item But try not to include too many more.
+  \item Less ``ignorance,'' but we ``know too much.''
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{MOP Versus IDEAL}
+  \begin{itemize}[<+->]
+  \item Any solution that is $\leq$ IDEAL accounts for all
+    executable paths (and maybe more paths)
+    \begin{itemize}
+    \item and is therefore conservative (safe)
+    \item even if not accurate.
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{MFP vs MOP}
+  \begin{itemize}[<+->]
+  \item If MFP $\leq$ MOP?
+    \begin{itemize}
+    \item If so, then MFP $\leq$ MOP $\leq$ IDEAL, therefore MFP is safe.
+    \end{itemize}
+  \item Yes, but \ldots
+  \item Requires two assumptions about the
+    framework:
+    \begin{itemize}
+    \item ``Monotonicity.''
+    \item Finite height  
+    \item[] no infinite chains $\ldots < x_2 < x_1 < x < \ldots $
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{MFP vs MOP}
+  \begin{itemize}[<+->]
+  \item {\bf Intuition}: If we computed the MOP directly, we
+    would compose functions along all paths, then take a big
+    meet.
+  \item But the MFP (iterative algorithm) alternates compositions
+    and meets arbitrarily.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Good News}
+  \begin{itemize}[<+->]
+  \item The frameworks we've studied so far are all monotone.
+    \begin{itemize}
+    \item Easy proof for functions in Gen-Kill form.
+    \end{itemize}
+  \item And they have finite height.
+    \begin{itemize}
+    \item Only a finite number of defs, variables, etc. in any program.
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Two Paths to $B$ that Meet Early}
+    \begin{center}
+      \psset{unit=1mm}
+      \begin{pspicture}(0,-10)(60,20)
+        %\psframe(-30,-15)(90,30)
+        \putnode{ent}{origin}{-22}{10}{\psframebox{\bbent}}
+        \putnode{ox}{ent}{25}{10} {\psframebox[framesep=3]{}}
+        \putnode{lx}{ox}{10}{0}{\scriptsize$\OUT=x$}
+        \putnode{oy}{ent}{25}{-10}{\psframebox[framesep=3]{}}
+        \putnode{ly}{oy}{10}{0}{\scriptsize$\OUT=y$}
+        \putnode{ixy}{ent}{45}{0}{\psframebox[framesep=3]{}}
+        \putnode{lixi}{ixy}{-11}{0}{\scriptsize$\IN=x\meet y$}
+        \putnode{inf}{ixy}{30}{0}{\psframebox[framesep=3]{}}
+        \putnode{b0}{inf}{15}{0}{\psframebox[framesep=1.8]{B}}
+        \putnode{lb}{b0}{1}{-6}{\scriptsize$f(x\meet y)$}
+        \putnode{rb}{b0}{2}{6}{\red\scriptsize$f(x)\meet f(y)$}
+
+        \ncline[linestyle=dotted]{->}{ent}{ox}
+        \ncline[linestyle=dotted]{->}{ent}{oy}
+
+        \ncline{->}{ox}{ixy}
+        \ncline{->}{oy}{ixy}
+
+        \ncline[linestyle=dotted]{->}{ixy}{inf}
+        \ncline[offset=5,nodesep=-3]{|-|}{ixy}{inf}
+        \ncput*{\scriptsize$f$}
+        \ncline{->}{inf}{b0}
+
+        \nccurve[angleA=45,angleB=135,linecolor=red]{->}{ent}{b0}
+        \ncput*{\red\scriptsize$f(x)$}
+        \nccurve[angleA=-45,angleB=-135,linecolor=red]{->}{ent}{b0}
+        \ncput*{\red\scriptsize$f(y
+          )$}
+
+      \end{pspicture}      
+    \end{center}\pause
+    \begin{itemize}[<+->]
+    \item {\red MOP considers paths independently and combines at the
+      last possible moment.}
+    \item In MFP, Values x and y get combined too soon.
+    \item Since $f(x\meet y) \leq f(x) \meet f(y)$, it is as we
+      added non-existent paths.
+    \end{itemize}
+}
+
+\frame{
+  \frametitle{Distributive Frameworks}
+  \begin{itemize}[<+->]
+  \item Distributivity:
+    \[ f(x\meet y) = f(x) \meet f(y)\]
+  \item Stronger than Monotonicity
+    \begin{itemize}
+    \item Distributivity $\Rightarrow$ Monotonicity
+    \item But the reverse is not true
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Even More Good News!}
+  \begin{itemize}[<+->]
+  \item The 4 example frameworks are distributive.
+  \item If a framework is distributive, then combining paths early doesn't hurt.
+    \begin{itemize}
+    \item MOP = MFP.
+    \item That is, the iterative algorithm computes a solution
+      that takes into account all and only the physical paths.
+    \end{itemize}
+  \end{itemize}
+}
+
+\end{document}

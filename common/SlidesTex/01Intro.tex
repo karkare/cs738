@@ -1,0 +1,1676 @@
+\mode<presentation>
+{
+  \usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{colortbl}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+
+\newcommand{\myexample}{
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(50,-78)
+      %\psframe(0,0)(50,-78)
+      \putnode{entry}{origin}{25}{5}{\psframebox{ENTRY}}
+      
+      \putnode{b1}{entry}{0}{-11}{\psframebox{a = 2}}
+      \putnode{b2}{b1}{0}{-13}{\psframebox{b = 3}}
+      \putnode{b3}{b2}{0}{-13}{\psframebox{a < b}}
+      \putnode{b4}{b3}{-13}{-13}{\psframebox{c1 = 4}}
+      \putnode{b5}{b3}{10}{-13}{\psframebox{c2 = 5}}
+      \putnode{b6}{b3}{0}{-26}{\psframebox{c3 = $\phi$(c1, c2)}}
+
+      \putnode{exit}{entry}{0}{-74}{\psframebox{EXIT}}
+
+      \ncline{->}{entry}{b1}
+      \ncline{->}{b1}{b2}
+      \ncline{->}{b2}{b3}
+      \ncline{->}{b3}{b4} \Bput[0.1]{true}
+      \ncline{->}{b3}{b5} \Aput[0.1]{false}
+      \ncline{->}{b4}{b6}
+      \ncline{->}{b5}{b6}
+      \ncline{->}{b6}{exit}
+
+      \nccurve[linestyle=dotted,dotsep=0.3]{->}{b1}{b3}
+      \nccurve[linestyle=dotted,dotsep=0.3,angle=180]{->}{b2}{b3}
+      \nccurve[linestyle=dotted,dotsep=0.3,angle=180]{->}{b4}{b6}
+      \nccurve[linestyle=dotted,dotsep=0.3]{->}{b5}{b6}
+    \end{pspicture}
+  \end{center}
+}
+
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[]{\ \\{\LARGE Welcome \& Introduction}\\}
+
+\begin{document}
+
+\frame{\titlepage}
+\frame{
+  \frametitle{About the Course}
+  \begin{itemize}[<+->]
+  \item \alert{Program Analysis}
+  \item Analysis of a Program, by a Program, for a
+    Program\footnote{\scriptsize ``Democracy is the government of the
+      people, by the people, for the people'' - Abraham Lincoln}
+    \begin{itemize}
+    \item Of a Program -- User Program
+    \item By a Program -- Analyzer (Compiler, Runtime)
+    \item For a Program -- Optimizer, Verifier
+    \end{itemize}
+  \item Transforming user program based on the results of the
+    analysis
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Expectations from You}
+  \begin{itemize}[<+->]
+  \item Basic Compiler Knowledge
+  \item Write Code
+  \item Willingness to understand and modify large code bases
+  \item Read and present state-of-the-art reseach papers
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Your Expectations}
+  \alert{\Huge ?}
+}
+
+\frame{
+  \frametitle{Quick Quizzes (QQs)}
+  \begin{itemize}[<+->]
+  \item There will be small quizzes (10-15 min duration) during the class.
+  \item These can be announced or un-announced (surprize quizzes).
+  \item Always bring a pen and some loose papers to the class
+  \end{itemize}
+}
+
+\frame{
+  \newcommand{\compilerphase}{%
+    \psset{unit=1mm}
+    \begin{pspicture}(6.5,8)
+      \psframe(-1,-5)(8,8)
+    \end{pspicture}
+  }
+  \frametitle{QQ \#1 (Ungraded)}
+  \begin{itemize}
+  \item What are the vaious phases of a typical compiler? (5 minutes)
+
+    \[\mbox{\tt file.c}
+    \rightarrow \compilerphase
+    \rightarrow \compilerphase
+    \rightarrow \cdots
+    \rightarrow \compilerphase
+    \rightarrow \mbox{\tt file.asm}\]
+    
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Assignments}
+  \begin{itemize}[<+->]
+  \item Short assignments to apply the lecture material.
+  \item Assignments will have some written and some programming
+    tasks.
+  \item 4--5 Assignments for the semester 
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Using Program Analysis}
+  \begin{itemize}[<+->]
+  \item Compiler Code Optimizations
+  \item Why are optimizations important?
+  \item Why not write optimized code to begin with?
+  \item Where do optimizations fit in the compiler flow?
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Code Optimization}
+  \begin{itemize}[<+->]
+  \item Machine Independent
+    \begin{itemize}
+    \item Remove redundancy introduced by the Programmer
+    \item Remove redundancy not required by later phases of compiler
+    \item Take advantage of algebraic properties of operators
+    \end{itemize}
+    \item Machine dependent
+      \begin{itemize}
+      \item Take advantage of the properties of target machine
+      \end{itemize}
+    \item \alert{Optimization must preserve the semantics of the
+      original program!}
+  \end{itemize}
+}
+
+\mypart{
+  \begin{tabular}{c}
+    Machine Independent \\ Optimizations
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Motivational Example}
+  \tt\vspace*{-4mm}%
+  \only<2>{\vspace*{-4mm}\psframe[fillstyle=solid, fillcolor=yellow](1,-6.6)(9.5,-2.7)} 
+  \begin{tabbing}
+void quicksort(int m, int n) \\
+/* recursively sort a[m] through a[n] */ \\
+\{\ \ \ \ \= \\
+  \> int i, j; \\
+  \> int v, x; \\
+  \>   if(n <= m) return; \\
+  \> i = m-1; j = n; v = a[n]; \\
+  \> whil\=e (1) \{\\
+    \> \>do i = i+1; while (a[i] < v);\\
+    \> \>do j = j-1; while (a[j] > v);\\
+    \> \>if (i > j) break;\\
+    \> \>x = a[i]; a[i] = a[j]; a[j] = x;\\
+  \>\}\\
+  \>x = a[i]; a[i] = a[n]; a[n] = x;\\
+  \>quicksort(m,j); quicksort(i+1,n);\\
+\}   
+  \end{tabbing}
+}
+
+\frame{\tt
+  \begin{tabular}{@{}ll@{}}
+    \begin{tabular}{@{}r@{\ }p{4.4cm}}
+      ( 1) & i = m-1 \\
+      ( 2) & j = n \\
+      ( 3) & t1 = 4*n \\
+      ( 4) & v = a[t1]\\
+      ( 5) & i = i+1\\
+      ( 6) & t2 = 4*i\\
+      ( 7) & t3 = a[t2]\\
+      ( 8) & if t3 < v goto\,(5)\\
+      ( 9) & j = j-1\\
+      (10) & t4 = 4*j\\
+      (11) & t5 = a[t4]\\
+      (12) & if t5 > v goto\,(9)\\
+      (13) & if i >= j goto\,(23)     
+    \end{tabular}
+    &
+    \begin{tabular}{@{}rp{3.1cm}}
+      (14) & t6 = 4*i\\
+      (15) & x = a[t6] \\
+      (16) & t7 = 4*i\\
+      (17) & t8 = 4*j\\
+      (18) & t9 = a[t8]\\
+      (19) & a[t7] = t9\\
+      (20) & t10 = 4*j\\
+      (21) & a[t10] = x\\
+      (22) & goto\,(5) \\
+      (23) & t11 = 4*i\\
+      (24) & x = a[t11]\\
+      (25) & t12 = 4*i\\
+      (26) & t13 = 4*n\\
+      (27) & t14 = a[t13]\\
+      (28) & a[t12] = t14\\
+      (29) & t15 = 4*n\\
+      (30) & a[t15] = x
+    \end{tabular}
+  \end{tabular}
+}
+
+\frame{\tt
+  \begin{tabular}{@{}ll@{}}
+    \begin{tabular}{@{}r@{\ }p{4.4cm}}
+      \rowcolor{cyan}
+      ( 1) & i = m-1 \\
+      ( 2) & j = n \\
+      ( 3) & t1 = 4*n \\
+      ( 4) & v = a[t1]\\
+      \rowcolor{green}
+      ( 5) & i = i+1\\
+      ( 6) & t2 = 4*i\\
+      ( 7) & t3 = a[t2]\\
+      ( 8) & if t3 < v goto\,(5)\\
+      \rowcolor{cyan}
+      ( 9) & j = j-1\\
+      (10) & t4 = 4*j\\
+      (11) & t5 = a[t4]\\
+      (12) & if t5 > v goto\,(9)\\
+      \rowcolor{green}
+      (13) & if i >= j goto\,(23)     
+    \end{tabular}
+    &
+    \begin{tabular}{@{}rp{3.1cm}}
+      \rowcolor{cyan}
+      (14) & t6 = 4*i\\
+      (15) & x = a[t6] \\
+      (16) & t7 = 4*i\\
+      (17) & t8 = 4*j\\
+      (18) & t9 = a[t8]\\
+      (19) & a[t7] = t9\\
+      (20) & t10 = 4*j\\
+      (21) & a[t10] = x\\
+      (22) & goto\,(5) \\
+      \rowcolor{green}
+      (23) & t11 = 4*i\\
+      (24) & x = a[t11]\\
+      (25) & t12 = 4*i\\
+      (26) & t13 = 4*n\\
+      (27) & t14 = a[t13]\\
+      (28) & a[t12] = t14\\
+      (29) & t15 = 4*n\\
+      (30) & a[t15] = x
+    \end{tabular}
+  \end{tabular}
+}
+
+\newcommand{\blklab}[1]{%
+  \psframebox[fillstyle=solid,fillcolor=green,framesep=0.3]
+             {\scriptsize #1}}
+
+\newcommand{\blk}[1]{%
+  \psframebox[fillstyle=solid,fillcolor=pink,framesep=0]
+             {#1}}
+
+\newcommand{\bca}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{1.55cm}@{}}
+    i = m-1 \\
+    j = n \\
+    t1 = 4*n \\
+    v = a[t1]
+  \end{tabular}
+}
+\newcommand{\bcb}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.93cm}@{}}
+    i = i+1\\
+    t2 = 4*i\\
+    t3 = a[t2]\\
+    if t3 < v goto\,B2 
+  \end{tabular}
+}
+\newcommand{\bcc}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    j = j-1\\
+    t4 = 4*j\\
+    t5 = a[t4]\\
+    if t5 > v goto\,B3\\
+  \end{tabular}
+}
+
+\newcommand{\bcd}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{3.15cm}@{}}
+    if i >= j goto\,B6     
+  \end{tabular}
+}
+
+\newcommand{\bce}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    t6 = 4*i\\
+    x = a[t6] \\
+    t7 = 4*i\\
+    t8 = 4*j\\
+    t9 = a[t8]\\
+    a[t7] = t9\\
+    t10 = 4*j\\
+    a[t10] = x\\
+    goto\,B2 \\
+  \end{tabular}
+}
+\newcommand{\bcf}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    t11 = 4*i\\
+    x = a[t11]\\
+    t12 = 4*i\\
+    t13 = 4*n\\
+    t14 = a[t13]\\
+    a[t12] = t14\\
+    t15 = 4*n\\
+    a[t15] = x
+  \end{tabular}
+}
+\frame{
+  \frametitle{Common Subexpresion Elimination}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,-20)(110,50)
+    %\psframe(0,-20)(110,50)
+    \putnode{bc1}{origin}{10}{38}{\blklab{B1}\blk{\bca}}
+    \putnode{bc2}{bc1}{35}{0}{\blklab{B2}\blk{\bcb}}
+    \putnode{bc3}{bc2}{45}{0}{\blklab{B3}\blk{\bcc}}
+    \putnode{bc4}{bc3}{-35}{-16}{\blklab{B4}\blk{\bcd}}
+    \putnode{bc5}{bc1}{20}{-43}{\blklab{B5}\blk{\bce}}
+    \putnode{bc6}{bc5}{43}{2}{\blklab{B6}\blk{\bcf}}
+
+    \ncline[nodesepB=-5]{->}{bc1}{bc2}
+    \ncline[nodesepB=-5]{->}{bc2}{bc3}
+    \ncline[nodesepA=-.3,angleA=-90]{->}{bc3}{bc4}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc5}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc6}
+
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc2}{bc2}
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc3}{bc3}
+    \ncangle[angleA=90,angleB=180,armB=.15cm,offsetB=-2,
+      offsetA=2,nodesepB=-5]{->}{bc5}{bc2}
+  \end{pspicture}
+}
+
+\renewcommand{\bca}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{1.55cm}@{}}
+    i = m-1 \\
+    j = n \\
+    \cellcolor{blue!20} t1 = 4*n \\
+    v = a[t1]
+  \end{tabular}
+}
+\renewcommand{\bcb}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.93cm}@{}}
+    i = i+1\\
+    \cellcolor{red!80} t2 = 4*i\\
+    t3 = a[t2]\\
+    if t3 < v goto\,B2 
+  \end{tabular}
+}
+\renewcommand{\bcc}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    j = j-1\\
+    \cellcolor{green!50!black!30} t4 = 4*j\\
+    t5 = a[t4]\\
+    if t5 > v goto\,B3\\
+  \end{tabular}
+}
+
+\renewcommand{\bcd}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{3.15cm}@{}}
+    if i >= j goto\,B6     
+  \end{tabular}
+}
+
+\renewcommand{\bce}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \cellcolor{red!80} t6 = 4*i\\
+    x = a[t6] \\
+    \cellcolor{red!80} t7 = 4*i\\
+    \cellcolor{green!50!black!30} t8 = 4*j\\
+    t9 = a[t8]\\
+    a[t7] = t9\\
+    \cellcolor{green!50!black!30} t10 = 4*j\\
+    a[t10] = x\\
+    goto\,B2 \\
+  \end{tabular}
+}
+\renewcommand{\bcf}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \cellcolor{red!80} t11 = 4*i\\
+    x = a[t11]\\
+    \cellcolor{red!80} t12 = 4*i\\
+    \cellcolor{blue!20}t13 = 4*n\\
+    t14 = a[t13]\\
+    a[t12] = t14\\
+    \cellcolor{blue!20} t15 = 4*n\\
+    a[t15] = x
+  \end{tabular}
+}
+
+
+\frame{
+  \frametitle{Common Subexpresion Elimination}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,-20)(110,50)
+    %\psframe(0,-20)(110,50)
+    \putnode{bc1}{origin}{10}{38}{\blklab{B1}\blk{\bca}}
+    \putnode{bc2}{bc1}{35}{0}{\blklab{B2}\blk{\bcb}}
+    \putnode{bc3}{bc2}{45}{0}{\blklab{B3}\blk{\bcc}}
+    \putnode{bc4}{bc3}{-35}{-16}{\blklab{B4}\blk{\bcd}}
+    \putnode{bc5}{bc1}{20}{-43}{\blklab{B5}\blk{\bce}}
+    \putnode{bc6}{bc5}{43}{2}{\blklab{B6}\blk{\bcf}}
+
+    \ncline[nodesepB=-5]{->}{bc1}{bc2}
+    \ncline[nodesepB=-5]{->}{bc2}{bc3}
+    \ncline[nodesepA=-.3,angleA=-90]{->}{bc3}{bc4}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc5}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc6}
+
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc2}{bc2}
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc3}{bc3}
+    \ncangle[angleA=90,angleB=180,armB=.15cm,offsetB=-2,
+      offsetA=2,nodesepB=-5]
+            {->}{bc5}{bc2}
+  \end{pspicture}
+}
+
+
+\renewcommand{\bca}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{1.55cm}@{}}
+    i = m-1 \\
+    j = n \\
+    \cellcolor{blue!20} t1 = 4*n \\
+    v = a[t1]
+  \end{tabular}
+}
+\renewcommand{\bcb}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.93cm}@{}}
+    i = i+1\\
+    \cellcolor{red!80} t2 = 4*i\\
+    t3 = a[t2]\\
+    if t3 < v goto\,B2 
+  \end{tabular}
+}
+\renewcommand{\bcc}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    j = j-1\\
+    \cellcolor{green!50!black!30} t4 = 4*j\\
+    t5 = a[t4]\\
+    if t5 > v goto\,B3\\
+  \end{tabular}
+}
+
+\renewcommand{\bcd}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{3.15cm}@{}}
+    if i >= j goto\,B6     
+  \end{tabular}
+}
+
+\renewcommand{\bce}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    x = a[t2] \\
+    \\
+    \\
+    t9 = a[t4]\\
+    a[t2] = t9\\
+    \\
+    a[t4] = x\\
+    goto\,B2 \\
+  \end{tabular}
+}
+\renewcommand{\bcf}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    x = a[t2]\\
+    \\
+    \\
+    t14 = a[t1]\\
+    a[t2] = t14\\
+    \\
+    a[t1] = x
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Common Subexpresion Elimination}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,-20)(110,50)
+    %\psframe(0,-20)(110,50)
+    \putnode{bc1}{origin}{10}{38}{\blklab{B1}\blk{\bca}}
+    \putnode{bc2}{bc1}{35}{0}{\blklab{B2}\blk{\bcb}}
+    \putnode{bc3}{bc2}{45}{0}{\blklab{B3}\blk{\bcc}}
+    \putnode{bc4}{bc3}{-35}{-16}{\blklab{B4}\blk{\bcd}}
+    \putnode{bc5}{bc1}{20}{-43}{\blklab{B5}\blk{\bce}}
+    \putnode{bc6}{bc5}{43}{2}{\blklab{B6}\blk{\bcf}}
+
+    \ncline[nodesepB=-5]{->}{bc1}{bc2}
+    \ncline[nodesepB=-5]{->}{bc2}{bc3}
+    \ncline[nodesepA=-.3,angleA=-90]{->}{bc3}{bc4}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc5}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc6}
+
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc2}{bc2}
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc3}{bc3}
+    \ncangle[angleA=90,angleB=180,armB=.15cm,offsetB=-2,
+      offsetA=2,nodesepB=-5]
+            {->}{bc5}{bc2}
+  \end{pspicture}
+}
+
+
+\renewcommand{\bca}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{1.55cm}@{}}
+    i = m-1 \\
+    j = n \\
+    t1 = 4*n \\
+    v = a[t1]
+  \end{tabular}
+}
+\renewcommand{\bcb}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.93cm}@{}}
+    i = i+1\\
+    t2 = 4*i\\
+    \cellcolor{blue!20} t3 = a[t2]\\
+    if t3 < v goto\,B2 
+  \end{tabular}
+}
+\renewcommand{\bcc}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    j = j-1\\
+    t4 = 4*j\\
+    \cellcolor{green!50!black!30} t5 = a[t4]\\
+    if t5 > v goto\,B3\\
+  \end{tabular}
+}
+
+\renewcommand{\bcd}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{3.15cm}@{}}
+    if i >= j goto\,B6     
+  \end{tabular}
+}
+
+\renewcommand{\bce}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \cellcolor{blue!20} x = a[t2] \\
+    \\
+    \\
+    \cellcolor{green!50!black!30} t9 = a[t4]\\
+    a[t2] = t9\\
+    \\
+    a[t4] = x\\
+    goto\,B2 \\
+  \end{tabular}
+}
+\renewcommand{\bcf}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \cellcolor{blue!20} x = a[t2]\\
+    \\
+    \\
+    t14 = a[t1]\\
+    a[t2] = t14\\
+    \\
+    a[t1] = x
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Common Subexpresion Elimination}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,-20)(110,50)
+    %\psframe(0,-20)(110,50)
+    \putnode{bc1}{origin}{10}{38}{\blklab{B1}\blk{\bca}}
+    \putnode{bc2}{bc1}{35}{0}{\blklab{B2}\blk{\bcb}}
+    \putnode{bc3}{bc2}{45}{0}{\blklab{B3}\blk{\bcc}}
+    \putnode{bc4}{bc3}{-35}{-16}{\blklab{B4}\blk{\bcd}}
+    \putnode{bc5}{bc1}{20}{-43}{\blklab{B5}\blk{\bce}}
+    \putnode{bc6}{bc5}{43}{2}{\blklab{B6}\blk{\bcf}}
+
+    \ncline[nodesepB=-5]{->}{bc1}{bc2}
+    \ncline[nodesepB=-5]{->}{bc2}{bc3}
+    \ncline[nodesepA=-.3,angleA=-90]{->}{bc3}{bc4}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc5}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc6}
+
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc2}{bc2}
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc3}{bc3}
+    \ncangle[angleA=90,angleB=180,armB=.15cm,offsetB=-2,
+      offsetA=2,nodesepB=-5]
+            {->}{bc5}{bc2}
+  \end{pspicture}
+}
+
+\renewcommand{\bca}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{1.55cm}@{}}
+    i = m-1 \\
+    j = n \\
+    t1 = 4*n \\
+    v = a[t1]
+  \end{tabular}
+}
+\renewcommand{\bcb}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.93cm}@{}}
+    i = i+1\\
+    t2 = 4*i\\
+    \cellcolor{blue!20} t3 = a[t2]\\
+    if t3 < v goto\,B2 
+  \end{tabular}
+}
+\renewcommand{\bcc}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    j = j-1\\
+    t4 = 4*j\\
+    \cellcolor{green!50!black!30} t5 = a[t4]\\
+    if t5 > v goto\,B3\\
+  \end{tabular}
+}
+
+\renewcommand{\bcd}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{3.15cm}@{}}
+    if i >= j goto\,B6     
+  \end{tabular}
+}
+
+\renewcommand{\bce}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    x = t3 \\
+    \\
+    \\
+    \\
+    a[t2] = t5\\
+    \\
+    a[t4] = x\\
+    goto\,B2 \\
+  \end{tabular}
+}
+\renewcommand{\bcf}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    x = t3\\
+    \\
+    \\
+    t14 = a[t1]\\
+    a[t2] = t14\\
+    \\
+    a[t1] = x
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Common Subexpresion Elimination}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,-20)(110,50)
+    %\psframe(0,-20)(110,50)
+    \putnode{bc1}{origin}{10}{38}{\blklab{B1}\blk{\bca}}
+    \putnode{bc2}{bc1}{35}{0}{\blklab{B2}\blk{\bcb}}
+    \putnode{bc3}{bc2}{45}{0}{\blklab{B3}\blk{\bcc}}
+    \putnode{bc4}{bc3}{-35}{-16}{\blklab{B4}\blk{\bcd}}
+    \putnode{bc5}{bc1}{20}{-43}{\blklab{B5}\blk{\bce}}
+    \putnode{bc6}{bc5}{43}{2}{\blklab{B6}\blk{\bcf}}
+
+    \ncline[nodesepB=-5]{->}{bc1}{bc2}
+    \ncline[nodesepB=-5]{->}{bc2}{bc3}
+    \ncline[nodesepA=-.3,angleA=-90]{->}{bc3}{bc4}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc5}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc6}
+
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc2}{bc2}
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc3}{bc3}
+    \ncangle[angleA=90,angleB=180,armB=.15cm,offsetB=-2,
+      offsetA=2,nodesepB=-5]
+            {->}{bc5}{bc2}
+  \end{pspicture}
+}
+
+
+\renewcommand{\bca}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{1.55cm}@{}}
+    i = m-1 \\
+    j = n \\
+    t1 = 4*n \\
+    \cellcolor{red} v = a[t1]
+  \end{tabular}
+}
+\renewcommand{\bcb}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.93cm}@{}}
+    i = i+1\\
+    t2 = 4*i\\
+    t3 = a[t2]\\
+    if t3 < v goto\,B2 
+  \end{tabular}
+}
+\renewcommand{\bcc}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    j = j-1\\
+    t4 = 4*j\\
+    t5 = a[t4]\\
+    if t5 > v goto\,B3\\
+  \end{tabular}
+}
+
+\renewcommand{\bcd}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{3.15cm}@{}}
+    if i >= j goto\,B6     
+  \end{tabular}
+}
+
+\renewcommand{\bce}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    x = t3 \\
+    \\
+    \\
+    \\
+    a[t2] = t5\\
+    \\
+    a[t4] = x\\
+    goto\,B2 \\
+  \end{tabular}
+}
+\renewcommand{\bcf}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    x = t3\\
+    \\
+    \\
+    \cellcolor{red} t14 = a[t1]\\
+    a[t2] = t14\\
+    \\
+    a[t1] = x
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Common Subexpresion Elimination}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,-20)(110,50)
+    %\psframe(0,-20)(110,50)
+    \putnode{bc1}{origin}{10}{38}{\blklab{B1}\blk{\bca}}
+    \putnode{bc2}{bc1}{35}{0}{\blklab{B2}\blk{\bcb}}
+    \putnode{bc3}{bc2}{45}{0}{\blklab{B3}\blk{\bcc}}
+    \putnode{bc4}{bc3}{-35}{-16}{\blklab{B4}\blk{\bcd}}
+    \putnode{bc5}{bc1}{20}{-43}{\blklab{B5}\blk{\bce}}
+    \putnode{bc6}{bc5}{43}{2}{\blklab{B6}\blk{\bcf}}
+
+    \ncline[nodesepB=-5]{->}{bc1}{bc2}
+    \ncline[nodesepB=-5]{->}{bc2}{bc3}
+    \ncline[nodesepA=-.3,angleA=-90]{->}{bc3}{bc4}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc5}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc6}
+
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc2}{bc2}
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc3}{bc3}
+    \ncangle[angleA=90,angleB=180,armB=.15cm,offsetB=-2,
+      offsetA=2,nodesepB=-5]
+            {->}{bc5}{bc2}
+     \putnode{a2}{origin}{55}{55}{\psovalbox[fillstyle=solid,fillcolor=blue!20]{\alert{Did we miss one expression?}}}
+            \pause
+     \putnode{al}{origin}{55}{-17}{\psovalbox[fillstyle=solid,fillcolor=blue!20]{\begin{tabular}{c}Elimination not safe as a[] is
+       modified on path \\B1$\rightarrow$B2$\rightarrow$B3$\rightarrow$B4$\rightarrow${\red B5}$\rightarrow$B2$\rightarrow$B3$\rightarrow$B4$\rightarrow$B6
+         \end{tabular}
+       }}
+  \end{pspicture}
+}
+
+
+\renewcommand{\bca}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{1.55cm}@{}}
+    i = m-1 \\
+    j = n \\
+    t1 = 4*n \\
+    v = a[t1]
+  \end{tabular}
+}
+\renewcommand{\bcb}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.93cm}@{}}
+    i = i+1\\
+    t2 = 4*i\\
+    t3 = a[t2]\\
+    if t3 < v goto\,B2 
+  \end{tabular}
+}
+\renewcommand{\bcc}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    j = j-1\\
+    t4 = 4*j\\
+    t5 = a[t4]\\
+    if t5 > v goto\,B3\\
+  \end{tabular}
+}
+
+\renewcommand{\bcd}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{3.15cm}@{}}
+    if i >= j goto\,B6     
+  \end{tabular}
+}
+
+\renewcommand{\bce}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \cellcolor{red} x = t3 \\
+    \\
+    \\
+    \\
+    a[t2] = t5\\
+    \\
+    \cellcolor{red} a[t4] = x\\
+    goto\,B2 \\
+  \end{tabular}
+}
+\renewcommand{\bcf}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \cellcolor{red} x = t3\\
+    \\
+    \\
+    t14 = a[t1]\\
+    a[t2] = t14\\
+    \\
+    \cellcolor{red} a[t1] = x
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Copy Propagation}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,-20)(110,50)
+    %\psframe(0,-20)(110,50)
+    \putnode{bc1}{origin}{10}{38}{\blklab{B1}\blk{\bca}}
+    \putnode{bc2}{bc1}{35}{0}{\blklab{B2}\blk{\bcb}}
+    \putnode{bc3}{bc2}{45}{0}{\blklab{B3}\blk{\bcc}}
+    \putnode{bc4}{bc3}{-35}{-16}{\blklab{B4}\blk{\bcd}}
+    \putnode{bc5}{bc1}{20}{-43}{\blklab{B5}\blk{\bce}}
+    \putnode{bc6}{bc5}{43}{2}{\blklab{B6}\blk{\bcf}}
+
+    \ncline[nodesepB=-5]{->}{bc1}{bc2}
+    \ncline[nodesepB=-5]{->}{bc2}{bc3}
+    \ncline[nodesepA=-.3,angleA=-90]{->}{bc3}{bc4}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc5}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc6}
+
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc2}{bc2}
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc3}{bc3}
+    \ncangle[angleA=90,angleB=180,armB=.15cm,offsetB=-2,
+      offsetA=2,nodesepB=-5]
+            {->}{bc5}{bc2}
+  \end{pspicture}
+}
+
+
+\renewcommand{\bca}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{1.55cm}@{}}
+    i = m-1 \\
+    j = n \\
+    t1 = 4*n \\
+    v = a[t1]
+  \end{tabular}
+}
+\renewcommand{\bcb}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.93cm}@{}}
+    i = i+1\\
+    t2 = 4*i\\
+    t3 = a[t2]\\
+    if t3 < v goto\,B2 
+  \end{tabular}
+}
+\renewcommand{\bcc}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    j = j-1\\
+    t4 = 4*j\\
+    t5 = a[t4]\\
+    if t5 > v goto\,B3\\
+  \end{tabular}
+}
+
+\renewcommand{\bcd}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{3.15cm}@{}}
+    if i >= j goto\,B6     
+  \end{tabular}
+}
+
+\renewcommand{\bce}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \cellcolor{red} x = t3 \\
+    \\
+    \\
+    \\
+    a[t2] = t5\\
+    \\
+    \cellcolor{red} a[t4] = t3\\
+    goto\,B2 \\
+  \end{tabular}
+}
+\renewcommand{\bcf}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \cellcolor{red} x = t3\\
+    \\
+    \\
+    t14 = a[t1]\\
+    a[t2] = t14\\
+    \\
+    \cellcolor{red} a[t1] = t3
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Copy Propagation}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,-20)(110,50)
+    %\psframe(0,-20)(110,50)
+    \putnode{bc1}{origin}{10}{38}{\blklab{B1}\blk{\bca}}
+    \putnode{bc2}{bc1}{35}{0}{\blklab{B2}\blk{\bcb}}
+    \putnode{bc3}{bc2}{45}{0}{\blklab{B3}\blk{\bcc}}
+    \putnode{bc4}{bc3}{-35}{-16}{\blklab{B4}\blk{\bcd}}
+    \putnode{bc5}{bc1}{20}{-43}{\blklab{B5}\blk{\bce}}
+    \putnode{bc6}{bc5}{43}{2}{\blklab{B6}\blk{\bcf}}
+
+    \ncline[nodesepB=-5]{->}{bc1}{bc2}
+    \ncline[nodesepB=-5]{->}{bc2}{bc3}
+    \ncline[nodesepA=-.3,angleA=-90]{->}{bc3}{bc4}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc5}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc6}
+
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc2}{bc2}
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc3}{bc3}
+    \ncangle[angleA=90,angleB=180,armB=.15cm,offsetB=-2,
+      offsetA=2,nodesepB=-5]
+            {->}{bc5}{bc2}
+            \pause
+            \putnode{al}{origin}{55}{-17}{\psovalbox[fillstyle=solid,fillcolor=blue!20]{\begin{tabular}{c}Created Dead Assignments \\
+                  Apply Dead Code Elimination
+         \end{tabular}
+       }}
+  \end{pspicture}
+}
+
+
+\renewcommand{\bca}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{1.55cm}@{}}
+    i = m-1 \\
+    j = n \\
+    t1 = 4*n \\
+    v = a[t1]
+  \end{tabular}
+}
+\renewcommand{\bcb}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.93cm}@{}}
+    i = i+1\\
+    t2 = 4*i\\
+    t3 = a[t2]\\
+    if t3 < v goto\,B2 
+  \end{tabular}
+}
+\renewcommand{\bcc}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    j = j-1\\
+    t4 = 4*j\\
+    t5 = a[t4]\\
+    if t5 > v goto\,B3\\
+  \end{tabular}
+}
+
+\renewcommand{\bcd}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{3.15cm}@{}}
+    if i >= j goto\,B6     
+  \end{tabular}
+}
+
+\renewcommand{\bce}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \\
+    \\
+    \\
+    \\
+    a[t2] = t5\\
+    \\
+    a[t4] = t3\\
+    goto\,B2 \\
+  \end{tabular}
+}
+\renewcommand{\bcf}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \\
+    \\
+    \\
+    t14 = a[t1]\\
+    a[t2] = t14\\
+    \\
+    a[t1] = t3
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Copy Propagation}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,-20)(110,50)
+    %\psframe(0,-20)(110,50)
+    \putnode{bc1}{origin}{10}{38}{\blklab{B1}\blk{\bca}}
+    \putnode{bc2}{bc1}{35}{0}{\blklab{B2}\blk{\bcb}}
+    \putnode{bc3}{bc2}{45}{0}{\blklab{B3}\blk{\bcc}}
+    \putnode{bc4}{bc3}{-35}{-16}{\blklab{B4}\blk{\bcd}}
+    \putnode{bc5}{bc1}{20}{-43}{\blklab{B5}\blk{\bce}}
+    \putnode{bc6}{bc5}{43}{2}{\blklab{B6}\blk{\bcf}}
+
+    \ncline[nodesepB=-5]{->}{bc1}{bc2}
+    \ncline[nodesepB=-5]{->}{bc2}{bc3}
+    \ncline[nodesepA=-.3,angleA=-90]{->}{bc3}{bc4}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc5}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc6}
+
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc2}{bc2}
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc3}{bc3}
+    \ncangle[angleA=90,angleB=180,armB=.15cm,offsetB=-2,
+      offsetA=2,nodesepB=-5]
+            {->}{bc5}{bc2}
+  \end{pspicture}
+}
+
+
+\renewcommand{\bca}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{1.55cm}@{}}
+    i = m-1 \\
+    j = n \\
+    t1 = 4*n \\
+    v = a[t1]
+  \end{tabular}
+}
+\renewcommand{\bcb}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.93cm}@{}}
+    \cellcolor{red!80}i = i+1\\
+    \cellcolor{red!80}t2 = 4*i\\
+    t3 = a[t2]\\
+    if t3 < v goto\,B2 
+  \end{tabular}
+}
+\renewcommand{\bcc}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \cellcolor{blue!30}j = j-1\\
+    \cellcolor{blue!30}t4 = 4*j\\
+    t5 = a[t4]\\
+    if t5 > v goto\,B3\\
+  \end{tabular}
+}
+
+\renewcommand{\bcd}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{3.15cm}@{}}
+    if i >= j goto\,B6     
+  \end{tabular}
+}
+
+\renewcommand{\bce}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \\
+    \\
+    \\
+    \\
+    a[t2] = t5\\
+    \\
+    a[t4] = t3\\
+    goto\,B2 \\
+  \end{tabular}
+}
+\renewcommand{\bcf}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \\
+    \\
+    \\
+    t14 = a[t1]\\
+    a[t2] = t14\\
+    \\
+    a[t1] = t3
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Strength Reduction}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,-20)(110,50)
+    %\psframe(0,-20)(110,50)
+    \putnode{bc1}{origin}{10}{38}{\blklab{B1}\blk{\bca}}
+    \putnode{bc2}{bc1}{35}{0}{\blklab{B2}\blk{\bcb}}
+    \putnode{bc3}{bc2}{45}{0}{\blklab{B3}\blk{\bcc}}
+    \putnode{bc4}{bc3}{-35}{-16}{\blklab{B4}\blk{\bcd}}
+    \putnode{bc5}{bc1}{20}{-43}{\blklab{B5}\blk{\bce}}
+    \putnode{bc6}{bc5}{43}{2}{\blklab{B6}\blk{\bcf}}
+
+    \ncline[nodesepB=-5]{->}{bc1}{bc2}
+    \ncline[nodesepB=-5]{->}{bc2}{bc3}
+    \ncline[nodesepA=-.3,angleA=-90]{->}{bc3}{bc4}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc5}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc6}
+
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc2}{bc2}
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc3}{bc3}
+    \ncangle[angleA=90,angleB=180,armB=.15cm,offsetB=-2,
+      offsetA=2,nodesepB=-5]
+            {->}{bc5}{bc2}
+  \end{pspicture}
+}
+
+
+\renewcommand{\bca}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{1.55cm}@{}}
+    i = m-1 \\
+    j = n \\
+    t1 = 4*n \\
+    v = a[t1] \\
+    \cellcolor{red!80} t2 = 4*i \\
+    \cellcolor{blue!30} t4 = 4*j
+  \end{tabular}
+}
+\renewcommand{\bcb}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.93cm}@{}}
+    \cellcolor{red!80}i = i+1\\
+    \cellcolor{red!80}t2 = t2+4\\
+    t3 = a[t2]\\
+    if t3 < v goto\,B2 
+  \end{tabular}
+}
+\renewcommand{\bcc}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \cellcolor{blue!30}j = j-1\\
+    \cellcolor{blue!30}t4 = t4-4\\
+    t5 = a[t4]\\
+    if t5 > v goto\,B3\\
+  \end{tabular}
+}
+
+\renewcommand{\bcd}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{3.15cm}@{}}
+    if i >= j goto\,B6     
+  \end{tabular}
+}
+
+\renewcommand{\bce}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \\
+    \\
+    \\
+    \\
+    a[t2] = t5\\
+    \\
+    a[t4] = t3\\
+    goto\,B2 \\
+  \end{tabular}
+}
+\renewcommand{\bcf}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \\
+    \\
+    \\
+    t14 = a[t1]\\
+    a[t2] = t14\\
+    \\
+    a[t1] = t3
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Strength Reduction}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,-20)(110,50)
+    %\psframe(0,-20)(110,50)
+    \putnode{bc1}{origin}{10}{38}{\blklab{B1}\blk{\bca}}
+    \putnode{bc2}{bc1}{35}{0}{\blklab{B2}\blk{\bcb}}
+    \putnode{bc3}{bc2}{45}{0}{\blklab{B3}\blk{\bcc}}
+    \putnode{bc4}{bc3}{-35}{-16}{\blklab{B4}\blk{\bcd}}
+    \putnode{bc5}{bc1}{20}{-43}{\blklab{B5}\blk{\bce}}
+    \putnode{bc6}{bc5}{43}{2}{\blklab{B6}\blk{\bcf}}
+
+    \ncline[nodesepB=-5]{->}{bc1}{bc2}
+    \ncline[nodesepB=-5]{->}{bc2}{bc3}
+    \ncline[nodesepA=-.3,angleA=-90]{->}{bc3}{bc4}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc5}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc6}
+
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc2}{bc2}
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc3}{bc3}
+    \ncangle[angleA=90,angleB=180,armB=.15cm,offsetB=-2,
+      offsetA=2,nodesepB=-5]
+            {->}{bc5}{bc2}
+  \end{pspicture}
+}
+
+
+\renewcommand{\bca}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{1.55cm}@{}}
+    i = m-1 \\
+    j = n \\
+    t1 = 4*n \\
+    v = a[t1] \\
+    t2 = 4*i \\
+    t4 = 4*j
+  \end{tabular}
+}
+\renewcommand{\bcb}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.93cm}@{}}
+    \cellcolor{red!80}i = i+1\\
+    \cellcolor{red!80}t2 = t2+4\\
+    t3 = a[t2]\\
+    if t3 < v goto\,B2 
+  \end{tabular}
+}
+\renewcommand{\bcc}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \cellcolor{red!80}j = j-1\\
+    \cellcolor{red!80}t4 = t4-4\\
+    t5 = a[t4]\\
+    if t5 > v goto\,B3\\
+  \end{tabular}
+}
+
+\renewcommand{\bcd}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{3.15cm}@{}}
+    \cellcolor{red!80} if i >= j goto\,B6     
+  \end{tabular}
+}
+
+\renewcommand{\bce}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \\
+    \\
+    \\
+    \\
+    a[t2] = t5\\
+    \\
+    a[t4] = t3\\
+    goto\,B2 \\
+  \end{tabular}
+}
+\renewcommand{\bcf}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \\
+    \\
+    \\
+    t14 = a[t1]\\
+    a[t2] = t14\\
+    \\
+    a[t1] = t3
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Induction Variable Elimination}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,-20)(110,50)
+    %\psframe(0,-20)(110,50)
+    \putnode{bc1}{origin}{10}{38}{\blklab{B1}\blk{\bca}}
+    \putnode{bc2}{bc1}{35}{0}{\blklab{B2}\blk{\bcb}}
+    \putnode{bc3}{bc2}{45}{0}{\blklab{B3}\blk{\bcc}}
+    \putnode{bc4}{bc3}{-35}{-16}{\blklab{B4}\blk{\bcd}}
+    \putnode{bc5}{bc1}{20}{-43}{\blklab{B5}\blk{\bce}}
+    \putnode{bc6}{bc5}{43}{2}{\blklab{B6}\blk{\bcf}}
+
+    \ncline[nodesepB=-5]{->}{bc1}{bc2}
+    \ncline[nodesepB=-5]{->}{bc2}{bc3}
+    \ncline[nodesepA=-.3,angleA=-90]{->}{bc3}{bc4}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc5}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc6}
+
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc2}{bc2}
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc3}{bc3}
+    \ncangle[angleA=90,angleB=180,armB=.15cm,offsetB=-2,
+      offsetA=2,nodesepB=-5]
+            {->}{bc5}{bc2}
+  \end{pspicture}
+}
+
+
+\renewcommand{\bca}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{1.55cm}@{}}
+    i = m-1 \\
+    j = n \\
+    t1 = 4*n \\
+    v = a[t1] \\
+    t2 = 4*i \\
+    t4 = 4*j
+  \end{tabular}
+}
+\renewcommand{\bcb}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.93cm}@{}}
+    \cellcolor{red!80}i = i+1\\
+    \cellcolor{red!80}t2 = t2+4\\
+    t3 = a[t2]\\
+    if t3 < v goto\,B2 
+  \end{tabular}
+}
+\renewcommand{\bcc}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \cellcolor{red!80}j = j-1\\
+    \cellcolor{red!80}t4 = t4-4\\
+    t5 = a[t4]\\
+    if t5 > v goto\,B3\\
+  \end{tabular}
+}
+
+\renewcommand{\bcd}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{3.15cm}@{}}
+    \cellcolor{red!80} if t2 >= t4 goto\,B6     
+  \end{tabular}
+}
+
+\renewcommand{\bce}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \\
+    \\
+    \\
+    \\
+    a[t2] = t5\\
+    \\
+    a[t4] = t3\\
+    goto\,B2 \\
+  \end{tabular}
+}
+\renewcommand{\bcf}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \\
+    \\
+    \\
+    t14 = a[t1]\\
+    a[t2] = t14\\
+    \\
+    a[t1] = t3
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Induction Variable Elimination}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,-20)(110,50)
+    %\psframe(0,-20)(110,50)
+    \putnode{bc1}{origin}{10}{38}{\blklab{B1}\blk{\bca}}
+    \putnode{bc2}{bc1}{35}{0}{\blklab{B2}\blk{\bcb}}
+    \putnode{bc3}{bc2}{45}{0}{\blklab{B3}\blk{\bcc}}
+    \putnode{bc4}{bc3}{-35}{-16}{\blklab{B4}\blk{\bcd}}
+    \putnode{bc5}{bc1}{20}{-43}{\blklab{B5}\blk{\bce}}
+    \putnode{bc6}{bc5}{43}{2}{\blklab{B6}\blk{\bcf}}
+
+    \ncline[nodesepB=-5]{->}{bc1}{bc2}
+    \ncline[nodesepB=-5]{->}{bc2}{bc3}
+    \ncline[nodesepA=-.3,angleA=-90]{->}{bc3}{bc4}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc5}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc6}
+
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc2}{bc2}
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc3}{bc3}
+    \ncangle[angleA=90,angleB=180,armB=.15cm,offsetB=-2,
+      offsetA=2,nodesepB=-5]
+            {->}{bc5}{bc2}
+  \end{pspicture}
+}
+
+
+\renewcommand{\bca}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{1.55cm}@{}}
+    i = m-1 \\
+    j = n \\
+    t1 = 4*n \\
+    v = a[t1] \\
+    t2 = 4*i \\
+    t4 = 4*j
+  \end{tabular}
+}
+\renewcommand{\bcb}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.93cm}@{}}
+    \\
+    t2 = t2+4\\
+    t3 = a[t2]\\
+    if t3 < v goto\,B2 
+  \end{tabular}
+}
+\renewcommand{\bcc}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    t4 = t4-4\\
+    t5 = a[t4]\\
+    if t5 > v goto\,B3\\
+  \end{tabular}
+}
+
+\renewcommand{\bcd}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{3.15cm}@{}}
+    if t2 >= t4 goto\,B6     
+  \end{tabular}
+}
+
+\renewcommand{\bce}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \\
+    \\
+    \\
+    \\
+    a[t2] = t5\\
+    \\
+    a[t4] = t3\\
+    goto\,B2 \\
+  \end{tabular}
+}
+\renewcommand{\bcf}{\scriptsize\tt
+  \begin{tabular}[t]{@{\ }p{2.95cm}@{}}
+    \\
+    \\
+    \\
+    \\
+    t14 = a[t1]\\
+    a[t2] = t14\\
+    \\
+    a[t1] = t3
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Dead Code Elimination (Again!)}
+  \psset{unit=1mm}
+  \begin{pspicture}(0,-20)(110,50)
+    %\psframe(0,-20)(110,50)
+    \putnode{bc1}{origin}{10}{38}{\blklab{B1}\blk{\bca}}
+    \putnode{bc2}{bc1}{35}{0}{\blklab{B2}\blk{\bcb}}
+    \putnode{bc3}{bc2}{45}{0}{\blklab{B3}\blk{\bcc}}
+    \putnode{bc4}{bc3}{-35}{-16}{\blklab{B4}\blk{\bcd}}
+    \putnode{bc5}{bc1}{20}{-43}{\blklab{B5}\blk{\bce}}
+    \putnode{bc6}{bc5}{43}{2}{\blklab{B6}\blk{\bcf}}
+
+    \ncline[nodesepB=-5]{->}{bc1}{bc2}
+    \ncline[nodesepB=-5]{->}{bc2}{bc3}
+    \ncline[nodesepA=-.3,angleA=-90]{->}{bc3}{bc4}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc5}
+    \ncline[nodesepB=-0.1]{->}{bc4}{bc6}
+
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc2}{bc2}
+    \ncangles[angleA=0,angleB=90,armA=.15cm,offset=1]{->}{bc3}{bc3}
+    \ncangle[angleA=90,angleB=180,armB=.15cm,offsetB=-2,
+      offsetA=2,nodesepB=-5]
+            {->}{bc5}{bc2}
+  \end{pspicture}
+}
+
+
+\frame{
+  \frametitle{Benefits}
+  \begin{minipage}[b]{.3\textwidth}
+    \begin{center}\scriptsize
+      \begin{tabular}[b]{@{}l|@{\ }c@{\ }|@{\ }c@{}} \hline
+        {\bf B\#} & {\bf \# Stmts} & {\bf \# Stmts} \\
+        & {\bf before} & {\bf after} \\
+        & {\bf Opts} & {\bf Opts} \\ \hline \hline
+        B1 & 4 & {\red 6} \\ \hline
+        B2 & 4 & {\green 3} \\\hline
+        B3 & 4 & {\green 3} \\\hline
+        B4 & 1 & {1} \\\hline
+        B5 & 9 & {\green 3} \\\hline
+        B6 & 8 & {\green 3} \\\hline
+        \multicolumn{3}{c}{}\\
+      \end{tabular}
+    \end{center}
+  \end{minipage}
+  \begin{minipage}[b]{.68\textwidth}
+    \begin{itemize}[<+->]
+    \item {\bf Assumptions:}
+    \begin{itemize}
+    \item Unit cost for each stmt
+    \item Outer loop: 10 iterations
+    \item Inner loops: 100 iterations each
+    \end{itemize}
+  \item {\bf Cost of Execution:}
+    \begin{itemize}%\scriptsize
+    \item {\bf Original Program:}\\
+      {\scriptsize 1*4  + 100*4 + 100*4 + 10*1 + 10*9 + 1*8 = 912}
+    \item {\bf Optimized Program:}\\
+      {\scriptsize 1*6  + 100*3 + 100*3 + 10*1 + 10*3 + 1*3 = 649}
+    \end{itemize}
+  \end{itemize}
+  \end{minipage}
+}
+
+\mypart{
+  \begin{tabular}{c}
+    Machine Dependent \\ Optimizations
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Peephole Optimizations}
+  \begin{itemize}[<+->]
+  \item Target code often contains redundant instructions and
+    suboptimal constructs
+
+  \item Examine a short sequence of target instruction (peephole)
+    and replace by a shorter or faster sequence
+
+  \item Peephole is a small moving window on the target systems
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Peephole Optimizations: Examples}
+  \begin{itemize}[<+->]
+  \item \alert{Redundant loads and stores}
+  \item Consider the code sequence
+    \begin{center}\tt
+      \begin{tabular}{l}
+        move $R_0$, $a$\\
+        move $a$, $R_0$
+      \end{tabular}
+    \end{center}
+  \item Is instruction 2 redundant? Can we always remove it?
+    \begin{itemize}
+    \item \alert{YES, if it does not have label}
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Peephole Optimizations: Unreachable code}
+  \begin{itemize}[<+->]
+  \item Consider the following code
+    {\tt\begin{tabbing}
+      int debug = 0;\\
+      if (\=debug) \{\\
+        \>print debugging info\\
+      \}
+    \end{tabbing}}
+  \item This may be translated as
+    {\tt\begin{tabbing}
+      \ \ \ \ \=int debug = 0;\\
+      \>if (debug == 1) goto L1\\
+      \>goto L2\\
+      L1: \>print debugging info\\
+      L2: \\
+    \end{tabbing}}
+  \end{itemize}
+}
+\frame{
+  \frametitle{Peephole Optimizations: Unreachable code}
+  \begin{itemize}[<+->]
+  \item Eliminate Jumps
+    {\tt\begin{tabbing}
+      \ \ \ \ \=int debug = 0;\\
+      \>if (debug != 1) goto L2\\
+      \>print debugging info\\
+      L2: \\
+    \end{tabbing}}
+  \item Constant propagation
+    {\tt\begin{tabbing}
+      \ \ \ \ \=int debug = 0;\\
+      \>if (0 != 1) goto L2\\
+      \>print debugging info\\
+      L2: \\
+    \end{tabbing}}
+  \end{itemize}
+}
+
+
+\frame{
+  \frametitle{Peephole Optimizations: Unreachable code}
+  \begin{itemize}[<+->]
+  \item Constant folding and simplification:  Since {\tt if} condition is always true, the code becomes:
+    {\tt\begin{tabbing}
+      \ \ \ \ \=goto L2\\
+      \>print debugging info\\
+      L2: \\
+    \end{tabbing}}
+  \item The print statement is now unreachable. Therefore, the code becomes
+    {\tt\begin{tabbing}
+      L2: \\
+    \end{tabbing}}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Peephole Optimizations: Jump Optimizations}
+  \begin{itemize}
+  \item Replace jump-over-jumps
+    \begin{center}
+      \begin{tabular}{|l|} \hline
+        \\\ \ \ \ \ \ \ goto L1 \\
+        \ \ \ \ \ \ \ \vdots \\
+        L1: goto L2 \\ \\ \hline
+      \end{tabular}
+      \pause can be replaced by
+      \begin{tabular}{|l|} \hline
+        \\\ \ \ \ \ \ goto L2 \\
+        \ \ \ \ \ \ \ \vdots \\
+        L1: goto L2 \\ \\ \hline
+      \end{tabular}
+    \end{center}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Peephole Optimizations: Simplify Algebraic Expressions}
+  \begin{itemize}
+  \item Remove 
+    \begin{itemize}
+    \item[] x = x + 0;
+    \item[] x = x * 1;
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Peephole Optimizations: Strength Reduction}
+  \begin{itemize}[<+->]
+  \item Replace $X^\wedge 2$ by $X*X$
+  \item Replace multiplication by left shift
+  \item Replace divison by right shift
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Peephole Optimizations: Use of Faster Instructions}
+  \begin{itemize}
+  \item Replace 
+    \begin{itemize}
+    \item[] Add \#1, R
+    \end{itemize}
+    by
+    \begin{itemize}
+    \item[] Inc R
+    \end{itemize}
+  \end{itemize}
+}
+
+\mypart{Course Logistics}
+\frame{
+  \frametitle{Evaluation}
+  \begin{itemize}
+  \item Assignments
+  \item Course project
+  \item Mid semester exam
+  \item End semester exan
+  \item Quizzes/Class participation
+  \item \alert{Refer to course webpage for details.}
+  \end{itemize}
+}
+\end{document}

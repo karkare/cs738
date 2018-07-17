@@ -1,0 +1,89 @@
+\documentclass[a4paper,11pt]{article}%
+\addtolength{\oddsidemargin}{-.5in}
+\addtolength{\evensidemargin}{-.5in}
+\addtolength{\textwidth}{1in}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{moreverb}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{anysize}
+\usepackage{pst-rel-points}
+\usepackage{pstricks}
+\usepackage{pst-node}
+%----------------------------------------------------------
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+%\renewcommand{\chaptername}{Experiment}
+
+%----------------------------------------------------------
+\begin{document}
+%\frontmatter
+\title{CS738: QQ\# \ldots}
+\author{Time: 20 minutes}
+\date{}
+\maketitle
+\begin{enumerate}
+\item Perform {\bf Flow insensitive Subset-based} and {\bf
+  Flow insensitive Equality-based} points-to analysis for
+  each of the programs. Show only the resulting points-to
+  graphs.
+\hrule
+  \begin{verbatim}
+(a)  p = &q;
+     r = &s;
+     t = &p;
+     u = p;
+    *t = r;
+  \end{verbatim}
+\vfill \hfill (P.T.O.)
+\clearpage
+  \begin{verbatim}
+(b)  if(...)
+        p = &x;
+     else
+        p = &y;
+
+      x = &a;
+      y = &b;
+     *p = &c;
+     *y = &a;
+  \end{verbatim}
+\vfill
+  \begin{verbatim}
+(c)  if(...)
+      y = &b;
+     else
+     *y = &a;
+
+      p = &x;
+      p = &y;
+      x = &a;
+     *p = &c;
+  \end{verbatim}
+\vfill\mbox{}
+\hrule
+\end{enumerate}
+\end{document}

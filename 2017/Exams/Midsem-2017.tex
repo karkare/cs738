@@ -1,0 +1,472 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{anysize}
+\usepackage{fancyhdr}
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{enumitem}
+\setlist{leftmargin=*}
+
+\setlength{\headheight}{15pt}
+\pagestyle{fancyplain}
+\lhead{\fancyplain{}{{\em Page \#\/}\thepage}}
+\chead{CS738}
+\rhead{\fancyplain{}{\textit{Roll No:}\rule{30mm}{0pt}}}
+\lfoot{}
+\cfoot{}
+\rfoot{}
+
+\newcommand{\tbd}[1]{{\red #1}}
+\newcommand{\answer}[1]{{{\blue #1}}}
+%\renewcommand{\answer}[1]{\mbox{}}
+\newcommand{\symbox}[2]{B#1\psframebox{#2}\phantom{B#1}}
+\newcommand{\rsymbox}[2]{\phantom{B#1}\psframebox{#2} B#1}
+
+
+%% \textwidth 7in
+%% \addtolength{\oddsidemargin}{-1in}
+%% \textheight 9.5in
+%% \addtolength{\topmargin}{-1in}
+%% \setlength{\parindent}{0pt}
+%% \setlength{\parskip}{0.5cm}
+%% \topskip 0.0in
+\thispagestyle{empty}
+
+\begin{document}
+
+\begin{center}
+CS738: Advanced Compiler Optimizations \\
+Mid Semester Examination, 2017-18 I\\
+Max Time: 2 Hours  \hfill Max Marks: {100} \\
+
+{\bf NOTE: }
+\begin{itemize}
+\item There are total {\bf 4} questions on {\bf 3 pages}
+\item No explanations will be provided. In case of a doubt, make
+  suitable assumptions and justify.
+
+\item Presenting your answers properly is your
+  responsibility. You lose credit if you can not present your
+  ideas clearly, and in proper form. Please DO NOT come back
+  for re-evaluation saying, ``What I actually meant was
+  \ldots''.
+
+\item Be precise and write clearly. Remember that somebody
+  has to read it to evaluate!
+
+\end{itemize}
+\hrule
+\end{center}
+%\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\thispagestyle{empty} \vspace{-5mm}
+%\includegraphics[angle=90,scale=.99]{Endsem-2011.Q2.eps}
+%\clearpage
+\begin{enumerate}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item Consider a flow graph G with a unique entry node ENTRY that
+  dominates all nodes of G. Prove that every node in G except
+  ENTRY has a unique {\em immediate dominator}. The
+  immediate dominator of a node $n$ is the {\em closest strict
+    dominator} of $n$.  \hfill[10]
+
+
+  \answer{
+  \begin{itemize}
+  \item Every node except ENTRY has at least one strict
+    dominator. Consider a node Z that has more than one strict
+    dominators. Consider two such dominators X and Y. Then, it
+    can be proved that either X dominates Y or Y dominates X
+    (*proof below). Thus, it possible to find {\em least} element
+    among all strict dominators of Z. This element is the desired
+    immediate dominator.
+  \item * Consider a cycle free path from
+    ENTRY$\rightarrow$Z. Because both X and Y strictly
+    dominate Z, they must occur on this path. WLOG, assume
+    that X occurs before Y in this path.  Thus the path is:
+    Entry $\rightarrow$ X $\rightarrow$ Y $\rightarrow$ Z. We
+    will prove that X must dominate Y.
+
+    Assume the contrary (X does not dominate Y). Then, we
+    have a path Entry $\Rightarrow Y$ free of X. But then,
+    Entry $\Rightarrow$ Y $\rightarrow$ Z is a path to Z free
+    of X. But that also contradicts the fact that X dominates
+    Z.
+  \end{itemize}
+}
+
+\newcommand{\df}{\mbox{\rm df}}
+\item The original definition of {\em Dominance Frontier} (\df) is:
+A node $m$ is in $\df(n)$ if
+\begin{enumerate}
+\item $n$ dominates a predecessor of $m$ in the flow graph, and
+\item $n$ does not strictly dominate $m$
+\end{enumerate}
+Dr Dominoz thinks the following modified definition of $\df(n)$ is equivalent as far as computation of SSA form is concerned: A node $m$ is in $\df(n)$ if
+\begin{enumerate}
+\item $n$ dominates a predecessor of $m$ in the flow graph, and
+\item $n$ does not dominate $m$
+\end{enumerate}
+i.e., Dr Dominoz has dropped the term ``strictly'' from the
+definition.
+
+You jobs  is to either {\bf  prove that  Dr Dominoz is  right} or
+show that  he is {\bf  wrong, by  giving a counter  example}. The
+proof must work for any  arbitrary CFG, while the counter example
+must  show   an  incorrect  SSA   form  being  generated   for  a
+CFG.\hfill[10]
+
+\answer{
+  Counter Example:
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(50,45)
+      %\psframe(0,0)(50,45)
+      \putnode{b0}{origin}{25}{45}{}
+      \putnode{b1}{b0}{0}{-10}{\psframebox{B1: x = 1}}
+      \putnode{b2}{b1}{0}{-15}{\psframebox{B2: x = 2}}
+      \putnode{b3}{b2}{0}{-10}{}        
+      \ncline{->}{b0}{b1}
+      \ncline{->}{b1}{b2}
+      \ncline{->}{b2}{b3}
+      \nccurve[angleA=-45,angleB=45, ncurv=10]{->}{b2}{b2}
+    \end{pspicture}
+  \end{center}
+
+  
+For Original definition: \\
+Dominance Frontier of $B1 = \emptyset$\\
+Dominance Frontier of $B2 = \{B2\}$\\
+$Def(x) = \{ B1 , B2 \}$\\
+$DF^1 = \{ B2 \}$\\
+so we will insert $\phi$-statement in block $B2$. \\ \medskip
+
+For Modified definition: \\
+Dominance Frontier of $B1 = \emptyset$\\
+Dominance Frontier of $B2 = \emptyset$\\
+$Def(x) = \{ B1 , B2 \}$\\
+$DF^1 = \emptyset$\\
+so it will not insert any $\emptyset$ statement.
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+\newcommand{\px}{\mbox{\bf x}}
+\item Consider the following extensions to our 3-address code
+  language:
+  \begin{itemize}
+  \item {\tt \px.lock}: ``locks'' a variable \px
+  \item {\tt \px.unlock}: ``unlocks'' a variable \px
+  \item {\tt \px.secureComp} does some ``secure computation'' on \px
+  \end{itemize}
+
+  In this language, a ``secure computation'' on a variable \px\
+  is allowed only when it is locked (\px.lock executed before
+  \px.secureComp, without an intervening \px.unlock). We call
+  such secureComp {\bf safe}, otherwise it is {\bf unsafe}.
+
+  The language obviously contains basic constructs like {\em
+    assignment} statements, {\em goto} statements, and
+  conditionals ({\em if-goto}). Following semantic properties
+  hold:
+ \begin{itemize}
+ \item All variables are {\bf unlocked} at the {\em entry}
+ \item  {\bf lock}  and  {\bf unlock}  operations are  idempotent
+   (Locking a locked variable is allowed, but it has no effect on
+   the  lock-status  of  the  variable.  Similarly,  unlocking  an
+   unlocked variable is also allowed)
+ \end{itemize}
+ Here are couple of sample programs, {\tt PROGRAM-1} is valid and
+ {\tt PROGRAM-2} is invalid.
+\begin{verbatim}
+   // PROGRAM-1                  // PROGRAM-2
+     c = 5                         c = 5 
+     n = 0                         n = 0
+     t = c > 0                     t = c > 0
+     if t goto L1                  if t goto L1
+     n.lock                          n.lock   
+     n.secureComp                    c.secureComp // BAD, c not locked
+     goto L2                         c.unlock  
+                                     goto L2
+   L1:                             L1:
+     c.lock                          n.lock
+     c.secureComp                    n.secureComp
+     d = e - 5;                      d  = e - 5;
+     c.unlock                        c.lock
+   L2:                             L2:
+     n.lock                          n.secureComp // OK, n locked on
+                                                  // all paths
+     n.secureComp                    c.secureComp // BAD,  c may not
+                                                  // be locked 
+     n.unlock                        n.unlock
+     c.unlock                        c.unlock
+\end{verbatim}
+
+ Design an {\bf intraprocedural} data flow
+ analysis framework to mark unsafe secure computations
+ (``secureComp''). In particular,
+ \begin{enumerate}
+ \item Draw the lattice for the
+   framework, and describe it briefly.\hfill[5]
+ \item Describe the meet operator ($\wedge$).\hfill[5]
+ \item Describe intuitively the meaning of the top and the
+   bottom elements. \hfill[5]
+ \item Define the flow functions  for statements. You do not need
+   to   list  all   types   of  statements,   but  use   suitable
+   representatives (for  e.g. {\tt  x op  y} to  represent binary
+   operators).\hfill[10]
+ \item Is your framework {\em Forward} or {\em Backward}?
+   Justify your answer. Also describe the {\em BoundaryInfo}
+   (initialization information at the boundary of the flow
+   graph). \hfill[2+3]
+ \end{enumerate}
+ \answer{
+   \begin{enumerate}
+\item Lattice (for each variable):
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(50,20)
+      \putnode{b0}{origin}{25}{20}{$\top$ = Lock}
+      \putnode{b3}{b0}{0}{-20}{$\bot$ = Unlock}        
+      \ncline[nodesep=1]{b0}{b3}
+    \end{pspicture}
+  \end{center}
+\item meet: 
+  \begin{center}
+    \begin{tabular}{c||c|c|}
+      $\wedge$ & $\top$ & $\bot$    \\ \hline \hline
+      $\top$   & $\top$ & $\bot$    \\ \hline
+      $\bot$   & $\bot$ & $\bot$ \\ \hline
+    \end{tabular}
+  \end{center}
+\item $\top$ represents a variable is locked,  $\bot$
+  represents it is unlocked (easy :-))
+\item Flow functions. (This is one of the many possible solutions)
+  \begin{enumerate}
+  \item S: x.lock
+    \begin{eqnarray*}
+      Gen(S) &=& \{x \mapsto Lock\}\\
+      Kill(S) &=& \{x \mapsto Lock, x \mapsto Unlock\} \\
+    \end{eqnarray*}
+
+  \item S: x.unlock
+    \begin{eqnarray*}
+      Gen(S) &=& \{x \mapsto Unlock\}\\
+      Kill(S) &=& \{x \mapsto Lock, x \mapsto Unlock\} \\
+    \end{eqnarray*}
+
+  \item S: Any Other Statement
+    \begin{eqnarray*}
+      Gen(S) &=& \{ \}\\
+      Kill(S) &=& \{ \} \\
+    \end{eqnarray*}
+
+  \end{enumerate}
+  \[Out(S) = In(S) - Kill(s) \cup Gen(S)\]
+  For a statement S: x.secureComp, if $x\mapsto Lock \not\in
+  In(S)$ then computation is unsafe.
+\item My framework is forward (but yours could be backward,
+  depends on the flow functions!). Out is computed in terms
+  of In. 
+    \begin{eqnarray*}
+      \mbox{\em BoundaryInfo} &=& \{x
+      \mapsto Unlocked\} \ \forall x \\
+    \end{eqnarray*} 
+\end{enumerate}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%\clearpage
+\item Consider the following flow graph. Use statement numbers as
+  basic block numbers.
+\begin{center}
+\psset{unit=1mm}
+\begin{pspicture}(0,0)(150,-100)
+  \psframe(0,0)(150,-100)
+  \putnode{be}{origin}{75}{-5}{\psframebox{ENTRY}}
+  \putnode{b1}{be}{0}{-15}{\psframebox{1: u = v}}
+
+  \putnode{b2}{b1}{-20}{-15}{\psframebox{2: w = u + v}}
+  \putnode{b3}{b2}{0}{-15}{\psframebox{3: u = 7}}
+  \putnode{b4}{b3}{0}{-15}{\psframebox{4: w = 10}}
+
+  \putnode{b5}{b1}{20}{-15}{\psframebox{5: v = u}}
+
+  \putnode{b6}{b5}{-15}{-15}{\psframebox{6: u = u+ w}}
+  \putnode{b7}{b5}{15}{-15}{\psframebox{7: v = w + v}}
+
+  \putnode{b8}{b6}{15}{-15}{\psframebox{8: \ldots}}
+
+  \putnode{b9}{b4}{25}{-15}{\psframebox{9: \ldots}}
+
+  \putnode{bx}{b9}{0}{-15}{\psframebox{EXIT}}
+
+  \ncline{->}{be}{b1}
+
+  \ncline{->}{b1}{b2}
+  \ncline{->}{b1}{b5}
+
+  \ncline{->}{b2}{b3}
+
+  \ncline{->}{b3}{b4}
+  \ncline{->}{b3}{b9}
+  \nccurve[angleA=-135,angleB=135,nodesep=-.2,ncurv=2.8]{->}{b4}{b3}
+
+  \ncline{->}{b5}{b6}
+  \ncline{->}{b5}{b7}
+
+  \ncline{->}{b6}{b8}
+  \ncline{->}{b7}{b8}
+
+  \ncline{->}{b8}{b9}
+
+  \ncline{->}{b9}{bx}
+
+\end{pspicture}
+\end{center}
+
+\begin{enumerate}
+\item Draw the dominator tree for the graph. \hfill[10]
+\item Calculate the dominance frontier for each
+  block. \hfill[15] 
+\item Calculate the iterated dominance frontiers for the nodes
+  containing the definitions of u, v and w. Assume that ENTRY
+  node contains implicit definitions of u, v, w as {\tt undef}.
+  \hfill[3*5 = 15]
+\item Convert the flow graph to minimal SSA form.  
+\hfill[10]
+\end{enumerate}
+
+\answer{
+\clearpage
+  Dominator Tree:
+\begin{center}
+\psset{unit=1mm}
+\begin{pspicture}(0,0)(100,-45)
+%  \psframe(0,0)(100,-45)
+  \putnode{b0}{origin}{40}{-2}{Bentry}
+  \putnode{b1}{b0}{0}{-10}{B1}
+  \ncline{->}{b0}{b1}
+
+  \putnode{b2}{b1}{-40}{-10}{B2}
+  \putnode{b5}{b1}{40}{-10}{B5}
+  \putnode{b9}{b1}{0}{-10}{B9}
+  \ncline{->}{b1}{b2}
+  \ncline{->}{b1}{b5}
+  \ncline{->}{b1}{b9}
+ 
+  \putnode{b3}{b2}{0}{-10}{B3}
+  \ncline{->}{b2}{b3}
+
+  \putnode{b4}{b3}{0}{-10}{B4}
+  \ncline{->}{b3}{b4}
+
+  \putnode{b6}{b5}{-20}{-10}{B6}
+  \putnode{b7}{b5}{20}{-10}{B7}
+  \putnode{b8}{b5}{0}{-10}{B8}
+  \ncline{->}{b5}{b6}
+  \ncline{->}{b5}{b7}
+  \ncline{->}{b5}{b8}
+
+  \putnode{ba}{b9}{0}{-10}{Bexit}
+  \ncline{->}{b9}{ba}
+
+\end{pspicture}
+\end{center}
+
+Dominance Frontier:
+%\begin{center}
+  \begin{tabular}{r|l}
+    Node & DF \\ \hline \hline
+    Entry & \{\} \\ \hline
+     1 & \{\} \\ \hline
+     2 & \{ 9 \} \\ \hline
+     3 & \{ 3, 9\} \\ \hline
+     4 & \{3 \} \\ \hline
+     5 & \{9\} \\ \hline
+     6 & \{8\} \\ \hline
+     7 & \{8\} \\ \hline
+     8 & \{9\} \\ \hline
+     9 & \{\} \\ \hline
+    Exit & \{\} \\ \hline
+  \end{tabular}
+%\end{center}
+
+\begin{center}
+  ENTRY node (1) contains implicit definitions of x, y, z.
+
+  \begin{tabular}{c|c|l} \hline
+  Var & Defs & Iterated Dom Frontier of Defs \\ \hline \hline
+  u & 0, 1, 3, 6 & \{ 3, 8, 9 \} \\ \hline
+  v & 0, 5, 7    & \{    8, 9 \} \\ \hline
+  w & 0, 2, 4    & \{ 3,    9\} \\ \hline
+  \end{tabular}
+\end{center}
+\begin{center}
+\psset{unit=1mm}
+\begin{pspicture}(0,0)(150,-130)
+  %\psframe(0,0)(150,-130)
+  \putnode{be}{origin}{75}{-4}{\psframebox{ENTRY[u0,v0,w0]}}
+  \putnode{b1}{be}{0}{-15}{\psframebox{1: u1 = v0}}
+
+  \putnode{b2}{b1}{-25}{-15}{\psframebox{2: w1 = u1 + v0}}
+  \putnode{b3}{b2}{0}{-25}{\psframebox{3:
+      \begin{tabular}{l}
+        u2 = $\phi$(u3, u1)\\
+        w2 = $\phi$(w3, w1)\\
+        u3 = 7
+      \end{tabular}}}
+  \putnode{b4}{b3}{0}{-25}{\psframebox{4: w3 = 10}}
+
+  \putnode{b5}{b1}{25}{-15}{\psframebox{5: v1 = u1}}
+
+  \putnode{b6}{b5}{-10}{-15}{\psframebox{6: u4 = u1+ w0}}
+  \putnode{b7}{b5}{25}{-15}{\psframebox{7: v2 = w0 + v1}}
+
+  \putnode{b8}{b6}{15}{-25}{\psframebox{8:       \begin{tabular}{l}
+        u5 = $\phi$(u4, u1)\\
+        v3 = $\phi$(v1, v2)\\
+        \ldots
+      \end{tabular}}}
+
+  \putnode{b9}{b4}{25}{-25}{\psframebox{9: 
+      \begin{tabular}{l}
+        u6 = $\phi$(u3, u5)\\
+        v4 = $\phi$(v0, v3)\\
+        w4 = $\phi$(w2, w0)\\
+        \ldots
+      \end{tabular}}}
+
+  \putnode{bx}{b9}{0}{-18}{\psframebox{EXIT}}
+
+  \ncline{->}{be}{b1}
+
+  \ncline{->}{b1}{b2}
+  \ncline{->}{b1}{b5}
+
+  \ncline{->}{b2}{b3}
+
+  \ncline{->}{b3}{b4}
+  \ncline{->}{b3}{b9}
+  \nccurve[angleA=-135,angleB=135,nodesep=-.2,ncurv=2.8]{->}{b4}{b3}
+
+  \ncline{->}{b5}{b6}
+  \ncline{->}{b5}{b7}
+
+  \ncline{->}{b6}{b8}
+  \ncline{->}{b7}{b8}
+
+  \ncline{->}{b8}{b9}
+
+  \ncline{->}{b9}{bx}
+
+\end{pspicture}
+\end{center}
+}
+\end{enumerate}
+\hrule
+\[ T H E ~~ E N D \]
+\end{document}
