@@ -25,6 +25,12 @@ slides: $(TGT)Slides.pdf
 handouts: $(TGT)Handout.pdf
 all: slides handouts
 
+%Handout.pdf: %Handout.tex 
+	$(LATEX) $< 
+	pdfnup --nup '2x2' --frame true --delta '5mm 5mm' --scale 0.95 \
+	        $(OUTPUTDIR)/$@ --outfile /tmp/bakup.pdf
+	mv /tmp/bakup.pdf $(OUTPUTDIR)/$@ 
+
 %.pdf: %.tex $(DEP)
 	$(LATEX) $< 
 
@@ -37,10 +43,13 @@ prep:
 	-mkdir -p output
 
 clean: 
+	-$(RM) -f $(OUTPUTDIR)/*.aux
 	-$(RM) -f $(OUTPUTDIR)/*.dvi
 	-$(RM) -f $(OUTPUTDIR)/*.fdb_latexmk
 	-$(RM) -f $(OUTPUTDIR)/*.fls
+	-$(RM) -f $(OUTPUTDIR)/*.log
 	-$(RM) -f $(OUTPUTDIR)/*.nav
+	-$(RM) -f $(OUTPUTDIR)/*.out
 	-$(RM) -f $(OUTPUTDIR)/*.ps
 	-$(RM) -f $(OUTPUTDIR)/*.snm
 	-$(RM) -f $(OUTPUTDIR)/*.toc

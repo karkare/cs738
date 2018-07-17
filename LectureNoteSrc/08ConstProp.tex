@@ -1,6 +1,6 @@
 \mode<presentation>
 {
-  \usetheme{umbc4}
+  %\usetheme{umbc4}
   %\setbeamercovered{dynamic}
 }
 \usepackage[english]{babel}
@@ -66,7 +66,7 @@
 }
 
 \newcommand{\nac}{\mbox{\em NAC}\xspace}
-\newcommand{\undef}{\mbox{\em Undef}\xspace}
+\newcommand{\unDef}{\mbox{\em Undef}\xspace}
 \frame{
   \frametitle{Special Values for CP}
   \begin{itemize}[<+->]
@@ -75,16 +75,16 @@
     \item If variable is inferred not to be a constant
     \item Multiple (different valued) defs, non-const defs, assigned an ``un-interpreted'' value, \ldots
     \end{itemize}
-  \item \undef: No definition of the variable is seen yet - nothing known!
+  \item \unDef: No definition of the variable is seen yet - nothing known!
   \end{itemize}
 }
 
 \frame{
-  \frametitle{\nac vs \undef}
+  \frametitle{\nac vs \unDef}
   \begin{itemize}[<+->]
   \item \nac$\Rightarrow$ {\em too many} definitions seen for a variable $v$ to declare $v$ is {\bf NOT} a constant
-  \item \undef$\Rightarrow$ {\em too few} definitions seen to declare anything about the variable
-  \item $\top$ is \undef; $\bot$ is \nac
+  \item \unDef$\Rightarrow$ {\em too few} definitions seen to declare anything about the variable
+  \item $\top$ is \unDef; $\bot$ is \nac
   \end{itemize}
   
 }
@@ -95,7 +95,7 @@
   \item Recall the requirement
     \[\top \meet x = x\]
     \[\bot \meet x = \bot\]
-  \item[] $\undef \meet c = c$
+  \item[] $\unDef \meet c = c$
   \item[] $\nac \meet c = \nac$
   \item[] $c_1 \meet c_2 = \nac \mbox{ when } c_1 \neq c_2$
   \item[] $c \meet c = c$
@@ -108,7 +108,7 @@
     \psset{unit=1mm}
     \begin{pspicture}(0,0)(50,30)
       %\psframe(0,0)(50,30)
-      \putnode{top}{origin}{25}{30}{\undef}
+      \putnode{top}{origin}{25}{30}{\unDef}
       \putnode{bot}{top}{0}{-30}{\nac}
       \putnode{zero}{top}{0}{-15}{0}
       \putnode{n1}{zero}{-8}{0}{-1}
@@ -169,7 +169,7 @@
              \onslide<3->{if $\{y\rightarrow c_1, z \rightarrow c_2\}$ in \IN then $\{x\rightarrow c_1+c_2\}$}\\
              \onslide<4->{else if \ $\{y\rightarrow \nac\}$ in \IN then $\{x\rightarrow \nac\}$}\\
              \onslide<5->{else if \ $\{z\rightarrow \nac\}$ in \IN then $\{x\rightarrow \nac\}$}\\
-             \onslide<6->{else $\{x\rightarrow \undef\}$}\\
+             \onslide<6->{else $\{x\rightarrow \unDef\}$}\\
           \end{tabular}
           \\ \hline
           $x = $ {\em complicated}&  \onslide<7->{$\{x \rightarrow \nac\}$}\\
@@ -182,7 +182,7 @@
   \frametitle{Monotonicity of CP}
   \begin{itemize}[<+->]
   \item Case analysis on transfer function $f$
-  \item $\nac \leq c \leq \undef$
+  \item $\nac \leq c \leq \unDef$
   \item $x = c$ has constant transfer function.
   \item $x = $ {\em complicated expr} also has constant transfer function
   \item See the next slide for $x = y + z$ (and similar statements)
@@ -192,8 +192,8 @@
 \frame{
   \frametitle{Monotonicity of CP: $x = y + z$}
   \begin{itemize}[<+->]
-  \item Fix $z$ to be one of \undef, $c_2$, \nac
-  \item Vary $y$ over \undef, $c_1$, \nac
+  \item Fix $z$ to be one of \unDef, $c_2$, \nac
+  \item Vary $y$ over \unDef, $c_1$, \nac
   \item Confirm that $x$ does not ``{\em increase}''
   \item Do this for all $z$ choices.
   \item Similarly, fix $y$ and vary $z$.
