@@ -27,7 +27,6 @@ all: slides handouts
 
 %.pdf: %.tex $(DEP)
 	$(LATEX) $< 
-	$(LN) -s -f $(OUTPUTDIR)/$@ $@
 
 %.ps: %.dvi
 	$(DVIPS) -o $@ $?
@@ -38,10 +37,15 @@ prep:
 	-mkdir -p output
 
 clean: 
-	-$(RM) -f $(OUTPUTDIR)/*
+	-$(RM) -f $(OUTPUTDIR)/*.dvi
+	-$(RM) -f $(OUTPUTDIR)/*.fdb_latexmk
+	-$(RM) -f $(OUTPUTDIR)/*.fls
+	-$(RM) -f $(OUTPUTDIR)/*.nav
+	-$(RM) -f $(OUTPUTDIR)/*.ps
+	-$(RM) -f $(OUTPUTDIR)/*.snm
+	-$(RM) -f $(OUTPUTDIR)/*.toc
 
 clobber: clean
-	-$(RM) -f $(HANDOUTS).ps $(HANDOUTS).pdf
-	-$(RM) -f $(SLIDES).ps $(SLIDES).pdf
+	-$(RM) -f $(OUTPUTDIR)/*
 
 fresh: clobber all
