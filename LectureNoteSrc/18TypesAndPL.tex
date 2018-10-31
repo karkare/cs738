@@ -247,7 +247,7 @@
     \depth(\usucc\ \tm) &=& \depth(\tm) + 1 \\ \pause
     \depth(\upred\ \tm) &=& \depth(\tm) + 1 \\ \pause
     \depth(\uiszero\ \tm) &=&  \depth(\tm) + 1 \\ \pause
-    \depth(\uif\ \tm_1\ \uthen\ \tm_2\ \uelse\ \tm_3) &=&  \mbox{\rm max}(\depth(\tm_1) + \depth(\tm_2) \\ & & \qquad +\ \depth(\tm_3)) + 1
+    \depth(\uif\ \tm_1\ \uthen\ \tm_2\ \uelse\ \tm_3) &=&  \mbox{\rm max}(\depth(\tm_1), \depth(\tm_2), \\ & & \qquad  \depth(\tm_3)) + 1
   \end{eqnarray*}
 }
 
