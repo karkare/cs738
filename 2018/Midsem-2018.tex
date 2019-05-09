@@ -1,0 +1,316 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{anysize}
+\usepackage{fancyhdr}
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{xspace}
+
+\setlength{\headheight}{15pt}
+\pagestyle{fancyplain}
+\lhead{\fancyplain{}{{\em Page \#\/}\thepage}}
+\chead{CS738}
+\rhead{\fancyplain{}{\textit{Roll No:}\rule{30mm}{0pt}}}
+\lfoot{}
+\cfoot{}
+\rfoot{}
+
+\newcommand{\tbd}[1]{{\red #1}}
+\newcommand{\answer}[1]{{{\blue #1}}}
+%\renewcommand{\answer}[1]{\mbox{}}
+\newcommand{\symbox}[2]{S#1\psframebox{#2}\phantom{S#1}}
+\newcommand{\rsymbox}[2]{\phantom{S#1}\psframebox{#2} S#1}
+
+\newcommand{\meet}{\ensuremath{\wedge}\xspace}
+
+%% \textwidth 7in
+%% \addtolength{\oddsidemargin}{-1in}
+%% \textheight 9.5in
+%% \addtolength{\topmargin}{-1in}
+%% \setlength{\parindent}{0pt}
+%% \setlength{\parskip}{0.5cm}
+%% \topskip 0.0in
+\thispagestyle{empty}
+
+\begin{document}
+
+{\Large\bf NAME: \hspace*{3in} ROLL NO:}
+
+\begin{center}
+CS738: Advanced Compiler Optimizations \\
+Mid Semester Examination, 2018-19 I\\
+Max Time: 2 Hours  \hfill Max Marks: {95} \\
+
+{\bf NOTE: }
+\begin{itemize}
+\item There are total {\bf 3} questions on {\bf 3 pages}.
+\item Write your name and roll number on the question paper and the
+  answer book.
+\item Presenting your answers properly is your
+  responsibility. You lose credit if you can not present your
+  ideas clearly, and in proper form. Please DO NOT come back
+  for re-evaluation saying, ``What I actually meant was
+  \ldots''.
+\item Be precise and write clearly. Remember that somebody
+  has to read it to evaluate!
+\end{itemize}
+\hrule
+\end{center}
+
+
+\newcommand{\pt}{\ensuremath{\pi}}
+\newcommand{\fgentry}{{\sf Entry}}
+\newcommand{\fgexit}{{\sf Exit}}
+\begin{center}
+  \Large\bf Notations
+\end{center}
+\newcommand{\indef}[2]{\ensuremath{{\sf BeforeIN}(#1, #2)}}
+\newcommand{\outdef}[2]{\ensuremath{{\sf BeforeOut}(#1, #2)}}
+\newcommand{\inuse}[2]{\ensuremath{{\sf AfterIN}(#1, #2)}}
+\newcommand{\outuse}[2]{\ensuremath{{\sf AfterOut}(#1, #2)}}
+\newcommand{\inacc}[2]{\ensuremath{{\sf AccIN}(#1, #2)}}
+\newcommand{\outacc}[2]{\ensuremath{{\sf AccOUT}(#1, #2)}}
+\newcommand{\inaccset}[2]{\ensuremath{{\sf AccSetIN}(#1, #2)}}
+\newcommand{\outaccset}[2]{\ensuremath{{\sf AccSetOUT}(#1, #2)}}
+\newcommand{\IN}[1]{\ensuremath{{\sf IN}(#1)}}
+\newcommand{\OUT}[1]{\ensuremath{{\sf OUT}(#1)}}
+\newcommand{\Pred}[1]{\ensuremath{{\sf PRED}(#1)}}
+\newcommand{\Succ}[1]{\ensuremath{{\sf SUCC}(#1)}}
+\newcommand{\cpath}{\ensuremath{\stackrel{+}{\longrightarrow}}}
+\newcommand{\idfp}{\ensuremath{\mbox{DF}^+}}
+
+\begin{itemize}
+\item CFG stands for control flow graph.
+\item \IN{S} denotes the program point before the statement
+  $S$. \OUT{S} denotes the program point after
+  the statement of $S$.
+\item \Pred{S} denotes the set of predecessors, and \Succ{S}
+  denotes the set of successors of $S$. %in the CFG.
+\item In a CFG, $x \cpath y$ denotes a path from
+  node $x$ to node $y$, having one or more edges. Both $x$ and
+  $y$ are considered to be a part of the path.
+\item \idfp($\varphi$) denotes the Iterated Dominance Frontier of
+  the set of CFG nodes $\varphi$.
+\end{itemize}
+\hrule
+\vfill
+\begin{enumerate}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item Prove the following statement: \hfill[15\answer{[5+10]}]
+
+  For any non-null path $p\!\!\!:\!\! X\!\!\cpath Z$ in a CFG, there exists a node \linebreak
+  $X' \in \{X\} \cup \idfp(\{X\})$ on $p$ that dominates
+  $Z$. Moreover, unless $X$ dominates every node on p, the node
+  $X'$ can be chosen in $\idfp(\{X\})$.
+
+\answer{
+  \begin{enumerate}
+  \item {\bf $X$ dominates every node in $p$}. Clearly $X$
+    dominates $Z$.
+  \item {\bf $X$ does not dominate every node in $p$}. Suppose the sequence of nodes in the path $p$ is $n_0 (=X), n_1, n_2, \ldots, n_k (=Z)$. Since $X$ does not dominate all nodes in $p$, some of the nodes in $p$ will be in $\idfp(\{X\})$ {\bf (WHY?)}. Let $n_j$ be the node in $\idfp(\{X\})$ such that it has the highest value of $j$. We claim that $X' = n_j$, i.e., $n_j$ dominates $Z$.
+  Suppose $n_j$ does not dominate $Z = (n_k)$. Then, $\exists i, j < i \leq k$ such that $n_j$ does not dominate $n_i$. Choose smallest such $i$. We have, parent of $n_i$ dominated by $n_j$, but $n_i$ is not (strictly) dominated by $n_j$. This gives us:
+  \begin{eqnarray*}
+    &&n_i \in \mbox{DF}(\{n_j\})\\
+       &\Rightarrow& n_i \in \idfp(\{n_j\})\\
+       &\Rightarrow& n_i \in \idfp(\{X\})
+  \end{eqnarray*}
+But this contradicts the fact that $j$ is the largest index such that $n_j \in \idfp(\{X\}).$
+  \end{enumerate}
+}
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item\label{ques1} {\bf Shortest Use Distance of A Definition.}  \hfill[35\answer{[25+8+2]}]
+
+  Let a definition $d$ define a variable $x$ at a program point $\pt_d$.  Let program point $\pt_u$ contain a use of $x$ on some path from $\pt_d$ to $\fgexit$, such that $x$ is not redefined between  $\pt_d$ and  $\pt_u$. The number of instructions between $\pt_d$ and $\pt_u$ is a {\bf use distance} of $d$. If there is no use of $x$ corresponding to $d$ on some path from $\pt_d$ to $\fgexit$, then the use distance on that path is $\infty$.
+
+  The {\bf shortest use distance (SUD)} of $d$ is defined as the minimum over all use distances of $d$. 
+  
+  Figure~\ref{fig:accessrange} shows an example program CFG, having variables A, B and C. SUDs for various definitions for this example are:
+  \begin{center}
+    \begin{tabular}{|c|c|c|}
+      \hline
+      Stmt& Var& SUD \\ \hline\hline
+      S1 & A & $\infty$ \\ \hline
+      S2 & A & $2$ \\ \hline
+      S3 & B & $1$ \\ \hline
+      S6 & C & $1$ \\ \hline
+    \end{tabular}
+  \end{center}
+\begin{figure}[h!]
+\centering
+%\includegraphics*[scale=0.59]{AccessRange.eps}
+\begin{center}
+\psset{xunit=1mm,yunit=.6mm}
+\begin{pspicture}(0,10)(150,-130)
+  %\psframe(0,10)(150,-160)
+  \putnode{b0}{origin}{75}{5}{\symbox{0}{\fgentry}}
+  \putnode{b1}{b0}{0}{-20}{\symbox{1}{$A = \ldots$}}
+  \putnode{b2}{b1}{0}{-20}{\rsymbox{2}{$A = \ldots$}}
+  \putnode{b3}{b2}{0}{-20}{\rsymbox{3}{$B = \ldots$}}
+  \putnode{b4}{b3}{-20}{-20}{\rsymbox{4}{$\ldots = B$}}
+  \putnode{b5}{b3}{20}{-20}{\symbox{5}{$\ldots = A$ }}
+  \putnode{b6}{b5}{0}{-20}{\symbox{6}{$C = \ldots$}}
+  \putnode{b7}{b6}{0}{-20}{\symbox{7}{$\ldots = C$}}
+  \putnode{b8}{b7}{0}{-20}{\symbox{8}{\fgexit}}
+
+  \ncline{->}{b0}{b1}
+  \ncline{->}{b1}{b2}
+  \ncline{->}{b2}{b3}
+  \ncline{->}{b3}{b4}
+  \ncline{->}{b3}{b5}
+  \ncline{->}{b5}{b6}
+  \ncline{->}{b6}{b7}
+  \ncline{->}{b7}{b8}
+  \nccurve[angleA=215,angleB=155,nodesep=0,ncurv=1.2]{->}{b4}{b2}
+\end{pspicture}
+\end{center}
+
+\caption{An Example Program\label{fig:accessrange}}
+\end{figure}
+
+\begin{enumerate}
+\item Design a data-flow analysis to compute SUDs for definitions
+  present in a program. Recall that you have to talk about the 4
+  components $\langle D, S, \meet, F\rangle$. Describe the lattice
+  $\langle S, \meet\rangle$ in details, with the help of a lattice
+  diagram. You also need to describe flow functions for various
+  statements of interest.
+\item Is your analysis guaranteed to terminate? Justify.
+\item Give one application of this analysis.
+\end{enumerate}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item Consider the following flow graph: \hfill[45\answer{[5+15+25]}]
+\begin{center}
+\scalebox{1.25}{    
+\psset{xunit=1.3mm, yunit=1.3mm}
+\begin{pspicture}(-9,0)(95,-96)
+%  \psframe(-9,0)(95,-107)
+%  \putnode{c0}{origin}{0}{-20}{}
+  \putnode{b1}{origin}{38}{5}{1\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        $a = \ldots$\\
+        $b = \ldots$
+      \end{tabular}
+  }}
+  \putnode{b2}{b1}{-22}{-12}{2\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        \rule{10mm}{0mm}\rule{0mm}{5mm}
+      \end{tabular}
+  }}
+  \putnode{b3}{b2}{22}{0}{3\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        \rule{10mm}{0mm}\rule{0mm}{5mm}        
+      \end{tabular}
+  }}
+  \putnode{b4}{b3}{22}{0}{4\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        \rule{10mm}{0mm}\rule{0mm}{5mm}
+      \end{tabular}
+  }}
+  \putnode{b5}{b2}{-26}{-12}{5\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        \rule{10mm}{0mm}\rule{0mm}{5mm}
+      \end{tabular}
+  }}
+  \putnode{b6}{b5}{32}{0}{6\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        \rule{10mm}{0mm}\rule{0mm}{5mm}
+      \end{tabular}
+  }}
+  \putnode{b7}{b6}{22}{0}{7\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        \rule{10mm}{0mm}\rule{0mm}{5mm}
+      \end{tabular}
+  }}
+  \putnode{b8}{b7}{11}{-12}{8\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        $a = \ldots$
+      \end{tabular}
+  }}
+  \putnode{b9}{b8}{22}{0}{9\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        $a = \ldots$
+      \end{tabular}
+  }}
+  \putnode{b11}{b8}{-22}{0}{11\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        \rule{10mm}{0mm}\rule{0mm}{5mm}
+      \end{tabular}
+  }}
+  \putnode{b10}{b11}{-32}{0}{10\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        \rule{10mm}{0mm}\rule{0mm}{5mm}
+      \end{tabular}
+  }}
+  \putnode{b12}{b8}{11}{-12}{12\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        \rule{10mm}{0mm}\rule{0mm}{5mm}
+      \end{tabular}
+  }}
+  \putnode{b17}{b12}{-11}{-12}{17\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        \rule{10mm}{0mm}\rule{0mm}{5mm}
+      \end{tabular}
+  }}
+  \putnode{b16}{b17}{-33}{0}{16\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        \rule{10mm}{0mm}\rule{0mm}{5mm}
+      \end{tabular}
+  }}
+  \putnode{b13}{b17}{-27}{-12}{13\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        \rule{10mm}{0mm}\rule{0mm}{5mm}
+      \end{tabular}
+  }}
+  \putnode{b14}{b13}{0}{-13}{14\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        \rule{10mm}{0mm}\rule{0mm}{5mm}
+      \end{tabular}
+  }}
+  \putnode{b15}{b14}{-20}{-14}{15\psframebox[framesep=2pt]{
+      \begin{tabular}{@{}l@{}}
+        \rule{10mm}{0mm}\rule{0mm}{5mm}
+      \end{tabular}
+  }}
+  
+  \ncline[nodesepA=-1.5mm]{->}{b1}{b2}
+  \ncline{->}{b1}{b3}
+  \ncline[nodesepB=-1.1mm]{->}{b1}{b4}
+  \ncline[nodesepA=-1.5mm]{->}{b2}{b5}
+  \ncline{->}{b2}{b10}
+  \ncline{->}{b3}{b6}
+  \ncline{->}{b3}{b7}
+  \ncline{->}{b4}{b8}
+  \ncline{->}{b4}{b9}
+  \ncline{->}{b5}{b10}
+  \ncline{->}{b6}{b11}
+  \ncline{->}{b7}{b11}
+  \ncline{->}{b8}{b12}
+  \ncline{->}{b9}{b12}
+  \ncline{->}{b10}{b16}
+  \ncline{->}{b10}{b15}
+  \ncline[offsetB=.5]{->}{b11}{b13}
+  \ncline{->}{b12}{b17}
+  \ncline{->}{b13}{b14}
+  \nccurve[angleA=-135,angleB=135,ncurv=2]{->}{b14}{b13}
+  \nccurve[angleA=-90]{->}{b14}{b15}
+  \ncline{->}{b16}{b13}
+  \nccurve[angleA=-90,angleB=45,ncurv=1]{->}{b17}{b14}
+\end{pspicture}
+}
+\end{center}
+Block \#1 is the $\fgentry$ block.
+\begin{enumerate}
+\item Draw the dominator tree for the graph.
+\item Calculate the dominance frontier for each
+  block.
+\item Convert the flow graph to minimal SSA form. Show the
+  important steps in conversion.
+\end{enumerate}
+
+\end{enumerate}
+\end{document}
+
