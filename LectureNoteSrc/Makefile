@@ -23,7 +23,7 @@ TEX:=$(LATEX)
 # Targets
 slides: $(TGT)Slides.pdf
 handouts: $(TGT)Handout.pdf
-all: slides handouts
+all: prep slides handouts
 
 %Handout.pdf: %Handout.tex 
 	$(LATEX) $< 
