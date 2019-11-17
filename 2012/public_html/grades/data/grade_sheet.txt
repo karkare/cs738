@@ -1,0 +1,18 @@
+quibcafK & 11111003 & AJAY KUMAR                & 10    & 6     & 10    & 0 &  6    &  4 & 1 &  8 & 51    & 29    &  42.5  & 
+RyowAcOf & 11111006 & AMITA SATISH SAHASRABUDHE & 10    & 4     &  6    & 6 &  8    &  4 & 8 &  9 & 53    & 31    &  81   & 
+TywuOfom & 11111011 & ASHU PACHAURI             & 10    & 6     & 10    & 0 &  6    &  4 & 2 &  9 & 61    & 35    & 101  & 
+AdantAvj & 11111013 & BAGMAR NITESHKUMAR DEVRAJ & 10    & 4     & 10    & 7 &  6    &  4 & 8 &  9 & 67    & 39    & 146.5  & 
+EkMynqua & 11111023 & JYOTI MEENA               & 10    & -1234 &  6    & 6 &  8    &  6 & 8 & 10 & 53    & 15    &  64  & 
+Jibyajug & 11111024 & JYOTI TRIYAR              & 10    & 4     &  6    & 6 &  8    &  6 & 8 &  9 & 67    & 17    &  79  & 
+yavcikTi & 11111029 & MANGAT RAI MODI           & 10    & 10    &  8    & 7 &  6    &  8 & 2 & 10 & 63    & 33    &  92  & 
+jowfyaps & 11111037 & SHABHAZ KHAN              & 10    & 10    & 10    & 0 &  8    &  8 & 1 &  9 & 61    & 32    & 129.5  & 
+haidIvOs & 11111063 & J VISHWESH                & 10    & 4     &  4    & 6 &  8    &  8 & 7 & 10 & 51    & 39    &  78.5  & 
+miUlEtug & Y8056    & AKSHAY MITTAL             & 10    & 8     & 10    & 8 & 10    &  6 & 5 & 10 & 55    & 35    & 132.5  & 
+WayruAly & Y8127136 & ARZOO KATIYAR             & 10    & 4     & 10    & 6 &  6    & 10 & 9 &  6 & 63    & 39    &  86.5  & 
+ulNacvaw & Y8127337 & PARUL AGARWAL             & 10    & 8     &  4    & 6 & 10    & 10 & 7 & 10 & 54    & 40    & 113.5  & 
+SiCirpUc & Y8127403 & R. SAILESH KUMAR RAJU     & 10    & 10    &  8    & 6 &  8    & 10 & 9 & 10 & 55    & 42    & 115   & 
+EdvennEy & Y8127461 & SAURABH SAXENA            & -1234 & 10    & -1234 & 8 &  8    &  6 & 7 &  6 & 60    & 30    & 117  & 
+DuPracaf & Y8127492 & SHUBHENDU AGGARWAL        & 10    & 10    &  4    & 8 &  8    & 10 & 7 & 10 & 54    & 39    & 126  & 
+TuAvRel# & Y8127552 & VAMSHI KRISHNA G          & 10    & -1234 &  4    & 8 & 10    &  6 & 7 &  9 & 55    & 40    &  82.5  & 
+radkiSwo & Y8469    & SHANTANU SARASWAT         & -1234 & 10    &  4    & 7 &  6    &  6 & 7 & 10 & 60    & 32    & 116.5  & 
+ryokkij8 & Z_Audit  & Anjana Singh              & -1234 & -1234 & 10    & 4 & -1234 &  8 & 6 &  6 & -1234 & -1234 &  113 & 
