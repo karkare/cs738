@@ -15,7 +15,7 @@ LN=/bin/ln
 SLIDES:=$(TGT)Slides
 HANDOUTS:=$(TGT)Handout
 OUTPUTDIR:=../lecturenotes
-LATEXOPTS:=-pdfps -output-directory=$(OUTPUTDIR)
+LATEXOPTS:=-output-directory=$(OUTPUTDIR)
 LATEX:=latexmk $(LATEXOPTS)
 # To please Emacs, if it cannot infer latex mode
 TEX:=$(LATEX)
@@ -23,25 +23,17 @@ TEX:=$(LATEX)
 # Targets
 slides: $(TGT)Slides.pdf
 handouts: $(TGT)Handout.pdf
-all: prep slides handouts
+all: slides handouts
 
 %Handout.pdf: %Handout.tex 
-	$(LATEX) $< 
-	pdfnup --nup '2x2' --frame true --delta '5mm 5mm' --scale 0.95 \
-	        $(OUTPUTDIR)/$@ --outfile /tmp/bakup.pdf
+	$(LATEX) -pdfps $< 
+	pdfjam --nup 2x2 --frame true --landscape $(OUTPUTDIR)/$@ --outfile /tmp/bakup.pdf
 	mv /tmp/bakup.pdf $(OUTPUTDIR)/$@ 
 
-%.pdf: %.tex $(DEP)
-	$(LATEX) $< 
+%Slides.pdf: %Slides.tex $(DEP)
+	$(LATEX) -pdfps $< 
 
-%.ps: %.dvi
-	$(DVIPS) -o $@ $?
-
-
-.PHONY: prep clean clobber fresh
-prep:
-	-mkdir -p output
-
+.PHONY: clean clobber fresh
 clean: 
 	-$(RM) -f $(OUTPUTDIR)/*.aux
 	-$(RM) -f $(OUTPUTDIR)/*.dvi
