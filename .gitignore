@@ -1,0 +1,13 @@
+*.aux
+*.dvi
+*.fdb_latexmk
+*.fls
+*.gz
+*.log
+*.nav
+*.out
+*.ps
+*.snm
+*.toc
+*/QQ/QQ?.pdf
+*/Exams/*.pdf

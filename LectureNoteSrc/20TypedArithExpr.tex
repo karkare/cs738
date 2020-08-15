@@ -1,0 +1,170 @@
+\mode<presentation>
+{
+  %\usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{etex}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{bcprules}
+\usepackage{graphicx}
+\newcommand{\change}[1]{{\red #1}}
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[Types]{\ \\{\LARGE Typed Arithmetic Expressions}}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\frame{
+  \frametitle{Reference Book}
+  Types and Programming Languages by Benjamin C. Pierce
+}
+
+\newcommand{\tm}{\ensuremath{t}}
+\newcommand{\uif}{\mbox{\tt if}}
+\newcommand{\uthen}{\mbox{\tt then}}
+\newcommand{\uelse}{\mbox{\tt else}}
+\newcommand{\usucc}{\mbox{\tt succ}}
+\newcommand{\upred}{\mbox{\tt pred}}
+\newcommand{\uiszero}{\mbox{\tt iszero}}
+\newcommand{\utrue}{\mbox{\tt true}}
+\newcommand{\ufalse}{\mbox{\tt false}}
+
+\frame{
+  \frametitle{Recap: Untyped Arithmetic Expression Language}
+  \begin{tabular}{lp{.4\textwidth}l}
+    \tm\ :=&& {\em -- terms} \\
+    & \utrue & {\em -- constant true} \\
+    & \ufalse & {\em -- constant false} \\
+    & \uif\ \tm\ \uthen\ \tm\ \uelse\ \tm & {\em -- conditional} \\
+    & 0 &  {\em -- constant zero} \\
+    & \usucc\ \tm & {\em -- successor} \\
+    & \upred\ \tm & {\em -- predecessor} \\
+    & \uiszero\ \tm & {\em -- zero test}
+  \end{tabular}
+}
+
+\newcommand{\val}{\ensuremath{v}}
+\frame{
+  \frametitle{Recap: The Set of Values}
+  \begin{tabular}{lp{.4\textwidth}l}
+    \val\ :=&& {\em -- values} \\
+    & \utrue & {\em -- value true} \\
+    & \ufalse & {\em -- value false} \\
+    & 0 &  {\em -- value zero} \\
+    & \usucc\ \val & {\em -- successor value}
+  \end{tabular}
+}
+
+\newcommand{\ty}{\ensuremath{T}}
+\newcommand{\bool}{\mbox{Bool}}
+\newcommand{\nat}{\mbox{Nat}}
+\frame{
+  \frametitle{Let's add Types to the Language}
+    \begin{tabular}{lp{.4\textwidth}l}
+    \ty\ :=&& {\em -- Types} \\
+      \pause & \bool & {\em -- Booleans} \\
+      \pause & \nat & {\em -- Natural Numbers} \\
+  \end{tabular}
+
+}
+
+\frame{
+  \frametitle{The Typing Relation}
+  \begin{itemize}[<+->]
+  \item A set of rules assigning types to terms
+  \item $\vdash \tm:\ty$ denotes ``term $\tm$ has type $\ty$''
+  \end{itemize}\pause
+  \infax{0 : \nat}\pause
+  \infrule{\tm_1 : \nat}{\usucc\ \tm_1 : \nat}\pause
+  \infrule{\tm_1 : \nat}{\upred\ \tm_1 : \nat}\pause
+  \infrule{\tm_1 : \nat}{\uiszero\ \tm_1 : \bool}
+}
+
+\frame{
+  \frametitle{The Typing Relation (contd\ldots)}
+  \begin{itemize}
+  \item A set of rules assigning types to terms
+  \item $\vdash \tm:\ty$ denotes ``term $\tm$ has type $\ty$''
+  \end{itemize}
+  \infax{\utrue : \bool}\pause
+  \infax{\ufalse : \bool}\pause
+  \infrule{\tm_1 : \bool \andalso \tm_2: \ty \andalso \tm_3:\ty}{ \uif\ \tm_1\ \uthen\ \tm_2\ \uelse\ \tm_3 : \ty}
+}
+
+\frame{
+  \frametitle{The Typing Relation: Definition}
+  \begin{itemize}[<+->]
+  \item The {\em typing relation} for arithmetic expressions is
+    the smallest binary relation between terms and types
+    satisfying all instances of the rules defined earlier.
+  \item A term $\tm$ is {\em typable} (or {\em well typed}) if there is some $\ty$ such that $\tm:\ty$.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Inversion of the Typing Relation}
+  \begin{itemize}[<+->]
+  \item If $\vdash 0 : R$, then $R = \nat$.
+  \item If $\vdash \usucc\ \tm_1: R$, then $R = \nat$ and $\vdash \tm_1:\nat$.
+  \item If $\vdash \upred\ \tm_1: R$, then $R = \nat$ and $\vdash \tm_1:\nat$.
+  \item If $\vdash \uiszero\ \tm_1: R$, then $R = \bool$ and $\vdash \tm_1:\nat$.
+  \item If $\vdash \utrue : R$, then $R = \bool$.
+  \item If $\vdash \ufalse : R$, then $R = \bool$.
+  \item If $\Gamma \vdash \uif\ \tm_1\ \uthen\ \tm_2\ \uelse\ \tm_3 : R$, then
+    \begin{itemize}
+    \item $\Gamma\vdash \tm_1 : \bool$
+    \item $\Gamma\vdash \tm_2 : R$
+    \item $\Gamma\vdash \tm_3 : R$
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Uniqueness of Types}
+  \begin{itemize}[<+->]
+  \item Every term $\tm$ has at most one type.
+  \item If $\tm$ is typeable, then its type is unique. 
+  \item Moreover, there is just one derivation of this typing
+    built from the inference rules.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Safety = Preservation + Progress}
+  \begin{itemize}[<+->]
+  \item The type system is {\em safe} (also called {\em sound})
+  \item Well-typed programs do not ``go wrong.''
+    \begin{itemize}
+    \item Do not reach a ``stuck state.''
+    \end{itemize}
+  \item {\bf Progress:} A well-typed term is not stuck.
+    \begin{itemize}
+    \item If $\vdash \tm:\ty$, then $\tm$ is either a value or
+      there exists some $\tm'$ such that $\tm\rightarrow\tm'$.
+    \end{itemize}
+  \item {\bf Preservation:} If a well-typed term takes a step of
+    evaluation, then the resulting term is also well-typed.
+    \begin{itemize}
+    \item If $\vdash \tm:\ty$ and $\tm\rightarrow\tm'$, then
+      $\vdash \tm' : \ty$.
+    \end{itemize}
+ \end{itemize}
+}
+\end{document}
+

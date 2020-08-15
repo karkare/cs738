@@ -1,0 +1,18 @@
+\frametitle{Function Variables}
+  \begin{itemize}[<+->]
+  \item Target of a function can not be determined statically
+  \item Function Pointers (including virtual functions)
+\begin{verbatim}
+   double (*fun)(double arg);
+   ...
+   if (cond)
+       fun = sqrt;
+   else
+       fun = fabs;
+   ...
+   fun(x);
+\end{verbatim}
+   \item Dynamically created functions (in functional
+     languages)
+   \item No static control flow graph!
+\end{itemize}

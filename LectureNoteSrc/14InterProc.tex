@@ -1,0 +1,893 @@
+\mode<presentation>
+{
+  %\usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+
+\newcommand{\change}[1]{{\red #1}}
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[]{\ \\{\LARGE Interprocedural Data Flow Analysis}}
+
+\begin{document}
+\newcommand{\main}{{\sf main}}
+
+\frame{\titlepage}
+
+\frame{
+  \frametitle{Interprocedural Analysis: WHY?}
+  \vspace{-1cm}
+  \begin{center}
+    \scalebox{0.99}{
+      \begin{tabular}{cc}
+        \multicolumn{2}{c}{Is $a * b$ available at IN of
+          $n_1$? } \\
+        {\main} & {$p$} \\ & \\ 
+        \psset{unit=1mm}
+        \begin{pspicture}(0,0)(50,-50)
+          %\psframe(0,0)(50,-50)
+          \putnode{b1}{origin}{25}{-4}{$r_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                read $a, b$\\
+                $r = a * b$
+              \end{tabular}
+          }}
+          \putnode{b2}{b1}{0}{-15}{$c_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                call $p$
+              \end{tabular}
+          }}
+          \putnode{b3}{b2}{0}{-15}{$n_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $t = a * b$\\
+                print $t$
+              \end{tabular}
+          }}
+          \putnode{b4}{b3}{0}{-15}{$e_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                EXIT
+              \end{tabular}
+          }}
+          \ncline{->}{b1}{b2}
+          \ncline{->}{b2}{b3}
+          \ncline{->}{b3}{b4}
+        \end{pspicture}
+        &
+        \psset{unit=1mm}
+        \begin{pspicture}(0,0)(50,-50)
+          %\psframe(0,0)(50,-50)
+          \putnode{b1}{origin}{25}{-2}{$r_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                if ($a==0$) 
+              \end{tabular}
+          }}
+          \putnode{b1t}{b1}{0}{-13}{$b_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $a = a - 1$
+              \end{tabular}
+          }}
+          \putnode{b2}{b1t}{0}{-13}{$c_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                call $p$
+              \end{tabular}
+          }}
+          \putnode{b3}{b2}{0}{-13}{$n_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $t = a * b$
+              \end{tabular}
+          }}
+          \putnode{b4}{b3}{0}{-13}{$e_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                return
+              \end{tabular}
+          }}
+          \ncline{->}{b1}{b1t}\Aput[0.1]{{\scriptsize $F$}}
+          \ncline{->}{b1t}{b2}
+          \ncline{->}{b2}{b3}
+          \ncline{->}{b3}{b4}
+          \nccurve[angleB=15,angleA=0]{->}{b1}{b4}\Aput[0.1]{{\scriptsize $T$}}
+        \end{pspicture}
+      \end{tabular}
+    }
+  \end{center}
+}
+
+\frame{
+  \frametitle{Challenges}
+  \begin{itemize}[<+->]
+  \item Infeasible paths
+  \item Recursion
+  \item Function pointers and virtual functions
+  \item Dynamic functions (functional programs)
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Infeasible Paths}
+  \vspace{-1cm}
+  \begin{center}
+    \scalebox{0.99}{
+      \begin{tabular}{cc}
+        \multicolumn{2}{c}{How to avoid data flowing along
+          invalid paths?} \\ 
+        \multicolumn{2}{c}{$r_1 \rightarrow c_1 \rightarrow
+          r_2 \rightarrow b_2 \rightarrow c_2 \rightarrow r_2
+          \rightarrow e_2 \rightarrow n_1$} \\
+        {\main} & {$p$} \\ & \\ 
+        \psset{unit=1mm}
+        \begin{pspicture}(0,0)(50,-50)
+          %\psframe(0,0)(50,-50)
+          \putnode{b1}{origin}{25}{-4}{$r_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                read $a, b$\\
+                $r = a * b$
+              \end{tabular}
+          }}
+          \putnode{b2}{b1}{0}{-15}{$c_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                call $p$
+              \end{tabular}
+          }}
+          \putnode{b3}{b2}{0}{-15}{$n_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $t = a * b$\\
+                print $t$
+              \end{tabular}
+          }}
+          \putnode{b4}{b3}{0}{-15}{$e_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                EXIT
+              \end{tabular}
+          }}
+          \ncline{->}{b1}{b2}
+          \ncline{->}{b2}{b3}
+          \ncline{->}{b3}{b4}
+        \end{pspicture}
+        &
+        \psset{unit=1mm}
+        \begin{pspicture}(0,0)(50,-50)
+          %\psframe(0,0)(50,-50)
+          \putnode{p1}{origin}{25}{-2}{$r_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                if ($a==0$) 
+              \end{tabular}
+          }}
+          \putnode{p1t}{p1}{0}{-13}{$b_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $a = a - 1$
+              \end{tabular}
+          }}
+          \putnode{p2}{p1t}{0}{-13}{$c_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                call $p$
+              \end{tabular}
+          }}
+          \putnode{p3}{p2}{0}{-13}{$n_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $t = a * b$
+              \end{tabular}
+          }}
+          \putnode{p4}{p3}{0}{-13}{$e_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                return
+              \end{tabular}
+          }}
+          \ncline{->}{p1}{p1t}\Aput[0.1]{{\scriptsize $F$}}
+          \ncline{->}{p1t}{p2}
+          \ncline{->}{p2}{p3}
+          \ncline{->}{p3}{p4}
+          \nccurve[angleB=15,angleA=0]{->}{p1}{p4}\Aput[0.1]{{\scriptsize $T$}}
+          \nccurve[linestyle=dashed,linecolor=red,angleA=0,angleB=135]
+                  {->}{b2}{p1}
+          \nccurve[linestyle=dashed,linecolor=red,angleA=225,angleB=165,nodesepB=-1.3]
+                  {->}{p2}{p1}
+          \nccurve[linestyle=dashed,linecolor=red,angleA=210,angleB=180]
+                  {->}{p4}{p3}
+          \nccurve[linestyle=dashed,linecolor=red,angleA=225,angleB=0]
+                  {->}{p4}{b3}
+          
+        \end{pspicture}
+      \end{tabular}
+    }
+  \end{center}
+}
+
+\frame{
+  \frametitle{Recursion}
+  \vspace{-1cm}
+  \begin{center}
+    \scalebox{0.99}{
+      \begin{tabular}{cc}        
+        \multicolumn{2}{c}{How to handle Infinite paths?} \\ 
+        \multicolumn{2}{c}{$\ldots \rightarrow
+          r_2 \rightarrow c_2 \rightarrow r_2
+          \rightarrow c_2 \rightarrow r_2 \ldots$} \\
+        {\main} & {$p$} \\ & \\ 
+        \psset{unit=1mm}
+        \begin{pspicture}(0,0)(50,-50)
+          %\psframe(0,0)(50,-50)
+          \putnode{b1}{origin}{25}{-4}{$r_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                read $a, b$\\
+                $r = a * b$
+              \end{tabular}
+          }}
+          \putnode{b2}{b1}{0}{-15}{$c_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                call $p$
+              \end{tabular}
+          }}
+          \putnode{b3}{b2}{0}{-15}{$n_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $t = a * b$\\
+                print $t$
+              \end{tabular}
+          }}
+          \putnode{b4}{b3}{0}{-15}{$e_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                EXIT
+              \end{tabular}
+          }}
+          \ncline{->}{b1}{b2}
+          \ncline{->}{b2}{b3}
+          \ncline{->}{b3}{b4}
+        \end{pspicture}
+        &
+        \psset{unit=1mm}
+        \begin{pspicture}(0,0)(50,-50)
+          %\psframe(0,0)(50,-50)
+          \putnode{p1}{origin}{25}{-2}{$r_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                if ($a==0$) 
+              \end{tabular}
+          }}
+          \putnode{p1t}{p1}{0}{-13}{$b_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $a = a - 1$
+              \end{tabular}
+          }}
+          \putnode{p2}{p1t}{0}{-13}{$c_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                call $p$
+              \end{tabular}
+          }}
+          \putnode{p3}{p2}{0}{-13}{$n_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $t = a * b$
+              \end{tabular}
+          }}
+          \putnode{p4}{p3}{0}{-13}{$e_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                return
+              \end{tabular}
+          }}
+          \ncline{->}{p1}{p1t}\Aput[0.1]{{\scriptsize $F$}}
+          \ncline{->}{p1t}{p2}
+          \ncline{->}{p2}{p3}
+          \ncline{->}{p3}{p4}
+          \nccurve[angleB=15,angleA=0]{->}{p1}{p4}\Aput[0.1]{{\scriptsize $T$}}
+          \nccurve[linestyle=dashed,angleA=0,angleB=135]
+                  {->}{b2}{p1}
+          \nccurve[linestyle=dashed,linecolor=red,angleA=225,angleB=165,nodesepB=-1.3]
+                  {->}{p2}{p1}
+          \nccurve[linestyle=dashed,linecolor=red,angleA=210,angleB=180]
+                  {->}{p4}{p3}
+          \nccurve[linestyle=dashed,angleA=225,angleB=0]
+                  {->}{p4}{b3}
+          
+        \end{pspicture}
+      \end{tabular}
+    }
+  \end{center}
+}
+
+\begin{frame}[fragile]
+  \frametitle{Function Variables}
+  \begin{itemize}[<+->]
+  \item Target of a function can not be determined statically
+  \item Function Pointers (including virtual functions)
+\begin{verbatim}
+   double (*fun)(double arg);
+   ...
+   if (cond) 
+       fun = sqrt;
+   else 
+       fun = fabs;
+   ...
+   fun(x);
+\end{verbatim}
+   \item Dynamically created functions (in functional
+     languages)
+   \item No static control flow graph!
+\end{itemize}
+\end{frame}
+
+\frame{
+  \frametitle{Two Approaches}
+  \begin{itemize}[<+->]
+  \item Functional approach
+    \begin{itemize}[<+->]
+    \item procedures as structured blocks
+    \item input-output relation ({\em functions}) for each
+      block
+    \item {\em function} used at call site to compute the
+      effect of procedure on program state
+    \end{itemize}
+  \item Call-strings approach
+    \begin{itemize}[<+->]
+    \item single flow graph for whole program
+    \item value of interest tagged with the history of
+      unfinished procedure calls
+    \end{itemize}
+  \end{itemize}
+  \vfill\pause
+      {\scriptsize M. Sharir, and A. Pnueli. {\bf Two Approaches to
+          Inter-Procedural Data-Flow Analysis}. In Jones and
+        Muchnik, editors, Program Flow Analysis: Theory and
+        Applications. Prentice-Hall, 1981.}
+}
+
+\mypart{Notations and Terminology}
+
+\frame{
+  \frametitle{Control Flow Graph}
+  \vspace{-1cm}
+  \begin{center}
+    \scalebox{0.99}{
+      \begin{tabular}{cc}
+        \multicolumn{2}{c}{One per procedure} \\ 
+        {\main} & {$p$} \\ & \\ 
+        \psset{unit=1mm}
+        \begin{pspicture}(0,0)(50,-50)
+          %\psframe(0,0)(50,-50)
+          \putnode{b1}{origin}{25}{-4}{$r_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                read $a, b$\\
+                $r = a * b$
+              \end{tabular}
+          }}
+          \putnode{b2}{b1}{0}{-15}{$c_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                call $p$
+              \end{tabular}
+          }}
+          \putnode{b3}{b2}{0}{-15}{$n_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $t = a * b$\\
+                print $t$
+              \end{tabular}
+          }}
+          \putnode{b4}{b3}{0}{-15}{$e_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                EXIT
+              \end{tabular}
+          }}
+          \ncline{->}{b1}{b2}
+          \ncline{->}{b2}{b3}
+          \ncline{->}{b3}{b4}
+        \end{pspicture}
+        &
+        \psset{unit=1mm}
+        \begin{pspicture}(0,0)(50,-50)
+          %\psframe(0,0)(50,-50)
+          \putnode{b1}{origin}{25}{-2}{$r_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                if ($a==0$) 
+              \end{tabular}
+          }}
+          \putnode{b1t}{b1}{0}{-13}{$b_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $a = a - 1$
+              \end{tabular}
+          }}
+          \putnode{b2}{b1t}{0}{-13}{$c_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                call $p$
+              \end{tabular}
+          }}
+          \putnode{b3}{b2}{0}{-13}{$n_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $t = a * b$
+              \end{tabular}
+          }}
+          \putnode{b4}{b3}{0}{-13}{$e_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                return
+              \end{tabular}
+          }}
+          \ncline{->}{b1}{b1t}\Aput[0.1]{{\scriptsize $F$}}
+          \ncline{->}{b1t}{b2}
+          \ncline{->}{b2}{b3}
+          \ncline{->}{b3}{b4}
+          \nccurve[angleB=15,angleA=0]{->}{b1}{b4}\Aput[0.1]{{\scriptsize $T$}}
+        \end{pspicture}
+      \end{tabular}
+    }
+  \end{center}
+}
+
+\newcommand {\pathg}{\mbox{path}}
+\frame{
+  \frametitle{Control Flow Graph for Procedure $p$}
+  \begin{itemize}[<+->]
+  \item Single instruction basic blocks
+  \item Unique exit block, denoted $e_p$
+  \item Unique entry block, denoted $r_p$ (root block)
+  \item Edge $(m,n)$ if direct control transfer from (the end
+    of) block $m$ to (the start of) block $n$
+  \item Path: $(n_1, n_2, \ldots, n_k)$
+    \begin{itemize}[<+->]
+    \item $(n_i, n_{i+1}) \in$ Edge set for $1\leq i < k$
+    \item $\pathg_G(m,n)$: Set of all path in graph $G = (N,E)$
+      leading from $m$ to $n$
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Assumptions}
+  \begin{itemize}[<+->]
+  \item Parameterless procedures, to ignore the problems of
+    \begin{itemize}[<+->]
+    \item {\em aliasing}
+    \item recursion stack for formal parameters
+    \end{itemize}
+  \item No procedure variables (pointers, virtual functions
+    etc.)
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Data Flow Framework}
+  \begin{itemize}[<+->]
+  \item $(L, F)$: data flow framework 
+  \item $L$: a meet-semilattice
+    \begin{itemize}[<+->]
+    \item Largest element $\Omega$
+    \end{itemize}
+  \item {\scriptsize $F$}: space of propagation functions
+    \begin{itemize}[<+->]
+    \item Closed under composition and meet
+    \item Contains $id_L(x) = x$ and $f_\Omega(x) = \Omega$ 
+    \end{itemize}
+  \item $f_{(m,n)} \in F$ represents propagation function for
+    edge $(m,n)$ of control flow graph $G = (N,E)$
+    \begin{itemize}[<+->]
+    \item Change of DF values from the {\em start} of $m$,
+      through $m$, to the {\em start} of $n$
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Data Flow Equations}
+  \begin{eqnarray*}
+    x_r & = & \mbox{\em BoundaryInfo} \\
+    x_n & = & \bigwedge_{(m,n) \in E} f_{(m,n)}(x_m) \qquad n
+    \in N - {r}
+  \end{eqnarray*}
+  \begin{itemize}[<+->]
+  \item MFP solution, approximation of MOP
+  \end{itemize}
+  \begin{eqnarray*}
+    y_n &=& \bigwedge \left\{f_p(\mbox{\em BoundaryInfo}): p \in
+      \pathg_G(r,n)\right\}\quad n\in N
+  \end{eqnarray*}
+}
+
+\mypart{\begin{tabular}{c}
+    Functional Approach \\ to \\ Interprocedural Analysis
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Functional Approach}
+  \begin{itemize}[<+->]
+  \item Procedures treated as structures of blocks
+  \item Computes relationship between DF value at entry node and
+    related data at {\em any} internal node of procedure
+  \item At call site, DF value propagated directly using the
+    computed relation
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{{\em Interprocedural Flow Graph}}
+  First Representation:
+  \begin{eqnarray*}
+    G &=& \bigcup\{G_p : p \mbox{ is a procedure in
+      program}\} \\
+    G_p &=& (N_p, E_p, r_p) \\
+    N_p &=& \mbox{set of all basic block of $p$} \\
+    r_p &=& \mbox{root block of $p$} \\
+    E_p &=& \mbox{set of edges of $p$} \\
+    &=& E^0_p \cup E^1_p \\
+    (m,n) \in E^0_p &\Leftrightarrow& \mbox{direct control transfer from
+      $m$ to $n$} \\ 
+    (m,n) \in E^1_p &\Leftrightarrow& \mbox{$m$ is a call block, and $n$
+      immediately follows $m$}
+  \end{eqnarray*}
+}
+
+\frame{
+  \frametitle{Interprocedural Flow Graph: $1^{st}$ Representation}
+  \vspace{-1cm}
+  \begin{center}
+    \scalebox{0.99}{
+      \begin{tabular}{cc}
+        {\main} & {$p$} \\ & \\ 
+        \psset{unit=1mm}
+        \begin{pspicture}(0,0)(50,-50)
+          %\psframe(0,0)(50,-50)
+          \putnode{b1}{origin}{25}{-4}{$r_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                read $a, b$\\
+                $r = a * b$
+              \end{tabular}
+          }}
+          \putnode{b2}{b1}{0}{-15}{$c_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                call $p$
+              \end{tabular}
+          }}
+          \putnode{b3}{b2}{0}{-15}{$n_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $t = a * b$\\
+                print $t$
+              \end{tabular}
+          }}
+          \putnode{b4}{b3}{0}{-15}{$e_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                EXIT
+              \end{tabular}
+          }}
+          \ncline{->}{b1}{b2}\Bput[0.1]{$E^0_\main$}
+          \ncline[linecolor=red]{->}{b2}{b3}\Bput[0.1]{$E^1_\main$}
+          \ncline{->}{b3}{b4}\Bput[0.1]{$E^0_\main$}
+        \end{pspicture}
+        &
+        \psset{unit=1mm}
+        \begin{pspicture}(0,0)(50,-50)
+          %\psframe(0,0)(50,-50)
+          \putnode{b1}{origin}{25}{-2}{$r_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                if ($a==0$) 
+              \end{tabular}
+          }}
+          \putnode{b1t}{b1}{0}{-13}{$b_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $a = a - 1$
+              \end{tabular}
+          }}
+          \putnode{b2}{b1t}{0}{-13}{$c_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                call $p$
+              \end{tabular}
+          }}
+          \putnode{b3}{b2}{0}{-13}{$n_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $t = a * b$
+              \end{tabular}
+          }}
+          \putnode{b4}{b3}{0}{-13}{$e_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                return
+              \end{tabular}
+          }}
+          \ncline{->}{b1}{b1t}\Aput[0.1]{{\scriptsize $F$}}\Bput[0.1]{$E^0_p$}
+          \ncline{->}{b1t}{b2}\Bput[0.1]{$E^0_p$}
+          \ncline[linecolor=red]{->}{b2}{b3}\Bput[0.1]{$E^1_p$}
+          \ncline{->}{b3}{b4}\Bput[0.1]{$E^0_p$}
+          \nccurve[angleB=15,angleA=0]{->}{b1}{b4}\Aput[0.1]{{\scriptsize $T$}}\Bput[0.1]{$E^0_p$}
+        \end{pspicture}
+      \end{tabular}
+    }
+  \end{center}
+}
+
+\frame{
+  \frametitle{Interprocedural Flow Graph}
+  Second representation
+  \begin{eqnarray*}
+    G^* &=& (N^*, E^*, r_1) \\
+    r_1 &=& \mbox{root block of \main} \\
+    N^* &=& \bigcup_p N_p \\
+    E^* &=& E^0 \cup E^1 \\
+    E^0 &=& \bigcup_p E^0_p \\
+    (m,n) \in E^1 & \Leftrightarrow & \mbox{$(m,n)$ is either
+      a {\em call} edge} \\
+    && \mbox{or a {\em return} edge}
+  \end{eqnarray*}
+}
+
+\frame{
+  \frametitle{Interprocedural Flow Graph}
+  \begin{itemize}[<+->]
+  \item Call edge $(m,n)$:  
+    \begin{itemize}[<+->]
+    \item $m$ is a call block, say calling $p$ 
+    \item $n$ is root block of $p$
+    \end{itemize}
+  \item Return edge $(m,n)$:  
+    \begin{itemize}[<+->]
+    \item $m$ is an exit block of $p$ 
+    \item $n$ is a block immediately following a call to $p$
+    \end{itemize}
+  \item Call edge $(m,r_p)$ {\em corresponds} to return edge $(e_q,n)$ 
+    \begin{itemize}[<+->]
+    \item if $p = q$ and 
+    \item $(m,n) \in E^1_s$ for some procedure $s$
+    \end{itemize}
+  \end{itemize}
+}
+
+
+\frame{
+  \frametitle{Interprocedural Flow Graph: $2^{nd}$ Representation}
+  \vspace{-1cm}
+  \begin{center}
+    \scalebox{0.99}{
+      \begin{tabular}{cc}
+        {\main} & {$p$} \\ & \\ 
+        \psset{unit=1mm}
+        \begin{pspicture}(0,0)(50,-50)
+          %\psframe(0,0)(50,-50)
+          \putnode{b1}{origin}{25}{-4}{$r_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                read $a, b$\\
+                $r = a * b$
+              \end{tabular}
+          }}
+          \putnode{b2}{b1}{0}{-15}{$c_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                call $p$
+              \end{tabular}
+          }}
+          \putnode{b3}{b2}{0}{-15}{$n_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $t = a * b$\\
+                print $t$
+              \end{tabular}
+          }}
+          \putnode{b4}{b3}{0}{-15}{$e_1$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                EXIT
+              \end{tabular}
+          }}
+          \ncline{->}{b1}{b2}\Bput[0.1]{$E^0$}
+          %\ncline{->}{b2}{b3}
+          \ncline{->}{b3}{b4}\Bput[0.1]{$E^0$}
+        \end{pspicture}
+        &
+        \psset{unit=1mm}
+        \begin{pspicture}(0,0)(50,-50)
+          %\psframe(0,0)(50,-50)
+          \putnode{p1}{origin}{25}{-2}{$r_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                if ($a==0$)
+              \end{tabular}
+          }}
+          \putnode{p1t}{p1}{0}{-13}{$b_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $a = a - 1$
+              \end{tabular}
+          }}
+          \putnode{p2}{p1t}{0}{-13}{$c_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                call $p$
+              \end{tabular}
+          }}
+          \putnode{p3}{p2}{0}{-13}{$n_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                $t = a * b$
+              \end{tabular}
+          }}
+          \putnode{p4}{p3}{0}{-13}{$e_2$\psframebox[framesep=2pt]{
+              \begin{tabular}{@{}l@{}}
+                return
+              \end{tabular}
+          }}
+          \ncline{->}{p1}{p1t}\Aput[0.1]{{\scriptsize $F$}}\Bput[0.1]{$E^0$}
+          \ncline{->}{p1t}{p2}\Bput[0.1]{$E^0$}
+          %\ncline{->}{p2}{p3}
+          \ncline{->}{p3}{p4}\Bput[0.1]{$E^0$}
+          \nccurve[angleB=15,angleA=0]{->}{p1}{p4}\Aput[0.1]{{\scriptsize $T$}}\Bput[0.1]{$E^0$}
+          \nccurve[linecolor=red,angleA=0,
+                   angleB=135,ncurv=1]
+                  {->}{b2}{p1}\Aput[0.1]{$E^1$}
+          \nccurve[linecolor=red,angleA=225,
+                   ncurv=1.3,angleB=173,nodesepB=-2.1]
+                  {->}{p2}{p1}\Aput[0.1]{$E^1$}
+          \nccurve[linecolor=red,angleA=210,
+                   angleB=173,nodesepB=-2.3,ncurv=1.3]
+                  {->}{p4}{p3}\Aput[0.1]{$E^1$}
+          \nccurve[linecolor=red,angleA=225,angleB=0]
+                  {->}{p4}{b3}\Aput[0.1]{$E^1$}
+          
+        \end{pspicture}
+      \end{tabular}
+    }
+  \end{center}
+}
+
+\newcommand{\ivp}{\mbox{\sf IVP}}
+\frame{
+  \frametitle{Interprocedurally Valid Paths}
+  \begin{itemize}[<+->]
+  \item $G^*$ ignores the special nature of call and return
+    edges
+  \item Not all paths in $G^*$ are feasible
+    \begin{itemize}[<+->]
+    \item do not represent potentially valid execution paths 
+    \end{itemize}
+  \item {\bf $\ivp(r_1,n)$}: set of all interprocedurally
+    valid paths from $r_1$ to $n$
+  \item Path $q \in \pathg_{G^*}(r_1,n)$ is in $\ivp(r_1,n)$ 
+    \begin{itemize}[<+->]
+    \item iff sequence of all $E^1$ edges in $q$ (denoted $q_1$)is {\em proper}
+    \end{itemize}
+  \end{itemize}
+}
+
+
+\frame{
+  \frametitle{Proper sequence}
+  \begin{itemize}[<+->]
+  \item $q_1$ without any return edge is proper
+  \item let $q_1[i]$ be the first return edge in $q_1$. $q_1$
+    is proper if 
+    \begin{itemize}[<+->]
+    \item $i > 1$; and 
+    \item $q_1[i-1]$ is call edge corresponding to $q_1[i]$;
+      and
+    \item $q'_1$ obtained from deleting $q_1[i-1]$ and
+      $q_1[i]$ from $q_1$ is proper
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Interprocedurally Valid Complete Paths}
+  \begin{itemize}[<+->]
+  \item $\ivp_0(r_p, n)$ for procedure $p$ and node $n \in
+    N_p$ 
+  \item set of all interprocedurally valid paths $q$ in $G^*$
+    from $r_p$ to $n$ s.t.
+    \begin{itemize}[<+->]
+    \item Each call edge has corresponding return edge in $q$
+      restricted to $E^1$
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{{\ivp}s}
+  \vspace{-1.5cm}
+  \begin{center}
+    \begin{tabular}{cc}
+      {\main} & {$p$} \\ & \\ 
+      \scalebox{0.8}{
+        \psset{unit=1mm}
+      \begin{pspicture}(0,0)(50,-50)
+        %\psframe(0,0)(50,-50)
+        \putnode{b1}{origin}{25}{-4}{$r_1$\psframebox[framesep=2pt]{
+            \begin{tabular}{@{}l@{}}
+              read $a, b$\\
+              $r = a * b$
+            \end{tabular}
+        }}
+        \putnode{b2}{b1}{0}{-15}{$c_1$\psframebox[framesep=2pt]{
+            \begin{tabular}{@{}l@{}}
+              call $p$
+            \end{tabular}
+        }}
+        \putnode{b3}{b2}{0}{-15}{$n_1$\psframebox[framesep=2pt]{
+            \begin{tabular}{@{}l@{}}
+              $t = a * b$\\
+              print $t$
+            \end{tabular}
+        }}
+        \putnode{b4}{b3}{0}{-15}{$e_1$\psframebox[framesep=2pt]{
+            \begin{tabular}{@{}l@{}}
+              EXIT
+            \end{tabular}
+        }}
+        \ncline{->}{b1}{b2}
+        \ncline{->}{b2}{b3}
+        \ncline{->}{b3}{b4}
+      \end{pspicture}}
+      &
+      \scalebox{0.8}{
+      \psset{unit=1mm}
+      \begin{pspicture}(0,0)(50,-50)
+        %\psframe(0,0)(50,-50)
+        \putnode{p1}{origin}{25}{-2}{$r_2$\psframebox[framesep=2pt]{
+            \begin{tabular}{@{}l@{}}
+              if ($a==0$) 
+            \end{tabular}
+        }}
+        \putnode{p1t}{p1}{0}{-13}{$b_2$\psframebox[framesep=2pt]{
+            \begin{tabular}{@{}l@{}}
+              $a = a - 1$
+            \end{tabular}
+        }}
+        \putnode{p2}{p1t}{0}{-13}{$c_2$\psframebox[framesep=2pt]{
+            \begin{tabular}{@{}l@{}}
+              call $p$
+            \end{tabular}
+        }}
+        \putnode{p3}{p2}{0}{-13}{$n_2$\psframebox[framesep=2pt]{
+            \begin{tabular}{@{}l@{}}
+              $t = a * b$
+            \end{tabular}
+        }}
+        \putnode{p4}{p3}{0}{-13}{$e_2$\psframebox[framesep=2pt]{
+            \begin{tabular}{@{}l@{}}
+              return
+            \end{tabular}
+        }}
+        \ncline{->}{p1}{p1t}\Aput[0.1]{{\scriptsize $F$}}
+        \ncline{->}{p1t}{p2}
+        \ncline{->}{p2}{p3}
+        \ncline{->}{p3}{p4}
+        \nccurve[angleB=15,angleA=0]{->}{p1}{p4}\Aput[0.1]{{\scriptsize $T$}}
+        \nccurve[linestyle=dashed,linecolor=red,angleA=0,angleB=135]
+                {->}{b2}{p1}
+        \nccurve[linestyle=dashed,linecolor=red,angleA=225,angleB=165,nodesepB=-1.3]
+                {->}{p2}{p1}
+        \nccurve[linestyle=dashed,linecolor=red,angleA=210,angleB=180]
+                {->}{p4}{p3}
+        \nccurve[linestyle=dashed,linecolor=red,angleA=225,angleB=0]
+                {->}{p4}{b3}          
+      \end{pspicture}} \\ & \\ & \\
+      \multicolumn{2}{c}{
+        \only<2-3>{$r_1 \rightarrow c_1 \rightarrow
+          r_2 \rightarrow c_2 \rightarrow r_2
+          \rightarrow e_2 \rightarrow n_2 \rightarrow e_2
+          \rightarrow n_1 \rightarrow e_1$ \uncover<3>{$\in
+            \ivp(r_1,e_1)$}}
+        \only<4-5>{$r_1 \rightarrow c_1 \rightarrow
+          r_2 \rightarrow c_2 \rightarrow r_2
+          \rightarrow e_2 \rightarrow n_1 \rightarrow e_1$ \uncover<5>{$\not\in
+            \ivp(r_1,e_1)$}}
+        \only<6-7>{$r_2 \rightarrow c_2 \rightarrow r_2
+          \rightarrow e_2 \rightarrow n_2$ \uncover<7>{$ \in
+            \ivp_0(r_2,n_2)$}}
+        \only<8-9>{$r_2 \rightarrow c_2 \rightarrow r_2 \rightarrow c_2 
+          \rightarrow e_2 \rightarrow n_2$ \uncover<9>{$ \not\in
+            \ivp_0(r_2,n_2)$}}
+      }
+      \\
+    \end{tabular}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Path Decomposition}
+  \begin{eqnarray*}
+    q &\in& \ivp(r_\main,n) \\
+    &\Leftrightarrow& \\
+    q &=& q_1 \parallel (c_1, r_{p_2}) \parallel q_2
+    \parallel \cdots \parallel (c_{j-1}, r_{p_j}) \parallel
+    q_j \\
+    & & \mbox{where for each } i < j, q_i \in \ivp_0(r_{p_i},
+    c_i) \mbox{ and } q_j \in \ivp_0(r_{p_j}, n)
+  \end{eqnarray*}
+}
+\end{document}
+

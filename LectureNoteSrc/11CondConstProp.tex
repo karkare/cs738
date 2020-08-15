@@ -1,0 +1,312 @@
+\mode<presentation>
+{
+  %\usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+
+\newcommand{\change}[1]{{\red #1}}
+\newcommand{\myexample}{
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(50,-78)
+      %\psframe(0,0)(50,-78)
+      \putnode{entry}{origin}{25}{5}{\psframebox{ENTRY}}
+      
+      \putnode{b1}{entry}{0}{-11}{\psframebox{a = 2}}
+      \putnode{b2}{b1}{0}{-13}{\psframebox{b = 3}}
+      \putnode{b3}{b2}{0}{-13}{\psframebox{a < b}}
+      \putnode{b4}{b3}{-13}{-13}{\psframebox{c1 = 4}}
+      \putnode{b5}{b3}{10}{-13}{\psframebox{c2 = 5}}
+      \putnode{b6}{b3}{0}{-26}{\psframebox{c3 = $\phi$(c1, c2)}}
+
+      \putnode{exit}{entry}{0}{-74}{\psframebox{EXIT}}
+
+      \ncline{->}{entry}{b1}
+      \ncline{->}{b1}{b2}
+      \ncline{->}{b2}{b3}
+      \ncline{->}{b3}{b4} \Bput[0.1]{true}
+      \ncline{->}{b3}{b5} \Aput[0.1]{false}
+      \ncline{->}{b4}{b6}
+      \ncline{->}{b5}{b6}
+      \ncline{->}{b6}{exit}
+
+      \nccurve[linestyle=dotted,dotsep=0.3]{->}{b1}{b3}
+      \nccurve[linestyle=dotted,dotsep=0.3,angle=180]{->}{b2}{b3}
+      \nccurve[linestyle=dotted,dotsep=0.3,angle=180]{->}{b4}{b6}
+      \nccurve[linestyle=dotted,dotsep=0.3]{->}{b5}{b6}
+    \end{pspicture}
+  \end{center}
+}
+
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[]{\ \\{\LARGE Sparse Conditional Constant Propagation}}
+
+\begin{document}
+
+\frame{\titlepage}
+\frame{
+  \frametitle{Sparse Simple Constant Propagation (SSC)}
+  \begin{itemize}[<+->]
+  \item Improved analysis time over Simple Constant
+    Propagation
+  \item Finds all simple constant
+    \begin{itemize}[<+->]
+    \item Same class as Simple Constant Propagation
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Motivating Example}
+  {\scriptsize Dashed edges denote SSA \\def-use chains}
+  \vspace*{-6mm}\myexample
+}
+
+\frame{
+  \frametitle{Preparations for SSC Analysis}
+  \begin{itemize}[<+->]
+  \item Convert the program to SSA form
+  \item One statement per basic block
+  \item Add connections called {\em SSA edges}
+    \begin{itemize}[<+->]
+    \item Connect (unique) definition point of a variable to
+      its use points 
+    \item Same as {\em def-use} chains
+    \end{itemize}
+  \end{itemize}
+}
+
+\newcommand{\wl}{\mbox{\em WL}}
+\frame{
+  \frametitle{SSC Algorithm: Initialization}
+  \begin{itemize}[<+->]
+  \item Evaluate expressions involving constants only and
+    assign the value ($c$) to variable on LHS
+  \item If expression can not be evaluated at compile time,
+    assign $\bot$
+  \item Else (for expression contains variables) assign $\top$
+  \item Initialize worklist \wl\  with SSA edges whose def is
+    not $\top$ 
+  \item Algorithm terminates when \wl\  is empty
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{SSC Algorithm: Iterative Actions}
+  \begin{itemize}[<+->]
+  \item Take an SSA edge $E$ out of \wl
+  \item Take meet of the value at def end and the use end of
+    $E$ for the variable defined at def end
+  \item If the meet value is different from use value,
+    replace the use by the meet
+  \item Recompute the def $d$ at the use end of $E$
+  \item If the recomputed value is {\em lower} than the
+    stored value, add all SSA edges originating at $d$
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Meet for $\phi$-function}
+  $$v = \phi(v_1, v_2, \ldots, v_k) $$ \\
+  $$\Rightarrow \mbox{ValueOf}(v) = v_1 \wedge v_2 \wedge \ldots \wedge v_n$$
+}
+
+\frame{
+  \frametitle{SSC Algorithm: Complexity}
+    \begin{itemize}[<+->]
+    \item Height of CP lattice  = 2
+    \item Each SSA edge is examined at most
+      twice, for each lowering
+    \item Theoritical size of SSA graph: $O(V \times E)$
+    \item Practical size: linear in the program size
+    \end{itemize}
+}
+
+
+\frame{
+  \frametitle{SSC: Practice Example}
+  \myexample
+}
+
+\frame{
+  \frametitle{SSC: Practice Example}
+  What if we change ``c1 = 4'' to ``c1 = 5''?
+}
+
+\frame{
+  \frametitle{Sparse Condtional Constant Propagation (SCC)}
+  \begin{itemize}[<+->]
+  \item Constant Propagation with {\em unreachable code
+    elimination}
+  \item Ignore definitions that reach a use via a
+    non-executable edge
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{SCC Algorithm: Key Idea}
+  $$v = \phi(v_1, v_2, \ldots, v_k)$$ \\
+  $$\Rightarrow \mbox{ValueOf}(v) = \bigwedge_{i\in
+    Executable Path}
+  v_i$$\\
+
+We ignore paths that are not ``yet'' marked executable
+}
+
+\newcommand{\fwl}{\mbox{\em FWL}}
+\newcommand{\swl}{\mbox{\em SWL}}
+\newcommand{\eflag}{{\it ExecutableFlag}}
+\frame{
+  \frametitle{SCC Algorithm: Preparations}
+  \begin{itemize}[<+->]
+  \item Two Worklists
+    \begin{itemize}[<+->]
+    \item Flow Worklist (\fwl)
+      \begin{itemize}[<+->]
+      \item Worklist of flow graph edges
+      \end{itemize}
+    \item SSA Worklist (\swl)
+      \begin{itemize}[<+->]
+      \item Worklist of SSA graph edges
+      \end{itemize}
+    \end{itemize}
+  \item Execution Halts when {\bf both} worklists are empty
+  \item Associate a flag, the {{\eflag}}, with
+    every flow graph edge to control the evaluation of
+    $\phi$-function in the destination node
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{SCC Algorithm: Initialization}
+  \begin{itemize}[<+->]
+  \item Initialize \fwl\ to contain edges leaving ENTRY node
+  \item Initialize \swl\ to empty
+  \item Each {\eflag} is false initially
+  \item Each value is $\top$ initially (Optimistic) 
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{SCC Algorithm: Iterations}
+  \begin{itemize}[<+->]
+  \item Remove an item from either worklist
+  \item process the item (described next)
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{SCC Algorithm: Processing \fwl\ Item}
+  \begin{itemize}[<+->]
+  \item Item is flow graph edge
+  \item If {\eflag} is true, do nothing
+  \item Otherwise
+    \begin{itemize}[<+->]
+    \item Mark the {\eflag} as true
+    \item {\bf Visit-$\phi$} for all $\phi$-functions in the
+      destination
+    \item If only one of the {\eflag}s of incoming flow graph
+      edges for dest is true (dest visted for the first time),
+      then {\bf VisitExpression} for all expressions in dest
+    \item If the dest contains only one outgoing flow graph
+      edge, add that edge to \fwl
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{SCC Algorithm: Processing \swl\ Item}
+  \begin{itemize}[<+->]
+  \item Item is SSA edge
+  \item If dest is a $\phi$-function, {\bf
+    Visit-$\phi$}
+  \item If dest is an expression and any of {\eflag}s
+    for the incoming flow graph edges of dest is true,
+    perform {\bf VisitExpression}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{SCC Algorithm: Visit-$\phi$}
+  $$v = \phi(v_1, v_2, \ldots, v_k)$$ \\
+  \begin{itemize}[<+->]
+  \item If $i^{th}$ incoming edge's \eflag\ is true,
+    $val_i = \mbox{ValueOf}(v_i)$ else $val_i = \top$
+  \item $\mbox{ValueOf}(v) = \bigwedge_i val_i$
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{SCC Algorithm: VisitExpression}
+  \begin{itemize}[<+->]
+  \item Evaluate the expression using values of operands and
+    rules for operators
+  \item If the result is same as old, nothing to do
+  \item Otherwise
+    \begin{itemize}[<+->]
+    \item If the expression is part of assignment, add all
+      outgoing SSA edges to \swl
+    \item if the expression controls a conditional branch,
+      then
+      \begin{itemize}[<+->]
+      \item if the result is $\bot$, add all outgoing flow
+        edges to \fwl
+      \item if the value is constant $c$, only the
+        corresponding flow graph edge is added to \fwl
+      \item Value can not be $\top$ (why?)
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{SCC Algorithm: Complexity}
+  \begin{itemize}[<+->]
+  \item Each SSA edge is examined twice
+  \item Flow graph nodes are visited once for every incoming
+    edge
+  \item Complexity = O(\# of SSA edges + \# of flow graph edges) 
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{SCC Algorithm: Correctness and Precision}
+  \begin{itemize}[<+->]
+  \item SCC is conservative
+    \begin{itemize}[<+->]
+    \item Never labels a variable value as a constant
+    \end{itemize}
+  \item SCC is at least as powerful as Conditional Constant
+    Propagation (CC)
+    \begin{itemize}[<+->]
+    \item Finds all constants as CC does
+    \end{itemize}
+  \item PROOFs: In paper {\bf Constant propagation with
+    conditional branches} by {\bf Mark N. Wegman, F. Kenneth
+    Zadeck}, ACM TOPLAS 1991.
+
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Practice Example}
+  \myexample
+}
+
+\end{document}

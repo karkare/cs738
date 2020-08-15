@@ -1,0 +1,249 @@
+\mode<presentation>
+{
+  %\usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{xspace}
+
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[]{\ \\{\LARGE Constant Propagation}\\}
+
+\input{defs.tex}
+\begin{document}
+
+\frame{\titlepage}
+\frame{
+  \frametitle{Agenda}
+  \begin{itemize}
+  \item Using data flow analysis to identify ``constant
+    expressions'' in a program
+  \item Identify similarity/differences with bit-vector data flow
+    analyses discussed earlier
+  \item Other properties of constant propagation
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Constant Propagation}
+  \begin{itemize}[<+->]
+  \item CP: Replace expressions that evaluate to same constant ``c''
+    every time they are executed, by the value ``c''
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{DF Framework for CP}
+  \begin{itemize}[<+->]
+  \item Domain
+    \begin{itemize}
+    \item For a single variable $v$ of type $\tau$, all possible
+      constants of type $\tau$
+    \end{itemize}
+  \item Semilattice
+    \begin{itemize}
+    \item What is $\meet$?
+    \item What is $\top$?
+    \item What is $\bot$?
+      
+    \end{itemize}
+  \end{itemize}
+}
+
+\newcommand{\nac}{\mbox{\em NAC}\xspace}
+\newcommand{\unDef}{\mbox{\em Undef}\xspace}
+\frame{
+  \frametitle{Special Values for CP}
+  \begin{itemize}[<+->]
+  \item \nac: not a constant
+    \begin{itemize}
+    \item If variable is inferred not to be a constant
+    \item Multiple (different valued) defs, non-const defs, assigned an ``un-interpreted'' value, \ldots
+    \end{itemize}
+  \item \unDef: No definition of the variable is seen yet - nothing known!
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{\nac vs \unDef}
+  \begin{itemize}[<+->]
+  \item \nac$\Rightarrow$ {\em too many} definitions seen for a variable $v$ to declare $v$ is {\bf NOT} a constant
+  \item \unDef$\Rightarrow$ {\em too few} definitions seen to declare anything about the variable
+  \item $\top$ is \unDef; $\bot$ is \nac
+  \end{itemize}
+  
+}
+
+\frame{
+  \frametitle{CP Meet $\meet$}
+  \begin{itemize}[<+->]
+  \item Recall the requirement
+    \[\top \meet x = x\]
+    \[\bot \meet x = \bot\]
+  \item[] $\unDef \meet c = c$
+  \item[] $\nac \meet c = \nac$
+  \item[] $c_1 \meet c_2 = \nac \mbox{ when } c_1 \neq c_2$
+  \item[] $c \meet c = c$
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{CP Semilattice for an integer variable}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(50,30)
+      %\psframe(0,0)(50,30)
+      \putnode{top}{origin}{25}{30}{\unDef}
+      \putnode{bot}{top}{0}{-30}{\nac}
+      \putnode{zero}{top}{0}{-15}{0}
+      \putnode{n1}{zero}{-8}{0}{-1}
+      \putnode{n2}{zero}{-16}{0}{-2}
+      \putnode{n3}{zero}{-24}{0}{-3}
+      \putnode{nd}{zero}{-35}{0}{$\cdots$}
+      \putnode{p1}{zero}{8}{0}{1}
+      \putnode{p2}{zero}{16}{0}{2}
+      \putnode{p3}{zero}{24}{0}{3}
+      \putnode{pd}{zero}{35}{0}{$\cdots$}
+      \ncline[nodesep=.5]{top}{zero}
+      \ncline[nodesep=.5]{top}{n1}
+      \ncline[nodesep=.5]{top}{n2}
+      \ncline[nodesep=.5]{top}{n3}
+      \ncline[nodesep=.5]{top}{nd}
+      \ncline[nodesep=.5]{top}{p1}
+      \ncline[nodesep=.5]{top}{p2}
+      \ncline[nodesep=.5]{top}{p3}
+      \ncline[nodesep=.5]{top}{pd}
+
+      \ncline[nodesep=.5]{bot}{zero}
+      \ncline[nodesep=.5]{bot}{n1}
+      \ncline[nodesep=.5]{bot}{n2}
+      \ncline[nodesep=.5]{bot}{n3}
+      \ncline[nodesep=.5]{bot}{nd}
+      \ncline[nodesep=.5]{bot}{p1}
+      \ncline[nodesep=.5]{bot}{p2}
+      \ncline[nodesep=.5]{bot}{p3}
+      \ncline[nodesep=.5]{bot}{pd}
+    \end{pspicture}
+  \end{center}
+  \begin{itemize}
+  \item Infinite domain, but finite height
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{CP Semilattice}
+  \begin{itemize}[<+->]
+  \item Previous figure was semilattice for one variable of one type
+  \item CP Semilattice = Product of such lattices for all variables (of all types)
+  \item Each semilattice has a {\bf finite} height
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Computing \Gen}
+  \begin{itemize}[<+->]
+  \item Informal representation
+  \end{itemize}
+  \begin{center}
+    \begin{tabular}{@{}l|l@{}}
+      \hline
+          {\bf Statement} & {\bf \Gen} \\ \hline
+          $x = c$ // const &  \onslide<2->{$\{x \rightarrow c\}$} \\ \hline
+          $x = y+z$ & 
+          \begin{tabular}{@{}l@{}}
+             \onslide<3->{if $\{y\rightarrow c_1, z \rightarrow c_2\}$ in \IN then $\{x\rightarrow c_1+c_2\}$}\\
+             \onslide<4->{else if \ $\{y\rightarrow \nac\}$ in \IN then $\{x\rightarrow \nac\}$}\\
+             \onslide<5->{else if \ $\{z\rightarrow \nac\}$ in \IN then $\{x\rightarrow \nac\}$}\\
+             \onslide<6->{else $\{x\rightarrow \unDef\}$}\\
+          \end{tabular}
+          \\ \hline
+          $x = $ {\em complicated}&  \onslide<7->{$\{x \rightarrow \nac\}$}\\
+          $\qquad${\em expr} & \\ \hline
+    \end{tabular}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Monotonicity of CP}
+  \begin{itemize}[<+->]
+  \item Case analysis on transfer function $f$
+  \item $\nac \leq c \leq \unDef$
+  \item $x = c$ has constant transfer function.
+  \item $x = $ {\em complicated expr} also has constant transfer function
+  \item See the next slide for $x = y + z$ (and similar statements)
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Monotonicity of CP: $x = y + z$}
+  \begin{itemize}[<+->]
+  \item Fix $z$ to be one of \unDef, $c_2$, \nac
+  \item Vary $y$ over \unDef, $c_1$, \nac
+  \item Confirm that $x$ does not ``{\em increase}''
+  \item Do this for all $z$ choices.
+  \item Similarly, fix $y$ and vary $z$.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Nondistributivity of CP}
+  \begin{minipage}{.45\textwidth}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(45,30)
+      %\psframe(0,0)(45,30)
+      \putnode{n0}{origin}{23}{30}{\mylabbox{$B_0$}{\phantom{z = \ldots}}}
+      \putnode{n1}{n0}{-15}{-15}{\mylabbox{$B_1$}{
+          \begin{tabular}{@{}c@{}}
+            x = 2;\\
+            y = 3;
+          \end{tabular}
+      }}
+      \putnode{n2}{n0}{15}{-15}{\mylabbox{$B_2$}{
+          \begin{tabular}{@{}c@{}}
+            x = 3;\\
+            y = 2;
+          \end{tabular}
+      }}
+      \putnode{n3}{n0}{0}{-30}{\mylabbox{$B_3$}{
+          \begin{tabular}{@{}c@{}}
+            z = x + y;\\
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{n1}
+      \ncline{->}{n0}{n2}
+      \ncline{->}{n1}{n3}
+      \ncline{->}{n2}{n3}
+    \end{pspicture}
+  \end{minipage}
+  \begin{minipage}{.49\textwidth}
+    \begin{itemize}[<+->]
+    \item All paths:
+      \begin{itemize}
+      \item $B_0\rightarrow B_1 \rightarrow B_3$
+      \item $B_0\rightarrow B_2 \rightarrow B_3$
+      \end{itemize}
+    \item Value of $z$ is 5 along both the paths.
+    \item MOP value for $z$ is 5.
+    \item MFP value for $z$ is \nac. (Exercise) 
+    \item MFP value $\neq$ MOP value (MFP $<$ MOP)
+    \end{itemize}
+    
+  \end{minipage}
+}
+
+\end{document}

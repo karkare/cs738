@@ -1,0 +1,607 @@
+\mode<presentation>
+{
+  %\usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{xspace}
+
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[]{\ \\{\LARGE Static Single Assignment (SSA)}\\}
+
+\input{defs.tex}
+\begin{document}
+
+\frame{\titlepage}
+\frame{
+  \frametitle{Agenda}
+  \begin{itemize}
+  \item SSA Form
+  \item Constructing SSA form
+  \item Properties and Applications
+  \end{itemize}
+}
+
+
+\frame{
+  \frametitle{SSA Form}
+  \begin{itemize}[<+->]
+  \item Developed by Ron Cytron, Jeanne Ferrante, Barry K. Rosen, Mark N. Wegman, and F. Kenneth Zadeck, 
+    \begin{itemize}
+    \item in 1980s while at IBM.
+    \end{itemize}
+  \item {\em Static Single Assignment} -- A variable is assigned only once in program text
+    \begin{itemize}
+    \item May be assigned multiple times if program is executed
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{What is SSA Form?}
+  \begin{itemize}[<+->]
+  \item An Intermediate Representation
+  \item Sparse representation
+    \begin{itemize}
+    \item Definitions sites are directly associated with use sites
+    \end{itemize}
+  \item Advantage
+    \begin{itemize}
+    \item Directly access points where relevant data flow information is avaliable
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{SSA IR}
+  \begin{itemize}[<+->]
+  \item In SSA Form
+    \begin{itemize}
+    \item Each variable has exactly one definition
+    \item[$\Rightarrow$] A use of a variable is reached by exactly one definition
+    \end{itemize}
+  \item Control flow like traditional programs
+  \item Some {\em magic} is needed at {\em join} nodes
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Example}
+  \begin{frmminipage}{.4\textwidth}
+    \Large\tt
+    i = 0;\\
+    \ldots\\
+    i = i + 1;\\
+    \ldots\\
+    j = i * 5;\\
+    \ldots
+  \end{frmminipage}
+  \pause
+  \hfill\tossa\hfill
+  \begin{frmminipage}{.4\textwidth}
+    \Large\tt
+    i1 = 0;\\
+    \ldots\\
+    i2 = i1 + 1;\\
+    \ldots\\
+    j1 = i2 * 5;\\
+    \ldots
+  \end{frmminipage}
+}
+
+\frame{
+  \frametitle{SSA Example}
+  \begin{frmminipage}{.4\textwidth}
+    \Large\tt
+    i = \ldots;\\
+    j = \ldots;\\
+    if (i < 20) \\
+    \jstfy i = i + j;\\
+    else\\
+    \jstfy j = j + 2;\\
+    print i, j;
+  \end{frmminipage}\hfill
+  \begin{minipage}{.4\textwidth}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(45,30)
+      %\psframe(0,0)(45,30)
+      \putnode{n0}{origin}{23}{35}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            i = \ldots;\\
+            j = \ldots;
+          \end{tabular}
+      }}
+      \putnode{if0}{n0}{0}{-15}{\psframebox{if (i < 20)}}
+      \putnode{n1}{if0}{-15}{-15}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            i = i + j;
+          \end{tabular}
+      }}
+      \putnode{n2}{if0}{15}{-15}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            j = j + 2;
+          \end{tabular}
+      }}
+      \putnode{n3}{if0}{0}{-30}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            print i, j;
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{if0}
+      \ncline{->}{if0}{n1}
+      \ncline{->}{if0}{n2}
+      \ncline{->}{n1}{n3}
+      \ncline{->}{n2}{n3}
+    \end{pspicture}
+  \end{minipage}
+  
+}
+
+\frame{
+  \frametitle{SSA Example}
+  \begin{minipage}{.4\textwidth}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(45,30)
+      %\psframe(0,0)(45,30)
+      \putnode{n0}{origin}{23}{40}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            i = \ldots;\\
+            j = \ldots;
+          \end{tabular}
+      }}
+      \putnode{if0}{n0}{0}{-15}{\psframebox{if (i < 20)}}
+      \putnode{n1}{if0}{-15}{-15}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            i = i + j;
+          \end{tabular}
+      }}
+      \putnode{n2}{if0}{15}{-15}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            j = j + 2;
+          \end{tabular}
+      }}
+      \putnode{n3}{if0}{0}{-35}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            \\ \\ print i, j;
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{if0}
+      \ncline{->}{if0}{n1}
+      \ncline{->}{if0}{n2}
+      \ncline{->}{n1}{n3}
+      \ncline{->}{n2}{n3}
+    \end{pspicture}
+  \end{minipage}
+  \pause\hfill\tossa\hfill
+  \begin{minipage}{.4\textwidth}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(45,30)
+      %\psframe(0,0)(45,30)
+      \putnode{n0}{origin}{23}{40}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            i1 = \ldots;\\
+            j1 = \ldots;
+          \end{tabular}
+      }}
+      \putnode{if0}{n0}{0}{-15}{\psframebox{if (i1 < 20)}}
+      \putnode{n1}{if0}{-15}{-15}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            i2 = i1 + j1;
+          \end{tabular}
+      }}
+      \putnode{n2}{if0}{15}{-15}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            j2 = j1 + 2;
+          \end{tabular}
+      }}
+      \putnode{n3}{if0}{0}{-35}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            \onslide<3->{%
+              i3 = $\phi$(i2, i1);\\
+              j3 = $\phi$(j1, j2);\\
+            }
+            print i\onslide<4->{3}, j\onslide<4->{3};
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{if0}
+      \ncline{->}{if0}{n1}
+      \ncline{->}{if0}{n2}
+      \ncline{->}{n1}{n3}
+      \ncline{->}{n2}{n3}
+    \end{pspicture}
+  \end{minipage}
+}
+
+\frame{
+  \frametitle{SSA Example}
+  \begin{frmminipage}{.4\textwidth}
+    \Large\tt
+    i = \ldots;\\
+    j = \ldots;\\
+    if (i < 20) \\
+    \jstfy i = i + j;\\
+    else\\
+    \jstfy j = j + 2;\\
+    \\ \\ print i, j;
+  \end{frmminipage}
+  \hfill\tossa\hfill
+  \begin{frmminipage}{.43\textwidth}
+    \Large\tt
+    i1 = \ldots;\\
+    j1 = \ldots;\\
+    if (i1 < 20) \\
+    \jstfy i2 = i1 + j1;\\
+    else\\
+    \jstfy j2 = j1 + 2;\\
+    i3 = $\phi$(i2, i1);\\
+    j3 = $\phi$(j1, j2);\\
+    print i3, j3;
+  \end{frmminipage}
+}
+
+\frame{
+  \frametitle{The {\em magic}: $\phi$ function}
+  \begin{itemize}[<+->]
+  \item $\phi$ is used for selection
+    \begin{itemize}
+    \item One out of multiple values at join nodes
+    \end{itemize}
+  \item Not every join node needs a $\phi$
+    \begin{itemize}
+    \item Needed only if multiple definitions reach the node
+    \end{itemize}
+  \item Examples?
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{But\ldots What is $\phi$?}
+  \begin{itemize}[<+->]
+  \item What does $\phi$ operation mean in a machine code?
+  \item $\phi$ is a conceptual entity
+  \item Statically equivalent to chosing one of the arguments ``non-deterministicly'' 
+    \item No direct translation to machine code
+    \begin{itemize}
+    \item typically mimicked using ``copy'' in predecessors
+    \item Inefficient
+    \item Practically, the inefficiency is compensated by dead
+      code elimination and register allocation passes
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Properties of $\phi$}
+  \begin{itemize}[<+->]
+  \item Placed only at the entry of a join node
+  \item Multiple $\phi$-functions could be placed
+    \begin{itemize}
+    \item for multiple variables
+    \item all such $\phi$ functions execute concurrently
+    \end{itemize}
+  \item $n$-ary $\phi$ function at $n$-way join node
+  \item gets the value of $i$-th argument if control enters
+    through $i$-th edge
+    \begin{itemize}
+    \item Ordering of $\phi$ arguments according to the edge
+      ordering is important
+    \end{itemize}
+  \end{itemize}
+}
+
+
+\frame{
+  \frametitle{SSA Example (revisit)}
+  \begin{minipage}{.4\textwidth}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(45,30)
+      %\psframe(0,0)(45,30)
+      \putnode{n0}{origin}{23}{40}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            i = \ldots;\\
+            j = \ldots;
+          \end{tabular}
+      }}
+      \putnode{if0}{n0}{0}{-15}{\psframebox{if (i < 20)}}
+      \putnode{n1}{if0}{-15}{-15}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            i = i + j;
+          \end{tabular}
+      }}
+      \putnode{n2}{if0}{15}{-15}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            j = j + 2;
+          \end{tabular}
+      }}
+      \putnode{n3}{if0}{0}{-35}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            \\ \\ print i, j;
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{if0}
+      \ncline{->}{if0}{n1}
+      \ncline{->}{if0}{n2}
+      \ncline{->}{n1}{n3}
+      \ncline{->}{n2}{n3}
+    \end{pspicture}
+  \end{minipage}
+  \hfill\tossa\hfill
+  \begin{minipage}{.4\textwidth}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(45,30)
+      %\psframe(0,0)(45,30)
+      \putnode{n0}{origin}{23}{40}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            i1 = \ldots;\\
+            j1 = \ldots;
+          \end{tabular}
+      }}
+      \putnode{if0}{n0}{0}{-15}{\psframebox{if (i1 < 20)}}
+      \putnode{n1}{if0}{-15}{-15}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            i2 = i1 + j1;
+          \end{tabular}
+      }}
+      \putnode{n2}{if0}{15}{-15}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            j2 = j1 + 2;
+          \end{tabular}
+      }}
+      \putnode{n3}{if0}{0}{-35}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            \onslide<1->{%
+              i3 = $\phi$(i2, i1);\\
+              j3 = $\phi$(j1, j2);\\
+            }
+            print i\onslide<1->{3}, j\onslide<1->{3};
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{if0}
+      \ncline{->}{if0}{n1}
+      \ncline{->}{if0}{n2}
+      \ncline{->}{n1}{n3}
+      \ncline{->}{n2}{n3}
+    \end{pspicture}
+  \end{minipage}
+}
+
+\mypart{Construction of SSA Form}
+
+\frame{
+  \frametitle{Assumptions}
+  \begin{itemize}[<+->]
+  \item Only scalar variables
+    \begin{itemize}
+    \item Structures, pointers, arrays could be handled
+    \item Refer to publications
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Dominators}
+  \begin{itemize}[<+->]
+  \item Nodes $x$ and $y$ in flow graph
+  \item $x$ \alert{dominates} $y$ if {\bf every} path from $\bbent$
+    to $y$ goes through $x$
+    \begin{itemize}
+    \item $x \dom y$
+    \item partial order?
+    \end{itemize}
+  \item $x$ \alert{strictly dominates} $y$ if  $x\dom y$ and $x \neq y$
+    \begin{itemize}
+    \item $x \sdom y$
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Computing Dominators}
+  \begin{itemize}[<+->]
+  \item Equation
+    \begin{eqnarray*}
+      \DOM(n) &=& \{n\} \cup \left( \bigcap_{m\in\Pred(n)} \DOM(m)\right),\\
+      && \qquad\qquad \forall n \in N
+    \end{eqnarray*}
+  \item Initial Conditions:
+    \begin{eqnarray*}
+      \DOM(n_\bbent) &=& \{n_\bbent\} \\
+      \DOM(n) &=& N,  \forall n \in N - \{n_\bbent\}       
+    \end{eqnarray*}
+    where $N$ is the set of all nodes, $n_\bbent$ is the node
+    corresponding to the $\bbent$ block.
+  \item Note that efficient methods exist for computing dominators
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Immediate Dominators and Dominator Tree}
+  \begin{itemize}[<+->]
+  \item $x$ is \alert{immediate dominator} of $y$ if $x$ is the
+    {\em closest strict dominator} of $y$
+    \begin{itemize}
+    \item unique, if it exists
+    \item denoted $\idom[y]$
+    \end{itemize}
+  \item Dominator Tree
+    \begin{itemize}
+    \item A tree showing all immediate dominator relationships
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Dominator Tree Example}
+  \begin{minipage}{.4\textwidth}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(45,60)
+      %\psframe(0,0)(45,60)
+      \putnode{n0}{origin}{13}{55}{$B_0$}
+      \putnode{n1}{n0}{0}{-10}{$B_1$}
+      \putnode{n2}{n1}{-10}{-10}{$B_2$}
+      \putnode{n3}{n1}{10}{-10}{$B_3$}
+      \putnode{n4}{n3}{-7}{-10}{$B_4$}
+      \putnode{n5}{n3}{7}{-10}{$B_5$}
+      \putnode{n6}{n3}{0}{-20}{$B_6$}
+      \putnode{n7}{n1}{0}{-40}{$B_7$}
+      \ncline{->}{n0}{n1}
+      \ncline{->}{n1}{n2}
+      \ncline{->}{n1}{n3}
+      \ncline{->}{n3}{n4}
+      \ncline{->}{n3}{n5}
+      \ncline{->}{n4}{n6}
+      \ncline{->}{n5}{n6}
+      \ncline{->}{n2}{n7}
+      \ncline{->}{n6}{n7}
+      \nccurve[ncurv=2]{->}{n7}{n1}
+    \end{pspicture}
+  \end{minipage}
+  \begin{minipage}{.4\textwidth}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(45,60)
+      %\psframe(0,0)(45,30)
+      \putnode{n0}{origin}{23}{55}{$B_0$}
+      \putnode{n1}{n0}{0}{-10}{$B_1$}
+      \putnode{n2}{n1}{-10}{-10}{$B_2$}
+      \putnode{n3}{n1}{10}{-10}{$B_3$}
+      \putnode{n4}{n3}{-7}{-10}{$B_4$}
+      \putnode{n5}{n3}{7}{-10}{$B_5$}
+      \putnode{n6}{n3}{0}{-20}{$B_6$}
+      \putnode{n7}{n1}{0}{-40}{$B_7$}
+      \pause \ncline{->}{n0}{n1}
+      \pause \ncline{->}{n1}{n2}
+      \pause \ncline{->}{n1}{n3}
+      \pause \ncline{->}{n1}{n7}
+      \pause \ncline{->}{n3}{n4}
+      \pause \ncline{->}{n3}{n5}
+      \pause \ncline{->}{n3}{n6}
+    \end{pspicture}
+  \end{minipage}
+}
+
+\frame{
+  \frametitle{Dominance Frontier: $\DF$}
+  \begin{itemize}[<+->]
+  \item Dominance Frontier of $x$ is set of all nodes $y$ s.t.
+    \begin{itemize}
+    \item $x$ \alert{dominates a predecessor} of $y$ AND
+    \item $x$ \alert{does not strictly dominate} $y$
+    \end{itemize}
+  \item Denoted $\DF(x)$
+  \item Why do you think $\DF(x)$ is important for any $x$?
+    \begin{itemize}
+    \item Think about the information originated in $x$. 
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Computing $\DF$}
+  \begin{itemize}
+  \item $\operatorname{PARENT}(x)$ denotes parent of node $x$ in the
+    dominator tree.
+  \item $\operatorname{CHILDERN}(x)$ denotes childern of node $x$ in the
+    dominator tree.
+  \item \Pred and \Succ from CFG.
+  \end{itemize}
+  \begin{eqnarray*}
+    \DF(x) &=& \DF_{\operatorname{local}}(x) \cup
+    \left(\bigcup_{z \in \operatorname{CHILDERN}(x)} \DF_{\operatorname{up}}(z)\right)
+    \\ & \\ \pause
+    \DF_{\operatorname{local}}(x) &=&
+    \{y \in \Succ(x) \mid \idom[y] \neq x\} \\ \pause
+    \DF_{\operatorname{up}}(z) &=&
+    \{y \in \DF(z) \mid \idom[y] \neq \operatorname{PARENT}(z)\}
+  \end{eqnarray*}
+}
+
+\frame{
+  \frametitle{Iterated Dominance Frontier}
+  \begin{itemize}[<+->]
+  \item Transitive closure of Dominance frontiers on a set of nodes
+  \item Let $S$ be a set of nodes
+    \begin{eqnarray*}
+      \DF(S) &=& \bigcup_{x\in S} \DF(x) \\
+      & \\ \pause
+      \DF^1(S) &=& \DF(S) \\
+      \DF^{i+1}(S) &=& \DF( S \cup \DF^i(S))
+    \end{eqnarray*}
+  \item $\DF^+(S)$ is the fixed point of $\DF^i$ computation.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Minimal SSA Form Construction}
+  \begin{itemize}[<+->]
+  \item Compute $\DF^+$ set for each flow graph node
+  \item Place \alert{trivial} $\phi$-functions for each variable in the node
+    \begin{itemize}
+    \item trivial $\phi$-function at $n$-ary join:
+      $x = \phi(\overbrace{x, x, \ldots, x}^\text{$n$-times})$
+    \end{itemize}
+  \item Rename variables
+  \item \alert{Why $\DF^+$? Why not only $\DF$?}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Inserting $\phi$-functions}
+  \tt
+  \begin{tabbing}
+    for\=each variable $v$ \{\\\pause
+    \>$S = \bbent \cup \{ B_n \mid v \mbox{ defined in } B_n\}$\\\pause
+    \>Compute $\DF^+(S)$\\\pause
+    \>for\=each $n$ in $\DF^+(S)$ \{\\\pause
+    \>\>insert $\phi$-function for $v$ at the start of $B_n$\\
+    \>\}\\
+    \}
+  \end{tabbing}
+}
+
+\frame{
+  \frametitle{Renaming Variables (Pseudo Code)}
+  \begin{itemize}[<+->]
+  \item Rename from the \bbent node recursively
+    \begin{itemize}
+    \item For each variable $x$, maintain a rename stack of $x
+    \mapsto x_{\operatorname{version}}$ mapping
+    \end{itemize}
+  \item For node n
+    \begin{itemize}
+    \item For each assignment ($x = \ldots$) in $n$
+      \begin{itemize}
+      \item If non-$\phi$ assignment, rename any use of $x$ with
+        the Top mapping of $x$ from the rename stack
+      \item Push the mapping $x \mapsto x_i$ on the rename stack
+      \item Replace lhs of the assignment by $x_i$
+      \item $i = i + 1$
+      \end{itemize}
+    \end{itemize}
+  \item For the successors of $n$
+    \begin{itemize}
+    \item Rename $\phi$ operands through \Succ edge index
+    \end{itemize}
+  \item Recursively rename all child nodes in the dominator tree 
+  \item For each assignment ($x = \ldots$) in $n$ 
+    \begin{itemize}
+    \item Pop $x\mapsto \ldots$  from the rename stack
+    \end{itemize}
+  \end{itemize}
+}
+
+\end{document}

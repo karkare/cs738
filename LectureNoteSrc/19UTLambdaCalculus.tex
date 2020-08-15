@@ -1,0 +1,390 @@
+\mode<presentation>
+{
+  %\usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{etex}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{bcprules}
+\usepackage{graphicx}
+\newcommand{\change}[1]{{\red #1}}
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[Types]{\ \\{\LARGE The Untyped Lambda Calculus}}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\frame{
+  \frametitle{Reference Book}
+  Types and Programming Languages by Benjamin C. Pierce
+}
+\newcommand{\tm}{\ensuremath{\mathsf t}}
+\frame{
+  \frametitle{The Abstract Syntax}
+  \begin{tabular}{rcl@{\qquad}r}
+    $\tm$ & := & $x$         &-- Variable\\ \pause
+    & & $\mid \lambda x.\tm$ &-- Abstraction\\ \pause
+    & & $\mid \tm\ \tm $     &-- Application \\ \pause
+  \end{tabular}
+
+  Parenthesis, (\ldots), can be used for grouping and scoping.
+}
+
+\frame{
+  \frametitle{Conventions}
+  \begin{itemize}[<+->]
+  \item $\lambda x.\tm_1\tm_2\tm_3$ is an abbreviation for
+    $\lambda x.(\tm_1\tm_2\tm_3)$, i.e., the scope of $x$ is as
+    far to the right as possible until it is
+    \begin{itemize}
+    \item terminated by a {\bf )} whose matching {\bf (} occurs to the left pf $\lambda$, OR
+    \item terminated by the end of the term.
+    \end{itemize}
+  \item Applications associate to the left: $\tm_1\tm_2\tm_3$ to be read as $(\tm_1\tm_2)\tm_3$ and not as $\tm_1(\tm_2\tm_3)$
+  \item $\lambda x y z.\tm$ is an abbreviation for  $\lambda x \lambda y \lambda z.\tm$ which in turn is abbreviation for $\lambda x.(\lambda y.(\lambda z.\tm))$.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{$\alpha$-renaming}
+  \begin{itemize}[<+->]
+  \item The name of a bound variable has no
+    meaning except for its use to identify
+    the bounding $\lambda$.
+  \item Renaming a $\lambda$ variable, including all its
+    bound occurrences, does not change the meaning of an expression.
+    For example, $\lambda x. x\ x\ y$ is equivalent to
+    $\lambda u. u\ u\ y$
+
+    \begin{itemize}
+    \item But it is not same as $\lambda x. x\ x\ w$
+    \item Can not change free variables! 
+    \end{itemize}
+  \end{itemize}
+}
+
+\newcommand{\betared}{\ensuremath{\stackrel{\beta}{\longrightarrow}}}
+\newcommand{\alpharen}{\ensuremath{\stackrel{\alpha}{\longrightarrow}}}
+
+\frame{
+  \frametitle{$\beta$-reduction (Execution Semantics)}
+  \begin{itemize}[<+->]
+  \item if an abstraction $\lambda x.\tm_1$ is applied to a
+    term $\tm_2$ then the result of the
+    application is
+    \begin{itemize}
+    \item the body of the abstraction $\tm_1$ with all free
+      occurrences of the formal parameter $x$ replaced with $\tm_2$.
+    \end{itemize}
+  \item For example,
+    \[(\lambda f \lambda x. f\ (f\ x))\ g \betared \lambda x. g\ (g\ x)\]
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Caution}
+  \begin{itemize}[<+->]
+  \item During $\beta$-reduction, make sure a free
+    variable is not captured inadvertently.
+  \item The following reduction is {\bf WRONG}
+    \[ (\lambda x \lambda y. x) (\lambda x. y) \betared 
+    \lambda y. \lambda x. y\]
+  \item Use $\alpha$-renaming to avoid variable capture
+    \[ (\lambda x \lambda y. x) (\lambda x. y) 
+    \alpharen (\lambda u \lambda v. u) (\lambda x. y) 
+    \betared 
+    \lambda v. \lambda x. y\]
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Exercise}
+  \begin{itemize}
+  \item Apply $\beta$-reduction as far as possible
+  \end{itemize}
+  \begin{enumerate}
+  \item $(\lambda x\ y\ z.\ x\ z\ (y\ z))\ (\lambda x\ y.\ x)\ (\lambda y. y)$
+  \item $(\lambda x.\ x\ x) (\lambda x.\ x\ x)$
+  \item $(\lambda x\ y\ z.\ x\ z\ (y\ z))\ (\lambda x\ y.\ x)\ ((\lambda x.\ x\ x) (\lambda x.\ x\ x))$
+  \end{enumerate}
+}
+
+\frame{
+  \frametitle{Church-Rosser Theorem}
+  \begin{itemize}[<+->]
+  \item Multiple ways to apply $\beta$-reduction
+  \item Some may not terminate
+  \item However, if two different reduction
+    sequences terminate then they always
+    terminate in the same term
+    \begin{itemize}
+    \item Also called the {\em Diamond Property}
+    \end{itemize}
+  \item Leftmost, outermost reduction will find
+    the normal form if it exists
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Programming in $\lambda$ Calculus}
+  \begin{itemize}[<+->]
+  \item Where is the other stuff?
+  \item Constants?
+    \begin{itemize}
+    \item Numbers
+    \item Booleans
+    \end{itemize}
+  \item Complex Types?
+    \begin{itemize}
+    \item Lists
+    \item Arrays
+    \end{itemize}
+  \item Don't we need data?
+  \end{itemize}
+  \pause\alert{Abstractions act as functions as well as data!}
+}
+
+\frame{
+  \frametitle{Numbers: Church Numerals}
+  \begin{itemize}[<+->]
+  \item We need a ``Zero''
+    \begin{itemize}
+    \item ``Absence of item''
+    \end{itemize}
+  \item And something to count
+    \begin{itemize}    
+    \item ``Presence of item''
+    \end{itemize}
+  \item Intuition: Whiteboard and Marker
+    \begin{itemize}
+    \item Blank board represents Zero
+    \item  Each mark by marker represents a count.
+    \item  However, other pairs of objects will work
+      as well
+    \end{itemize}
+  \item Lets translate this intuition into $\lambda$-expressions
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Numbers}
+  \begin{itemize}[<+->]
+  \item Zero = $\lambda m\ w.\ w$
+    \begin{itemize}
+    \item No mark on the whiteboard
+    \end{itemize}
+  \item One = $\lambda m\ w.\ m\ w$
+    \begin{itemize}
+    \item One mark on the whiteboard
+    \end{itemize}
+  \item Two = $\lambda m\ w.\ m\ (m\ w)$
+  \item \ldots
+    
+  \item What about operations?
+    \begin{itemize}
+    \item add, multiply, subtract, divide, \ldots?
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Operations on Numbers}
+  \begin{itemize}[<+->]
+  \item succ = $\lambda x\ m\ w.\ m\ (x\ m\ w)$
+    \begin{itemize}
+    \item Verify: succ N = N + 1
+    \end{itemize}
+  \item add = $\lambda x\ y\ m\ w.\ x\ m\ (y\ m\ w)$
+    \begin{itemize}
+    \item Verify: add M N = M + N
+    \end{itemize}
+  \item mult = $\lambda x\ y\ m\ w.\ x\ (y\ m)\ w$
+    \begin{itemize}
+    \item Verify: mult M N = M * N
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{More Operations}
+  \begin{itemize}[<+->]
+  \item pred = $\lambda x\ m\ w.\ x\ (\lambda g\ h.\ h\ (g\ m)) (\lambda u.\ w) (\lambda u.\ u)$
+    \begin{itemize}
+    \item Verify: pred N = N - 1
+    \end{itemize}
+  \item nminus = $\lambda x\ y.\ y\ \mbox{pred}\ x$
+    \begin{itemize}
+    \item Verify: nminus M N = max(0, M - N) -- natural subtraction
+    \end{itemize}
+  \end{itemize}
+}
+\frame{
+  \frametitle{Church Booleans}
+  \begin{itemize}[<+->]
+  \item True and False
+  \item Intuition: Selection of one out of two (complementary)
+    choices
+  \item True = $\lambda x\ y.\ x$
+  \item False = $\lambda x\ y.\ y$
+  \item Predicate:
+    \begin{itemize}
+    \item isZero = $\lambda x.\ x\ (\lambda u.\mbox{False})\ \mbox{True}$
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Operations on Booleans}
+  \begin{itemize}[<+->]
+  \item Logical operations
+    \begin{eqnarray*}
+      and &=& \lambda p\ q.\ p\ q\ p\\
+      or  &=& \lambda p\ q.\ p\ p\ q \\ 
+      not &=& \lambda p\ t\ f. p\ f\ t
+    \end{eqnarray*}
+  \item The conditional operator $if$
+    \begin{itemize}
+    \item $if\ c\ e_t\ e_f$ reduces to $e_t$ if $c$ is True, and
+      to $e_f$ if $c$ is False
+    \end{itemize}
+    \begin{eqnarray*}
+      if  &=& \lambda c\ e_t\ e_f.\ (c\ e_t\ e_f)
+    \end{eqnarray*}
+  \end{itemize}
+}
+
+\frame {
+  \frametitle{More\ldots}
+  \begin{itemize}[<+->]
+  \item More such types can be found at \\ \url{https://en.wikipedia.org/wiki/Church_encoding}
+  \item It is fun to come up with your own definitions for
+    constants and operations over different types 
+  \item or to develop understanding for existing definitions.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{We are missing something!!}
+  \begin{itemize}
+  \item  The machinery described so far does
+    not allow us to define Recursive
+    functions
+    \begin{itemize}
+    \item Factorial, Fibonacci, \ldots
+    \end{itemize}
+  \item There is no concept of ``named'' functions
+    \begin{itemize}
+    \item So no way to refer to a function
+      ``recursively''!
+    \end{itemize}
+  \item Fix-point computation comes to rescue
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Fix-point and $Y$-combinator}
+  \begin{itemize}[<+->]
+  \item A fix-point of a function $f$ is a value
+    $p$ such that $f\ p = p$
+  \item Assume existence of a magic
+    expression, called $Y$-combinator, that
+    when applied to a $\lambda$-expression, gives
+    its fixed point
+    \[Y\ f = f\ (Y\ f)\]
+  \item $Y$-combinator gives us a way to apply
+    a function recursively
+    \end{itemize}
+}
+
+\newcommand{\factl}{\mbox{fact}}
+\newcommand{\iszero}{\mbox{isZero}}
+\newcommand{\mult}{\mbox{mult}}
+\newcommand{\pred}{\mbox{pred}}
+\newcommand{\one}{\mbox{One}}
+
+\frame{
+  \frametitle{Recursion Example: Factorial}
+  \begin{eqnarray*}
+    \factl &=& \lambda n.\ if\ (\iszero\ n)\ \one\ (\mult\ n\ (\factl\ 
+              (\pred\ n)))\\
+          &=& (\lambda f\ n.\ if\ (\iszero\ n)\ \one\ (\mult\ n\ (f\ (\pred\ n))))\ \factl \\ && \\ \pause
+    \factl &=& g\ \factl
+  \end{eqnarray*}
+  \begin{itemize}[<+->]
+  \item fact is a fixed point of the function
+    \[ g = (\lambda f\ n.\ if\ (\iszero\ n) \one\ (\mult\ n\ (f\ (\pred\ n))))\]
+  \item Using Y-combinator,
+    \[\factl\ =\ Y\ g\]
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Factorial: Verify}
+  \begin{eqnarray*}
+    \factl\ 2 &=& (Y\ g)\ 2 \\\pause
+           &=& g\ (Y\ g)\ 2 \quad\mbox{-- by definition of Y-combinator}\\\pause
+           &=& (\lambda f n.\ if\ (\iszero\ n)\ 1\ (\mult\ n\ (f\ (\pred\ n))))\ (Y\ g)\ 2\\\pause
+           &=& (\lambda n.\ if\ (\iszero\ n)\ 1\ (\mult\ n\ ((Y\ g)\ (\pred\ n))))\ 2\\\pause
+           &=& if\ (\iszero\ 2)\ 1\ (\mult\ 2\ ((Y\ g) (\pred 2)))\\\pause
+           &=& (\mult\ 2\ ((Y\ g)\ 1))\\\pause
+           & & \ldots\\ 
+           &=& (\mult\ 2\ (\mult\ 1\ (if\ (\iszero\ 0)\ 1\ (\ldots))))\\\pause
+           &=& (\mult\ 2\ (\mult\ 1\ 1))\\\pause &=& 2
+  \end{eqnarray*}
+}
+
+\frame{
+  \frametitle{Recursion and $Y$-combinator}
+  \begin{itemize}[<+->]
+  \item Y-combinator allows to unroll the body
+    of loop once---similar to one unfolding
+    of recursive call
+    
+  \item Sequence of $Y$-combinator applications
+    allow complete unfolding of recursive
+    calls
+  \end{itemize}
+  \pause\alert{BUT, what about the existence of $Y$-combinator?}
+}
+
+\frame{
+  \frametitle{$Y$-combinators}
+  \begin{itemize}
+  \item Many candidates exist
+    \[Y_1 =  \lambda f.\ (\lambda x.\ f\ (x\ x))\  (\lambda x.\ f\ (x\ x)) \]\pause
+    {\small\[Y = \lambda abcdefghijklmnopqstuvwxwzr.r(thisisafixedpointcombinator)\]}\pause
+    \[ Y_{\rm funny} = TTTTT\ TTTTT\ TTTTT\ TTTTT\ TTTTT\ T \]\pause
+  \item Verify that $(Y\ f)\ =\ f\ (Y\ f)$ for each
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Summary}
+  \begin{itemize}[<+->]
+  \item 
+    A cursory look at $\lambda$-calculus
+  \item Functions are data, and Data are
+    functions!
+  \item Not covered but important to know:  The power of
+    $\lambda$ calculus is equivalent to that of Turing
+    Machine (``Church Turing Thesis'')
+  \end{itemize}
+}
+
+\end{document}

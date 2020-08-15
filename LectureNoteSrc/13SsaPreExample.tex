@@ -1,0 +1,1458 @@
+\mode<presentation>
+{
+  %\usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+
+\newcommand{\change}[1]{{\red #1}}
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[]{\ \\{\LARGE SSAPRE: Example}}
+
+\begin{document}
+
+\frame{\titlepage}
+\frame[plain]{
+  \scalebox{0.6}{
+    \psset{xunit=1.3mm, yunit=1.3mm}
+    \begin{pspicture}(0,0)(\textwidth,-\textheight)
+      %%\psframe(0,0)(132,-108)
+      \putnode{c0}{origin}{0}{0}{Example}
+      \putnode{b1}{origin}{66}{5}{1\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 = \ldots$\\
+            $b_1 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b2}{b1}{-22}{-12}{2\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{22}{0}{3\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{22}{0}{4\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b5}{b2}{-26}{-12}{5\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1$
+          \end{tabular}
+      }}
+      \putnode{b6}{b5}{32}{0}{6\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1$
+          \end{tabular}
+      }}
+      \putnode{b7}{b6}{22}{0}{7\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b8}{b7}{11}{-12}{8\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_2 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b9}{b8}{22}{0}{9\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_3 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b11}{b8}{-22}{0}{11\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b10}{b11}{-32}{0}{10\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b12}{b8}{11}{-12}{12\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_4 = \phi(a_2,a_3)$
+          \end{tabular}
+      }}
+      \putnode{b17}{b12}{-11}{-12}{17\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b16}{b17}{-33}{0}{16\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b13}{b17}{-27}{-12}{13\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_5 = \phi(a_6, a_1)$
+          \end{tabular}
+      }}
+      \putnode{b14}{b13}{0}{-13}{14\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_6 = \phi(a_5,a_4)$\\
+            $a_6 + b_1$
+          \end{tabular}
+      }}
+      \putnode{b15}{b14}{-20}{-14}{15\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+
+      \ncline[nodesepA=-1.5mm]{->}{b1}{b2}
+      \ncline{->}{b1}{b3}
+      \ncline[nodesepB=-1.1mm]{->}{b1}{b4}
+      \ncline[nodesepA=-1.5mm]{->}{b2}{b5}
+      \ncline{->}{b2}{b10}
+      \ncline{->}{b3}{b6}
+      \ncline{->}{b3}{b7}
+      \ncline{->}{b4}{b8}
+      \ncline{->}{b4}{b9}
+      \ncline{->}{b5}{b10}
+      \ncline{->}{b6}{b11}
+      \ncline{->}{b7}{b11}
+      \ncline{->}{b8}{b12}
+      \ncline{->}{b9}{b12}
+      \ncline{->}{b10}{b16}
+      \ncline{->}{b10}{b15}
+      \ncline[offsetB=.5]{->}{b11}{b13}
+      \ncline{->}{b12}{b17}
+      \ncline{->}{b13}{b14}
+      \nccurve[angleA=-135,angleB=135,ncurv=2]{->}{b14}{b13}
+      \nccurve[angleA=-90]{->}{b14}{b15}
+      \ncline{->}{b16}{b13}
+      \nccurve[angleA=-90,angleB=45,ncurv=1]{->}{b17}{b14}
+    \end{pspicture}
+  }
+}
+
+\frame[plain]{
+  \scalebox{0.6}{
+    \psset{xunit=1.3mm, yunit=1.3mm}
+    \begin{pspicture}(0,0)(\textwidth,-\textheight)
+      %%\psframe(0,0)(132,-108)
+      \putnode{c0}{origin}{0}{0}{$\Phi$ insertion}
+      \putnode{b1}{origin}{66}{5}{1\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 = \ldots$\\
+            $b_1 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b2}{b1}{-22}{-12}{2\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{22}{0}{3\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{22}{0}{4\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b5}{b2}{-26}{-12}{5\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1$
+          \end{tabular}
+      }}
+      \putnode{b6}{b5}{32}{0}{6\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1$
+          \end{tabular}
+      }}
+      \putnode{b7}{b6}{22}{0}{7\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b8}{b7}{11}{-12}{8\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_2 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b9}{b8}{22}{0}{9\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_3 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b11}{b8}{-22}{0}{11\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h = \Phi(h,h)}$
+          \end{tabular}
+      }}
+      \putnode{b10}{b11}{-32}{0}{10\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h = \Phi(h,h)}$
+          \end{tabular}
+      }}
+      \putnode{b12}{b8}{11}{-12}{12\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_4 = \phi(a_2,a_3)$\\
+            ${\red h = \Phi(h,h)}$
+          \end{tabular}
+      }}
+      \putnode{b17}{b12}{-11}{-12}{17\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b16}{b17}{-33}{0}{16\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b13}{b17}{-27}{-12}{13\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_5 = \phi(a_6, a_1)$\\
+            ${\red h = \Phi(h,h,h)}$
+          \end{tabular}
+      }}
+      \putnode{b14}{b13}{0}{-13}{14\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_6 = \phi(a_5,a_4)$\\
+            ${\red h = \Phi(h,h)}$\\
+            $a_6 + b_1$
+          \end{tabular}
+      }}
+      \putnode{b15}{b14}{-20}{-14}{15\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+
+      \ncline[nodesepA=-1.5mm]{->}{b1}{b2}
+      \ncline{->}{b1}{b3}
+      \ncline[nodesepB=-1.1mm]{->}{b1}{b4}
+      \ncline[nodesepA=-1.5mm]{->}{b2}{b5}
+      \ncline{->}{b2}{b10}
+      \ncline{->}{b3}{b6}
+      \ncline{->}{b3}{b7}
+      \ncline{->}{b4}{b8}
+      \ncline{->}{b4}{b9}
+      \ncline{->}{b5}{b10}
+      \ncline{->}{b6}{b11}
+      \ncline{->}{b7}{b11}
+      \ncline{->}{b8}{b12}
+      \ncline{->}{b9}{b12}
+      \ncline{->}{b10}{b16}
+      \ncline{->}{b10}{b15}
+      \ncline[offsetB=.5]{->}{b11}{b13}
+      \ncline{->}{b12}{b17}
+      \ncline{->}{b13}{b14}
+      \nccurve[angleA=-135,angleB=135,ncurv=2]{->}{b14}{b13}
+      \nccurve[angleA=-90]{->}{b14}{b15}
+      \ncline{->}{b16}{b13}
+      \nccurve[angleA=-90,angleB=15,ncurv=1]{->}{b17}{b14}
+    \end{pspicture}
+  }
+}
+
+\frame[plain]{
+  \scalebox{0.6}{
+    \psset{xunit=1.3mm, yunit=1.3mm}
+    \begin{pspicture}(0,0)(\textwidth,-\textheight)
+      %%\psframe(0,0)(132,-108)
+      \putnode{c0}{origin}{0}{0}{Rename}
+      \putnode{b1}{origin}{66}{5}{1\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 = \ldots$\\
+            $b_1 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b2}{b1}{-22}{-12}{2\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{22}{0}{3\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]}$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{22}{0}{4\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b5}{b2}{-26}{-12}{5\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_1]}$
+          \end{tabular}
+      }}
+      \putnode{b6}{b5}{32}{0}{6\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]}$
+          \end{tabular}
+      }}
+      \putnode{b7}{b6}{22}{0}{7\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b8}{b7}{11}{-12}{8\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_2 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b9}{b8}{22}{0}{9\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_3 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b11}{b8}{-22}{0}{11\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_4 = \Phi(h_3,h_3)}$
+          \end{tabular}
+      }}
+      \putnode{b10}{b11}{-32}{0}{10\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_2 = \Phi(h1,\bot)}$
+          \end{tabular}
+      }}
+      \putnode{b12}{b8}{11}{-12}{12\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_4 = \phi(a_2,a_3)$\\
+            ${\red h_5 = \Phi(\bot,\bot)}$
+          \end{tabular}
+      }}
+      \putnode{b17}{b12}{-11}{-12}{17\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b16}{b17}{-33}{0}{16\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b13}{b17}{-27}{-12}{13\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_5 = \phi(a_6, a_1)$\\
+            ${\red h_6 = \Phi(h_2,h_4,h_7)}$
+          \end{tabular}
+      }}
+      \putnode{b14}{b13}{0}{-13}{14\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_6 = \phi(a_5,a_4)$\\
+            ${\red h_7 = \Phi(h_6,h_5)}$\\
+            $a_6 + b_1 {\red[h_7]}$
+          \end{tabular}
+      }}
+      \putnode{b15}{b14}{-20}{-14}{15\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+
+      \ncline[nodesepA=-1.5mm]{->}{b1}{b2}
+      \ncline{->}{b1}{b3}
+      \ncline[nodesepB=-1.1mm]{->}{b1}{b4}
+      \ncline[nodesepA=-1.5mm]{->}{b2}{b5}
+      \ncline{->}{b2}{b10}
+      \ncline{->}{b3}{b6}
+      \ncline{->}{b3}{b7}
+      \ncline{->}{b4}{b8}
+      \ncline{->}{b4}{b9}
+      \ncline{->}{b5}{b10}
+      \ncline{->}{b6}{b11}
+      \ncline{->}{b7}{b11}
+      \ncline{->}{b8}{b12}
+      \ncline{->}{b9}{b12}
+      \ncline{->}{b10}{b16}
+      \ncline{->}{b10}{b15}
+      \ncline[offsetB=.5]{->}{b11}{b13}
+      \ncline{->}{b12}{b17}
+      \ncline{->}{b13}{b14}
+      \nccurve[angleA=-135,angleB=135,ncurv=2]{->}{b14}{b13}
+      \nccurve[angleA=-90]{->}{b14}{b15}
+      \ncline{->}{b16}{b13}
+      \nccurve[angleA=-90,angleB=15,ncurv=1]{->}{b17}{b14}
+    \end{pspicture}
+  }
+}
+
+\frame[plain]{
+  \scalebox{0.6}{
+    \psset{xunit=1.3mm, yunit=1.3mm}
+    \begin{pspicture}(0,0)(\textwidth,-\textheight)
+      %%\psframe(0,0)(132,-108)
+      \putnode{c0}{origin}{10}{0}{FRG (def-use) edges}
+      \putnode{b1}{origin}{66}{5}{1\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 = \ldots$\\
+            $b_1 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b2}{b1}{-22}{-12}{2\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{22}{0}{3\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]\rnode{sh3}{}}$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{22}{0}{4\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b5}{b2}{-26}{-12}{5\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_1]\rnode{sh1}{}}$
+          \end{tabular}
+      }}
+      \putnode{b6}{b5}{32}{0}{6\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]\rnode{sh3b}{}}$
+          \end{tabular}
+      }} \ncline{->}{sh3b}{sh3}
+      \putnode{b7}{b6}{22}{0}{7\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b8}{b7}{11}{-12}{8\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_2 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b9}{b8}{22}{0}{9\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_3 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b11}{b8}{-22}{0}{11\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_4 =\rnode{sh4}{} \Phi(h_3\rnode{dh311a}{},h_3\rnode{dh311b}{})}$
+          \end{tabular}
+      }}\ncline{->}{dh311a}{sh3b}\ncline{->}{dh311b}{sh3}
+      \putnode{b10}{b11}{-32}{0}{10\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_2 =\rnode{sh2}{} \Phi(h1\rnode{dh110}{},\bot)}$
+          \end{tabular}
+      }}\ncline{->}{dh110}{sh1}
+      \putnode{b12}{b8}{11}{-12}{12\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_4 = \phi(a_2,a_3)$\\
+            ${\red h_5 =\rnode{sh5}{} \Phi(\bot,\bot)}$
+          \end{tabular}
+      }}
+      \putnode{b17}{b12}{-11}{-12}{17\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b16}{b17}{-33}{0}{16\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b13}{b17}{-27}{-12}{13\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_5 = \phi(a_6, a_1)$\\
+            ${\red h_6 =\rnode{sh6}{} \Phi(h_2\rnode{dh213}{},h_4\rnode{dh413}{},h_7\rnode{dh713}{})}$
+          \end{tabular}
+      }}\ncline{->}{dh213}{sh2}\ncline{->}{dh413}{sh4}
+      \putnode{b14}{b13}{0}{-13}{14\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_6 = \phi(a_5,a_4)$\\
+            ${\red h_7 =\rnode{sh7}{} \Phi(h_6\rnode{dh614}{},h_5\rnode{dh514}{})}$\\
+            $a_6 + b_1 {\red[h_7]\rnode{dh714}{}}$
+          \end{tabular}
+      }}\ncline{->}{dh514}{sh5}\ncline{->}{dh614}{sh6}\ncline{->}{dh714}{sh7}
+      \nccurve[ncurv=-2]{->}{dh713}{sh7}
+      \putnode{b15}{b14}{-20}{-14}{15\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepA=-1.5mm]{->}{b1}{b2}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b1}{b3}
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepB=-1.1mm]{->}{b1}{b4}
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepA=-1.5mm]{->}{b2}{b5}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b2}{b10}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b3}{b6}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b3}{b7}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b4}{b8}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b4}{b9}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b5}{b10}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b6}{b11}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b7}{b11}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b8}{b12}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b9}{b12}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b10}{b16}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b10}{b15}
+      \ncline[linestyle=dotted,dotsep=1mm,offsetB=.5]{->}{b11}{b13}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b12}{b17}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b13}{b14}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-135,angleB=135,ncurv=2]{->}{b14}{b13}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-90]{->}{b14}{b15}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b16}{b13}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-90,angleB=15,ncurv=1]{->}{b17}{b14}
+    \end{pspicture}
+  }
+}
+
+\frame[plain]{
+  \scalebox{0.6}{
+    \psset{xunit=1.3mm, yunit=1.3mm}
+    \begin{pspicture}(0,0)(\textwidth,-\textheight)
+      %%\psframe(0,0)(132,-108)
+      \putnode{b1}{origin}{66}{5}{1\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 = \ldots$\\
+            $b_1 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b2}{b1}{-22}{-12}{2\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{22}{0}{3\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]\rnode{sh3}{}}$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{22}{0}{4\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b5}{b2}{-26}{-12}{5\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_1]\rnode{sh1}{}}$
+          \end{tabular}
+      }}
+      \putnode{b6}{b5}{32}{0}{6\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]\rnode{sh3b}{}}$
+          \end{tabular}
+      }} \ncline{->}{sh3b}{sh3}
+      \putnode{b7}{b6}{22}{0}{7\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b8}{b7}{11}{-12}{8\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_2 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b9}{b8}{22}{0}{9\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_3 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b11}{b8}{-22}{0}{11\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_4 =\rnode{sh4}{} \Phi(h_3\rnode{dh311a}{},h_3\rnode{dh311b}{})}$
+          \end{tabular}
+      }}\ncline{->}{dh311a}{sh3b}\ncline{->}{dh311b}{sh3}
+      \putnode{b10}{b11}{-32}{0}{10\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_2 =\rnode{sh2}{} \Phi(h1\rnode{dh110}{},\bot)}$
+          \end{tabular}
+      }}\ncline{->}{dh110}{sh1}
+      \putnode{b12}{b8}{11}{-12}{12\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_4 = \phi(a_2,a_3)$\\
+            ${\red h_5 =\rnode{sh5}{} \Phi(\bot,\bot)}$
+          \end{tabular}
+      }}
+      \putnode{b17}{b12}{-11}{-12}{17\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b16}{b17}{-33}{0}{16\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b13}{b17}{-27}{-12}{13\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_5 = \phi(a_6, a_1)$\\
+            ${\red h_6 =\rnode{sh6}{} \Phi(h_2\rnode{dh213}{},h_4\rnode{dh413}{},h_7\rnode{dh713}{})}$
+          \end{tabular}
+      }}\ncline{->}{dh213}{sh2}\ncline{->}{dh413}{sh4}
+      \putnode{b14}{b13}{0}{-13}{14\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_6 = \phi(a_5,a_4)$\\
+            ${\red h_7 =\rnode{sh7}{} \Phi(h_6\rnode{dh614}{},h_5\rnode{dh514}{})}$\\
+            $a_6 + b_1 {\red[h_7]\rnode{dh714}{}}$
+          \end{tabular}
+      }}\ncline{->}{dh514}{sh5}\ncline{->}{dh614}{sh6}\ncline{->}{dh714}{sh7}
+      \nccurve[ncurv=-2]{->}{dh713}{sh7}
+      \putnode{b15}{b14}{-20}{-14}{15\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepA=-1.5mm]{->}{b1}{b2}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b1}{b3}
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepB=-1.1mm]{->}{b1}{b4}
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepA=-1.5mm]{->}{b2}{b5}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b2}{b10}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b3}{b6}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b3}{b7}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b4}{b8}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b4}{b9}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b5}{b10}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b6}{b11}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b7}{b11}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b8}{b12}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b9}{b12}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b10}{b16}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b10}{b15}
+      \ncline[linestyle=dotted,dotsep=1mm,offsetB=.5]{->}{b11}{b13}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b12}{b17}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b13}{b14}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-135,angleB=135,ncurv=2]{->}{b14}{b13}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-90]{->}{b14}{b15}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b16}{b13}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-90,angleB=15,ncurv=1]{->}{b17}{b14}
+      {Down-safety
+        \alt<2>{}{\white}{\putnode{c0}{origin}{10}{0}{
+        \begin{tabular}[t]{c|c} \hline
+          $\Phi$ Block & Value \\ \hline 
+          10 & false \\ 
+          11 & true \\ 
+          12 & true \\ 
+          13 & true \\ 
+          14 & true \\ \hline
+        \end{tabular}
+      }}}
+    \end{pspicture}
+  }
+}
+
+\frame[plain]{
+  \scalebox{0.6}{
+    \psset{xunit=1.3mm, yunit=1.3mm}
+    \begin{pspicture}(0,0)(\textwidth,-\textheight)
+      %%\psframe(0,0)(132,-108)
+      \putnode{b1}{origin}{66}{5}{1\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 = \ldots$\\
+            $b_1 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b2}{b1}{-22}{-12}{2\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{22}{0}{3\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]\rnode{sh3}{}}$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{22}{0}{4\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b5}{b2}{-26}{-12}{5\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_1]\rnode{sh1}{}}$
+          \end{tabular}
+      }}
+      \putnode{b6}{b5}{32}{0}{6\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]\rnode{sh3b}{}}$
+          \end{tabular}
+      }} \ncline{->}{sh3b}{sh3}
+      \putnode{b7}{b6}{22}{0}{7\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b8}{b7}{11}{-12}{8\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_2 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b9}{b8}{22}{0}{9\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_3 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b11}{b8}{-22}{0}{11\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_4 =\rnode{sh4}{} \Phi(h_3\rnode{dh311a}{},h_3\rnode{dh311b}{})}$
+          \end{tabular}
+      }}\ncline{->}{dh311a}{sh3b}\ncline{->}{dh311b}{sh3}
+      \putnode{b10}{b11}{-32}{0}{10\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_2 =\rnode{sh2}{} \Phi(h1\rnode{dh110}{},\bot)}$
+          \end{tabular}
+      }}\ncline{->}{dh110}{sh1}
+      \putnode{b12}{b8}{11}{-12}{12\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_4 = \phi(a_2,a_3)$\\
+            ${\red h_5 =\rnode{sh5}{} \Phi(\bot,\bot)}$
+          \end{tabular}
+      }}
+      \putnode{b17}{b12}{-11}{-12}{17\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b16}{b17}{-33}{0}{16\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b13}{b17}{-27}{-12}{13\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_5 = \phi(a_6, a_1)$\\
+            ${\red h_6 =\rnode{sh6}{} \Phi(h_2\rnode{dh213}{},h_4\rnode{dh413}{},h_7\rnode{dh713}{})}$
+          \end{tabular}
+      }}\ncline{->}{dh213}{sh2}\ncline{->}{dh413}{sh4}
+      \putnode{b14}{b13}{0}{-13}{14\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_6 = \phi(a_5,a_4)$\\
+            ${\red h_7 =\rnode{sh7}{} \Phi(h_6\rnode{dh614}{},h_5\rnode{dh514}{})}$\\
+            $a_6 + b_1 {\red[h_7]\rnode{dh714}{}}$
+          \end{tabular}
+      }}\ncline{->}{dh514}{sh5}\ncline{->}{dh614}{sh6}\ncline{->}{dh714}{sh7}
+      \nccurve[ncurv=-2]{->}{dh713}{sh7}
+      \putnode{b15}{b14}{-20}{-14}{15\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepA=-1.5mm]{->}{b1}{b2}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b1}{b3}
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepB=-1.1mm]{->}{b1}{b4}
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepA=-1.5mm]{->}{b2}{b5}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b2}{b10}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b3}{b6}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b3}{b7}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b4}{b8}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b4}{b9}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b5}{b10}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b6}{b11}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b7}{b11}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b8}{b12}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b9}{b12}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b10}{b16}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b10}{b15}
+      \ncline[linestyle=dotted,dotsep=1mm,offsetB=.5]{->}{b11}{b13}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b12}{b17}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b13}{b14}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-135,angleB=135,ncurv=2]{->}{b14}{b13}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-90]{->}{b14}{b15}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b16}{b13}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-90,angleB=15,ncurv=1]{->}{b17}{b14}
+      {CanBeAvail
+        \alt<2>{}{\white}{\putnode{c0}{origin}{10}{0}{
+        \begin{tabular}[t]{c|c} \hline
+          $\Phi$ Block & Value \\ \hline 
+          10 & false \\ 
+          11 & true \\ 
+          12 & true \\ 
+          13 & true \\ 
+          14 & true \\ \hline
+        \end{tabular}
+      }}}
+    \end{pspicture}
+  }
+}
+
+\frame[plain]{
+  \scalebox{0.6}{
+    \psset{xunit=1.3mm, yunit=1.3mm}
+    \begin{pspicture}(0,0)(\textwidth,-\textheight)
+      %%\psframe(0,0)(132,-108)
+      \putnode{b1}{origin}{66}{5}{1\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 = \ldots$\\
+            $b_1 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b2}{b1}{-22}{-12}{2\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{22}{0}{3\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]\rnode{sh3}{}}$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{22}{0}{4\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b5}{b2}{-26}{-12}{5\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_1]\rnode{sh1}{}}$
+          \end{tabular}
+      }}
+      \putnode{b6}{b5}{32}{0}{6\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]\rnode{sh3b}{}}$
+          \end{tabular}
+      }} \ncline{->}{sh3b}{sh3}
+      \putnode{b7}{b6}{22}{0}{7\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b8}{b7}{11}{-12}{8\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_2 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b9}{b8}{22}{0}{9\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_3 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b11}{b8}{-22}{0}{11\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_4 =\rnode{sh4}{} \Phi(h_3\rnode{dh311a}{},h_3\rnode{dh311b}{})}$
+          \end{tabular}
+      }}\ncline{->}{dh311a}{sh3b}\ncline{->}{dh311b}{sh3}
+      \putnode{b10}{b11}{-32}{0}{10\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_2 =\rnode{sh2}{} \Phi(h1\rnode{dh110}{},\bot)}$
+          \end{tabular}
+      }}\ncline{->}{dh110}{sh1}
+      \putnode{b12}{b8}{11}{-12}{12\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_4 = \phi(a_2,a_3)$\\
+            ${\red h_5 =\rnode{sh5}{} \Phi(\bot,\bot)}$
+          \end{tabular}
+      }}
+      \putnode{b17}{b12}{-11}{-12}{17\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b16}{b17}{-33}{0}{16\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b13}{b17}{-27}{-12}{13\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_5 = \phi(a_6, a_1)$\\
+            ${\red h_6 =\rnode{sh6}{} \Phi(h_2\rnode{dh213}{},h_4\rnode{dh413}{},h_7\rnode{dh713}{})}$
+          \end{tabular}
+      }}\ncline{->}{dh213}{sh2}\ncline{->}{dh413}{sh4}
+      \putnode{b14}{b13}{0}{-13}{14\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_6 = \phi(a_5,a_4)$\\
+            ${\red h_7 =\rnode{sh7}{} \Phi(h_6\rnode{dh614}{},h_5\rnode{dh514}{})}$\\
+            $a_6 + b_1 {\red[h_7]\rnode{dh714}{}}$
+          \end{tabular}
+      }}\ncline{->}{dh514}{sh5}\ncline{->}{dh614}{sh6}\ncline{->}{dh714}{sh7}
+      \nccurve[ncurv=-2]{->}{dh713}{sh7}
+      \putnode{b15}{b14}{-20}{-14}{15\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepA=-1.5mm]{->}{b1}{b2}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b1}{b3}
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepB=-1.1mm]{->}{b1}{b4}
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepA=-1.5mm]{->}{b2}{b5}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b2}{b10}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b3}{b6}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b3}{b7}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b4}{b8}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b4}{b9}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b5}{b10}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b6}{b11}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b7}{b11}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b8}{b12}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b9}{b12}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b10}{b16}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b10}{b15}
+      \ncline[linestyle=dotted,dotsep=1mm,offsetB=.5]{->}{b11}{b13}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b12}{b17}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b13}{b14}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-135,angleB=135,ncurv=2]{->}{b14}{b13}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-90]{->}{b14}{b15}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b16}{b13}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-90,angleB=15,ncurv=1]{->}{b17}{b14}
+      {Later
+        \alt<2>{}{\white}{\putnode{c0}{origin}{10}{0}{
+        \begin{tabular}[t]{c|c} \hline
+          $\Phi$ Block & Value \\ \hline 
+          10 & -  \\ 
+          11 & false \\ 
+          12 & true \\ 
+          13 & false \\ 
+          14 & false \\ \hline
+        \end{tabular}
+      }}}
+    \end{pspicture}
+  }
+}
+
+\frame[plain]{
+  \scalebox{0.6}{
+    \psset{xunit=1.3mm, yunit=1.3mm}
+    \begin{pspicture}(0,0)(\textwidth,-\textheight)
+      %%\psframe(0,0)(132,-108)
+      \putnode{b1}{origin}{66}{5}{1\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 = \ldots$\\
+            $b_1 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b2}{b1}{-22}{-12}{2\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{22}{0}{3\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]\rnode{sh3}{}}$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{22}{0}{4\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b5}{b2}{-26}{-12}{5\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_1]\rnode{sh1}{}}$
+          \end{tabular}
+      }}
+      \putnode{b6}{b5}{32}{0}{6\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]\rnode{sh3b}{}}$
+          \end{tabular}
+      }} \ncline{->}{sh3b}{sh3}
+      \putnode{b7}{b6}{22}{0}{7\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b8}{b7}{11}{-12}{8\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_2 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b9}{b8}{22}{0}{9\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_3 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b11}{b8}{-22}{0}{11\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_4 =\rnode{sh4}{} \Phi(h_3\rnode{dh311a}{},h_3\rnode{dh311b}{})}$
+          \end{tabular}
+      }}\ncline{->}{dh311a}{sh3b}\ncline{->}{dh311b}{sh3}
+      \putnode{b10}{b11}{-32}{0}{10\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_2 =\rnode{sh2}{} \Phi(h1\rnode{dh110}{},\bot)}$
+          \end{tabular}
+      }}\ncline{->}{dh110}{sh1}
+      \putnode{b12}{b8}{11}{-12}{12\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_4 = \phi(a_2,a_3)$\\
+            ${\red h_5 =\rnode{sh5}{} \Phi(\bot,\bot)}$
+          \end{tabular}
+      }}
+      \putnode{b17}{b12}{-11}{-12}{17\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b16}{b17}{-33}{0}{16\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b13}{b17}{-27}{-12}{13\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_5 = \phi(a_6, a_1)$\\
+            ${\red h_6 =\rnode{sh6}{} \Phi(h_2\rnode{dh213}{},h_4\rnode{dh413}{},h_7\rnode{dh713}{})}$
+          \end{tabular}
+      }}\ncline{->}{dh213}{sh2}\ncline{->}{dh413}{sh4}
+      \putnode{b14}{b13}{0}{-13}{14\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_6 = \phi(a_5,a_4)$\\
+            ${\red h_7 =\rnode{sh7}{} \Phi(h_6\rnode{dh614}{},h_5\rnode{dh514}{})}$\\
+            $a_6 + b_1 {\red[h_7]\rnode{dh714}{}}$
+          \end{tabular}
+      }}\ncline{->}{dh514}{sh5}\ncline{->}{dh614}{sh6}\ncline{->}{dh714}{sh7}
+      \nccurve[ncurv=-2]{->}{dh713}{sh7}
+      \putnode{b15}{b14}{-20}{-14}{15\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepA=-1.5mm]{->}{b1}{b2}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b1}{b3}
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepB=-1.1mm]{->}{b1}{b4}
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepA=-1.5mm]{->}{b2}{b5}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b2}{b10}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b3}{b6}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b3}{b7}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b4}{b8}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b4}{b9}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b5}{b10}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b6}{b11}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b7}{b11}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b8}{b12}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b9}{b12}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b10}{b16}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b10}{b15}
+      \ncline[linestyle=dotted,dotsep=1mm,offsetB=.5]{->}{b11}{b13}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b12}{b17}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b13}{b14}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-135,angleB=135,ncurv=2]{->}{b14}{b13}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-90]{->}{b14}{b15}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b16}{b13}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-90,angleB=15,ncurv=1]{->}{b17}{b14}
+      {WillBeAvail
+        \alt<2>{}{\white}{\putnode{c0}{origin}{10}{0}{
+        \begin{tabular}[t]{c|c} \hline
+          $\Phi$ Block & Value \\ \hline 
+          10 & false \\ 
+          11 & true \\ 
+          12 & false \\ 
+          13 & true \\ 
+          14 & true \\ \hline
+        \end{tabular}
+      }}}
+    \end{pspicture}
+  }
+}
+
+
+\frame[plain]{
+  \scalebox{0.6}{
+    \psset{xunit=1.3mm, yunit=1.3mm}
+    \begin{pspicture}(0,0)(\textwidth,-\textheight)
+      %%\psframe(0,0)(132,-108)
+      \putnode{b1}{origin}{66}{5}{1\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 = \ldots$\\
+            $b_1 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b2}{b1}{-22}{-12}{2\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{22}{0}{3\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]\rnode{sh3}{}}$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{22}{0}{4\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b5}{b2}{-26}{-12}{5\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_1]\rnode{sh1}{}}$
+          \end{tabular}
+      }}
+      \putnode{b6}{b5}{32}{0}{6\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]\rnode{sh3b}{}}$
+          \end{tabular}
+      }} \ncline{->}{sh3b}{sh3}
+      \putnode{b7}{b6}{22}{0}{7\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b8}{b7}{11}{-12}{8\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_2 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b9}{b8}{22}{0}{9\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_3 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b11}{b8}{-22}{0}{11\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_4 =\rnode{sh4}{} \Phi(h_3\rnode{dh311a}{},h_3\rnode{dh311b}{})}$
+          \end{tabular}
+      }}\ncline{->}{dh311a}{sh3b}\ncline{->}{dh311b}{sh3}
+      \putnode{b10}{b11}{-32}{0}{10\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_2 =\rnode{sh2}{} \Phi(h1\rnode{dh110}{},\bot)}$
+          \end{tabular}
+      }}\ncline{->}{dh110}{sh1}
+      \putnode{b12}{b8}{11}{-12}{12\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_4 = \phi(a_2,a_3)$\\
+            ${\red h_5 =\rnode{sh5}{} \Phi(\bot,\bot)}$
+          \end{tabular}
+      }}
+      \putnode{b17}{b12}{-11}{-12}{17\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b16}{b17}{-33}{0}{16\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b13}{b17}{-27}{-12}{13\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_5 = \phi(a_6, a_1)$\\
+            ${\red h_6 =\rnode{sh6}{} \Phi(h_2\rnode{dh213}{},h_4\rnode{dh413}{},h_7\rnode{dh713}{})}$
+          \end{tabular}
+      }}\ncline{->}{dh213}{sh2}\ncline{->}{dh413}{sh4}
+      \putnode{b14}{b13}{0}{-13}{14\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_6 = \phi(a_5,a_4)$\\
+            ${\red h_7 =\rnode{sh7}{} \Phi(h_6\rnode{dh614}{},h_5\rnode{dh514}{})}$\\
+            $a_6 + b_1 {\red[h_7]\rnode{dh714}{}}$
+          \end{tabular}
+      }}\ncline{->}{dh514}{sh5}\ncline{->}{dh614}{sh6}\ncline{->}{dh714}{sh7}
+      \nccurve[ncurv=-2]{->}{dh713}{sh7}
+      \putnode{b15}{b14}{-20}{-14}{15\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepA=-1.5mm]{->}{b1}{b2}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b1}{b3}
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepB=-1.1mm]{->}{b1}{b4}
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepA=-1.5mm]{->}{b2}{b5}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b2}{b10}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b3}{b6}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b3}{b7}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b4}{b8}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b4}{b9}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b5}{b10}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b6}{b11}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b7}{b11}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b8}{b12}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b9}{b12}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b10}{b16}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b10}{b15}
+      \ncline[linestyle=dotted,dotsep=1mm,offsetB=.5]{->}{b11}{b13}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b12}{b17}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b13}{b14}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-135,angleB=135,ncurv=2]{->}{b14}{b13}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-90]{->}{b14}{b15}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b16}{b13}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-90,angleB=15,ncurv=1]{->}{b17}{b14}
+      {Finalize
+        \alt<2>{}{\white}{\putnode{c0}{origin}{15}{0}{
+        \begin{tabular}[t]{c|c} \hline
+          $\Phi$ Block & Reload,Save \\ \hline 
+          3 & f,t \\ 
+          5 & f,t \\ 
+          6 & t,f \\ 
+          14 & t,f \\ \hline
+        \end{tabular}
+      }}}
+    \end{pspicture}
+  }
+}
+
+
+\frame[plain]{
+  \scalebox{0.6}{
+    \psset{xunit=1.3mm, yunit=1.3mm}
+    \begin{pspicture}(0,0)(\textwidth,-\textheight)
+      %%\psframe(0,0)(132,-108)
+      \putnode{b1}{origin}{66}{5}{1\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 = \ldots$\\
+            $b_1 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b2}{b1}{-22}{-12}{2\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{22}{0}{3\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]\rnode{sh3}{}}$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{22}{0}{4\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b5}{b2}{-26}{-12}{5\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_1]\rnode{sh1}{}}$
+          \end{tabular}
+      }}
+      \putnode{b6}{b5}{32}{0}{6\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 + b_1 {\red[h_3]\rnode{sh3b}{}}$
+          \end{tabular}
+      }} \ncline{->}{sh3b}{sh3}
+      \putnode{b7}{b6}{22}{0}{7\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b8}{b7}{11}{-12}{8\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_2 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b9}{b8}{22}{0}{9\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_3 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b11}{b8}{-22}{0}{11\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_4 =\rnode{sh4}{} \Phi(h_3\rnode{dh311a}{},h_3\rnode{dh311b}{})}$
+          \end{tabular}
+      }}\ncline{->}{dh311a}{sh3b}\ncline{->}{dh311b}{sh3}
+      \putnode{b10}{b11}{-32}{0}{10\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red h_2 =\rnode{sh2}{} \Phi(h1\rnode{dh110}{},\bot)}$
+          \end{tabular}
+      }}\ncline{->}{dh110}{sh1}
+      \putnode{b12}{b8}{11}{-12}{12\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_4 = \phi(a_2,a_3)$\\
+            ${\red h_5 =\rnode{sh5}{} \Phi(\bot,\bot)}$
+          \end{tabular}
+      }}
+      \putnode{b17}{b12}{-11}{-12}{17\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b16}{b17}{-33}{0}{16\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b13}{b17}{-27}{-12}{13\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_5 = \phi(a_6, a_1)$\\
+            ${\red h_6 =\rnode{sh6}{} \Phi(h_2\rnode{dh213}{},h_4\rnode{dh413}{},h_7\rnode{dh713}{})}$
+          \end{tabular}
+      }}\ncline{->}{dh213}{sh2}\ncline{->}{dh413}{sh4}
+      \putnode{b14}{b13}{0}{-13}{14\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_6 = \phi(a_5,a_4)$\\
+            ${\red h_7 =\rnode{sh7}{} \Phi(h_6\rnode{dh614}{},h_5\rnode{dh514}{})}$\\
+            $a_6 + b_1 {\red[h_7]\rnode{dh714}{}}$
+          \end{tabular}
+      }}\ncline{->}{dh514}{sh5}\ncline{->}{dh614}{sh6}\ncline{->}{dh714}{sh7}
+      \nccurve[ncurv=-2]{->}{dh713}{sh7}
+      \putnode{b15}{b14}{-20}{-14}{15\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepA=-1.5mm]{->}{b1}{b2}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b1}{b3}
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepB=-1.1mm]{->}{b1}{b4}
+      \ncline[linestyle=dotted,dotsep=1mm,nodesepA=-1.5mm]{->}{b2}{b5}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b2}{b10}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b3}{b6}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b3}{b7}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b4}{b8}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b4}{b9}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b5}{b10}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b6}{b11}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b7}{b11}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b8}{b12}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b9}{b12}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b10}{b16}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b10}{b15}
+      \ncline[linestyle=dotted,dotsep=1mm,offsetB=.5]{->}{b11}{b13}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b12}{b17}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b13}{b14}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-135,angleB=135,ncurv=2]{->}{b14}{b13}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-90]{->}{b14}{b15}
+      \ncline[linestyle=dotted,dotsep=1mm]{->}{b16}{b13}
+      \nccurve[linestyle=dotted,dotsep=1mm,angleA=-90,angleB=15,ncurv=1]{->}{b17}{b14}
+      {Finalize
+        {\putnode{c0}{origin}{10}{0}{
+        \begin{tabular}[t]{c|c} \hline
+          $\Phi$ Block & Insert \\ \hline 
+          16 & t \\ 
+          17 & t \\ 
+          Others & f \\ \hline
+        \end{tabular}
+      }}}
+    \end{pspicture}
+  }
+}
+
+
+\frame[plain]{
+  \scalebox{0.6}{
+    \psset{xunit=1.3mm, yunit=1.3mm}
+    \begin{pspicture}(0,0)(\textwidth,-\textheight)
+      %%\psframe(0,0)(132,-108)
+      \putnode{b1}{origin}{66}{5}{1\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_1 = \ldots$\\
+            $b_1 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b2}{b1}{-22}{-12}{2\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{22}{0}{3\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red t_3 = a_1 + b_1}$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{22}{0}{4\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b5}{b2}{-26}{-12}{5\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red t_1 = a_1 + b_1}$
+          \end{tabular}
+      }}
+      \putnode{b6}{b5}{32}{0}{6\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red  \qquad t_3}$
+          \end{tabular}
+      }} \ncline{->}{sh3b}{sh3}
+      \putnode{b7}{b6}{22}{0}{7\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b8}{b7}{11}{-12}{8\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_2 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b9}{b8}{22}{0}{9\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_3 = \ldots$
+          \end{tabular}
+      }}
+      \putnode{b11}{b8}{-22}{0}{11\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b10}{b11}{-32}{0}{10\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+      \putnode{b12}{b8}{11}{-12}{12\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_4 = \phi(a_2,a_3)$
+          \end{tabular}
+      }}
+      \putnode{b17}{b12}{-11}{-12}{17\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red t_5 = a_4 + b_1}$
+          \end{tabular}
+      }}
+      \putnode{b16}{b17}{-33}{0}{16\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            ${\red t_2 = a_1 + b_1}$
+          \end{tabular}
+      }}
+      \putnode{b13}{b17}{-27}{-12}{13\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_5 = \phi(a_6, a_1)$\\
+            ${\red t_6 =\phi(t_2,t_3,t_7)}$
+          \end{tabular}
+      }}
+      \putnode{b14}{b13}{0}{-13}{14\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            $a_6 = \phi(a_5,a_4)$\\
+            ${\red t_7 = \phi(t_6,t_5)}$\\
+            ${\red \qquad t_7}$
+          \end{tabular}
+      }}
+
+      \putnode{b15}{b14}{-20}{-14}{15\psframebox[framesep=2pt]{
+          \begin{tabular}{@{}l@{}}
+            \rule{10mm}{0mm}\rule{0mm}{5mm}
+          \end{tabular}
+      }}
+
+      \ncline[nodesepA=-1.5mm]{->}{b1}{b2}
+      \ncline{->}{b1}{b3}
+      \ncline[nodesepB=-1.1mm]{->}{b1}{b4}
+      \ncline[nodesepA=-1.5mm]{->}{b2}{b5}
+      \ncline{->}{b2}{b10}
+      \ncline{->}{b3}{b6}
+      \ncline{->}{b3}{b7}
+      \ncline{->}{b4}{b8}
+      \ncline{->}{b4}{b9}
+      \ncline{->}{b5}{b10}
+      \ncline{->}{b6}{b11}
+      \ncline{->}{b7}{b11}
+      \ncline{->}{b8}{b12}
+      \ncline{->}{b9}{b12}
+      \ncline{->}{b10}{b16}
+      \ncline{->}{b10}{b15}
+      \ncline[offsetB=.5]{->}{b11}{b13}
+      \ncline{->}{b12}{b17}
+      \ncline{->}{b13}{b14}
+      \nccurve[angleA=-135,angleB=135,ncurv=2]{->}{b14}{b13}
+      \nccurve[angleA=-90]{->}{b14}{b15}
+      \ncline{->}{b16}{b13}
+      \nccurve[angleA=-90,angleB=15,ncurv=1]{->}{b17}{b14}
+      {Code Motion}
+    \end{pspicture}
+  }
+}
+\end{document}
+

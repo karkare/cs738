@@ -1,0 +1,481 @@
+\mode<presentation>
+{
+  %\usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{xspace}
+
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[]{\ \\{\LARGE Foundations of Data Flow Analysis}\\}
+
+\input{defs.tex}
+\begin{document}
+
+\frame{\titlepage}
+\frame{
+  \frametitle{Agenda}
+  \begin{itemize}
+  \item {\em Intraprocedural} Data Flow Analysis
+    \begin{itemize}
+    \item We looked at 4 classic examples
+    \item Today: Mathematical foundations
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Taxonomy of Dataflow Problems}
+  \begin{itemize}[<+->]
+  \item Categorized along several dimensions
+    \begin{itemize}
+    \item the information they are designed to provide
+    \item the direction of flow
+    \item confluence operator
+    \end{itemize}
+  \item Four kinds of dataflow problems, distinguished by
+    \begin{itemize}
+    \item the operator used for confluence or divergence
+    \item data flows backward or forward
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Taxonomy of Dataflow Problems}
+
+  \Huge
+  \begin{tabular}{|l||c|c|} \hline
+    {\bf Confluence $\rightarrow$} & $\bigcup$ & $\bigcap$ \\
+    {\bf Direction $\downarrow$} & & \\ \hline\hline
+    {\bf Forward} & \onslide<2->{R D} & \onslide<3->{Av E }\\ \hline
+    {\bf Backward} &\onslide<4->{L V } & \onslide<5->{V B E }\\ \hline
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Why Data Flow Analysis Works?}
+  \begin{itemize}
+  \item Suitable initial values and boundary conditions
+  \item Suitable domain of values
+    \begin{itemize}
+    \item Bounded, Finite
+    \end{itemize}
+
+  \item Suitable meet operator
+  \item Suitable flow functions
+    \begin{itemize}
+    \item monotonic, closed under composition
+    \end{itemize}
+  \item But what is {\bf SUITABLE} ?
+  \end{itemize}
+}
+
+\frame{
+  \alert{\Huge Lattice Theory}
+}
+
+
+\frame{
+  \frametitle{Partially Ordered Sets}
+  \begin{itemize}[<+->]
+  \item Posets
+  \item[] $S$: a set
+  \item[] $\leq$: a relation
+  \item[] $(S, \leq)$ is a {\bf poset} if for $x, y ,z \in S$
+    \begin{itemize}
+    \item $x \leq x$  (reflexive)
+    \item $x \leq y$ and $y \leq x$ $\Rightarrow$ $x = y$ (antisymmetric)
+    \item $x \leq y$ and $y \leq z$ $\Rightarrow$ $x \leq z$ (transitive)
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Chain}
+  \begin{itemize}[<+->]
+  \item Linear Ordering
+  \item Poset where every pair of elements is comparable
+  \item $x_1 \leq x_2 \leq \ldots \leq x_k$  is a chain of length $k$
+  \item We are interested in chains of finite length
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Observation}
+  \begin{itemize}[<+->]
+  \item Any {\bf finite nonempty subset} of a poset has {\bf minimal} and
+    {\bf maximal} elements
+  \item Any {\bf finite nonempty chain} has {\bf unique} minimum and maximum
+    elements
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Semilattice}
+  \begin{itemize}[<+->]
+  \item Set $S$ and meet $\bigwedge$
+  \item $x, y, z \in S$
+    \begin{itemize}
+    \item $x \bigwedge x = x$ (idempotent)
+    \item $x \bigwedge y = y \bigwedge x$ (commutative)
+    \item $x \bigwedge (y \bigwedge z) = (x \bigwedge y) \bigwedge z$ (associative)
+    \end{itemize}
+  \item Partial order for semilattice
+    \begin{itemize}
+    \item $x \leq y$ if and only if $x \bigwedge y = x$
+    \item Reflexive, antisymmetric, transitive
+    \end{itemize}
+\end{itemize}
+}
+
+\frame{
+  \frametitle{Border Elements}
+  \begin{itemize}[<+->]
+  \item Top Element ($\top$)
+    \begin{itemize}
+    \item $\forall x \in S, x \bigwedge \top = \top \bigwedge x = x$
+    \end{itemize}
+  \item (Optional) Bottom Element ($\bot$)
+    \begin{itemize}
+    \item $\forall x \in S, x \bigwedge \bot = \bot \bigwedge x = \bot$
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Familiar (Semi)Lattices}
+  \begin{itemize}[<+->]
+  \item Powerset for a set $S$, $2^S$
+  \item Meet $\bigwedge$ is $\cap$ 
+  \item Partial Order is $\subseteq$
+  \item Top element is $S$
+  \item Bottom element is $\emptyset$
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Familiar (Semi)Lattices}
+  \begin{itemize}[<+->]
+  \item Powerset for a set $S$, $2^S$
+  \item Meet $\bigwedge$ is $\cup$ 
+  \item Partial Order is $\supseteq$
+  \item Top element is $\emptyset$
+  \item Bottom element is $S$
+  \end{itemize}
+}
+
+
+\frame{
+  \frametitle{Greatest Lower Bound (\glb)}
+  \begin{itemize}[<+->]
+  \item $x, y, z \in S$
+  \item \glb of $x$ and $y$ is an element $g$ such that
+    \begin{itemize}
+    \item $g \leq x$
+    \item $g \leq y$
+    \item if $z \leq x$ and $z \leq y$ then $z \leq g$
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{QQ}
+  \begin{itemize}[<+->]
+  \item $x, y \in S$
+  \item $(S, \meet)$ is a semilattice
+  \item   {\Large Prove that $x \meet y$ is \glb of $x$ and $y$.}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Semi(?)-Lattice}
+  \begin{itemize}[<+->]
+  \item We can define symmetric concepts
+    \begin{itemize}
+    \item $\geq$ order
+    \item Join operation ($\join$)
+    \item Least upper bound (\lub)
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Lattice}
+  \begin{itemize}[<+->]
+  \item $(S, \meet, \join)$ is a lattice 
+  \item[] iff for each {\bf non-empty finite} subset $Y$ of $S$
+  \item[] both $\meet Y$ and $\join Y$ are in $S$.
+  \item $(S, \meet, \join)$ is a complete lattice 
+  \item[] iff for each subset $Y$ of $S$
+  \item[] both $\meet Y$ and $\join Y$ are in $S$.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Lattice}
+  \begin{itemize}[<+->]
+  \item Complete lattice $(S, \meet, \join)$ 
+    \begin{itemize}
+    \item For every pair of elements $x$ and $y$, both $x\meet y$
+      and $x\join y$ should be in $S$
+    \item Example : Powerset lattice
+    \end{itemize}
+  \item We will talk about {\bf meet} semi-lattices only
+    \begin{itemize}
+    \item except for some proofs
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Lattice Diagram}
+  \begin{itemize}[<+->]
+  \item Graphical view of posets
+  \item Elements = the nodes in the graph
+  \item If $x < y$ then $x$ is depicted lower than $y$ in the diagram
+  \item An edge between $x$ and $y$ ($x$ lower than $y$) implies
+    $x < y$ and no other element $z$ exists s.t. $x < z < y$
+    (i.e. transitivity is excluded)
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Lattice Diagram}
+  \psset{unit=1.6mm}
+  \begin{pspicture}(0,0)(30,30)
+    %\psframe(0,0)(30,30)
+    \putnode{e0}{origin}{40}{0}{$\emptyset$}
+    \putnode{c0}{e0}{-20}{5}{$\{c\}$}
+    \putnode{b0}{e0}{-2}{10}{$\{b\}$}
+    \putnode{a0}{e0}{14}{15}{$\{a\}$}
+    \ncline{e0}{a0}
+    \ncline{e0}{b0}
+    \ncline{e0}{c0}
+
+    \putnode{bc}{b0}{-20}{5}{$\{b,c\}$}
+    \putnode{ba}{b0}{14}{15}{$\{a,b \}$}
+    \ncline{b0}{ba}
+    \ncline{b0}{bc}
+    \ncline{a0}{ba}
+    \ncline{c0}{bc}
+
+    \putnode{ca}{e0}{-4}{20}{$\{c, a\}$}
+    \putnode{abc}{b0}{-4}{20}{$\{a, b, c\}$}
+    \ncline{c0}{ca}
+    \ncline{a0}{ca}
+    \ncline{ca}{abc}
+    \ncline{bc}{abc}
+    \ncline{ba}{abc}
+  \end{pspicture}
+  \begin{center}
+    Lattice Diagram for $(\{a, b, c\}, \cap)$
+  \end{center}
+ \pause $x \meet
+    y$ = the highest $z$ for which there are paths downward from
+    both $x$ and $y$.
+}
+
+\frame{
+  \frametitle{What if there is a large number of elements?}
+  \begin{itemize}[<+->]
+  \item Combine simple lattices to build a complex one
+  \item Superset lattices for singletons
+    \begin{center}
+      \psset{unit=1mm}
+      \begin{pspicture}(0,0)(60,20)
+        \putnode{a0}{origin}{5}{2}{$\emptyset$}
+        \putnode{b0}{a0}{30}{0}{$\emptyset$}
+        \putnode{c0}{b0}{30}{0}{$\emptyset$}
+        \putnode{a1}{origin}{5}{18}{$\{a\}$}
+        \putnode{b1}{a1}{30}{0}{$\{b\}$}
+        \putnode{c1}{b1}{30}{0}{$\{c\}$}
+        \ncline{a0}{a1}
+        \ncline{b0}{b1}
+        \ncline{c0}{c1}
+      \end{pspicture}      
+    \end{center}
+  \item Combine to form superset lattice for multi-element sets
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Product Lattice}
+  \begin{itemize}[<+->]
+  \item $(S, \meet)$ is product lattice of $(S_1, \meet_1)$ and $(S_2, \meet_2)$ when 
+    \begin{itemize}
+    \item[] $S = S_1 \times S_2$   (domain)
+    \item[] For $(a_1,a_2)$ and $(b_1, b2) \in S$
+      \begin{itemize}
+      \item[] $(a_1,a_2) \meet (b_1,b_2) = (a_1 \meet_1 b_1, a_2 \meet_2 b_2)$
+      \item[] $(a_1,a_2) \leq  (b_1,b_2) \mbox{ iff } a_1 \leq_1 b_1 \mbox{ and } a_2 \leq_2 b_2$
+      \end{itemize}
+    \item[]  $\leq$ relation follows from $\meet$ 
+    \end{itemize}
+  \item Product of lattices is associative
+  \item Can be generalized to product of $N > 2$ lattices
+  \item $(S_1,\meet_1), (S_2,\meet_2), \ldots$ are called component lattices
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Product Lattice: Example}
+  \psset{unit=1.3mm}
+  \begin{pspicture}(0,0)(30,30)
+    %\psframe(0,0)(30,30)
+        \putnode{a0}{origin}{5}{2}{$\emptyset$}
+        \putnode{b0}{a0}{10}{0}{$\emptyset$}
+        \putnode{c0}{b0}{10}{0}{$\emptyset$}
+        \putnode{a1}{origin}{5}{18}{$\{a\}$}
+        \putnode{b1}{a1}{10}{0}{$\{b\}$}
+        \putnode{c1}{b1}{10}{0}{$\{c\}$}
+        \ncline{a0}{a1}
+        \ncline{b0}{b1}
+        \ncline{c0}{c1}
+
+        \putnode{x0}{a0}{5}{7}{\Large$\times$}
+        \putnode{x1}{x0}{10}{0}{\Large$\times$}
+        \pause
+        \putnode{x2}{x1}{10}{0}{\Large$=$}
+
+        \putnode{e0}{origin}{60}{0}{$\emptyset$}
+        \putnode{c0}{e0}{-20}{5}{$\{c\}$}
+        \putnode{b0}{e0}{-2}{10}{$\{b\}$}
+        \putnode{a0}{e0}{14}{15}{$\{a\}$}
+        \ncline{e0}{a0}
+        \ncline{e0}{b0}
+        \ncline{e0}{c0}
+        
+        \putnode{bc}{b0}{-20}{5}{$\{b,c\}$}
+        \putnode{ba}{b0}{14}{15}{$\{a,b \}$}
+        \ncline{b0}{ba}
+        \ncline{b0}{bc}
+        \ncline{a0}{ba}
+        \ncline{c0}{bc}
+        
+        \putnode{ca}{e0}{-4}{20}{$\{c, a\}$}
+        \putnode{abc}{b0}{-4}{20}{$\{a, b, c\}$}
+        \ncline{c0}{ca}
+        \ncline{a0}{ca}
+        \ncline{ca}{abc}
+        \ncline{bc}{abc}
+        \ncline{ba}{abc}
+  \end{pspicture}
+}
+
+\frame{
+  \frametitle{Height of a Semilattice}
+  \begin{itemize}[<+->]
+  \item Length of a chain $x_1\leq x_2 \leq \ldots \leq x_k$ is $k$
+  \item Let $K$ = max over lengths of all the chains in a semilattice
+  \item Height of the semilattice = $K-1$
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Data Flow Analysis Framework}
+  \begin{itemize}[<+->]
+  \item {\Large $(D, S, \meet, F)$}
+  \item $D$: direction -- Forward or Backward
+  \item $(S, \meet)$: Semilattice -- Domain and meet
+  \item $F$: family of transfer functions of type $S\rightarrow S$ (see next slide)
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Transfer Functions}
+  \begin{itemize}[<+->]
+  \item $F$: family of functions $S\rightarrow$ S. Must Include
+    \begin{itemize}
+    \item functions suitable for the boundary conditions (constant transfer functions for \bbent  and \bbext nodes)
+    \item Identity function $I$:
+      \[ I(x) = x \quad \forall x \in S \]
+    \item Closed under composition:
+      \begin{eqnarray*}
+        f, g \in F,\quad f \circ g &\Rightarrow& h \in F
+      \end{eqnarray*}
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Monotonic Functions}
+  \begin{itemize}[<+->]
+  \item $(S, \leq)$: a poset
+  \item $f: S\rightarrow S$ is monotonic iff
+    \[ \forall x,y \in S\quad x \leq y \Rightarrow f(x) \leq f(y)\]
+  \item Composition preserves monotonicity
+    \begin{itemize}
+    \item If $f$ and $g$ are monotonic, $h = f\circ g$, then $h$
+      is also monotonic
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Monotone Frameworks}
+  \begin{itemize}[<+->]
+  \item $(D, S, \meet, F)$ is monotone if the family $F$ consists
+    of monotonic functions only
+    \[ f \in F,\quad \forall x,y \in S\qquad x\leq y \Rightarrow f(x) \leq f(y) \]
+  \item Equivalently
+    \[ f \in F,\quad \forall x,y \in S\qquad f(x\meet y) \leq f(x) \meet f(y) \]
+  \item Proof? : QQ in class
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Knaster-Tarski Fixed Point Theorem}
+  \begin{itemize}[<+->]
+  \item Let $f$ be a monotonic function on a complete lattice $(S,\meet,\join)$. Define
+    \begin{itemize}
+    \item ${\sf red}(f) = \{v \mid v \in S, f(v) \leq v\}$, pre fix-points
+    \item ${\sf ext}(f) = \{v \mid v \in S, f(v) \geq v\}$, post fix-points
+    \item ${\sf fix}(f) = \{v \mid v \in S, f(v) = v\}$, fix-points
+    \end{itemize}
+    Then,
+    \begin{itemize}
+    \item $\meet {\sf red}(f) \in {\sf fix}(f)$. Further, $\meet {\sf red}(f) = \meet {\sf fix}(f)$
+    \item $\join {\sf ext}(f) \in {\sf fix}(f)$. Further, $\join {\sf ext}(f) = \join {\sf fix}(f)$
+    \item ${\sf fix}(f)$ is a complete lattice 
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Application of Fixed Point Theorem}
+  \begin{itemize}[<+->]
+  \item $f: S\rightarrow S$ is a {\bf monotonic} function
+  \item $(S, \meet)$ is a {\bf finite height} semilattice
+  \item $\top$ is the top element of $(S, \meet)$
+  \item Notation: $f^0(x) = x, f^{i+1}(x) = f(f^i(x)), \forall i \geq 0$
+  \item The greatest fixed point of $f$ is
+    \[ f^k(\top), \mbox{ where } f^{k+1}(\top) = f^k(\top) \]
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Fixed Point Algorithm}
+  \texttt{// monotonic function f on a meet semilattice \\\pause
+    x := $\top$;\\\pause
+    while (x $\neq$ f(x)) x := f(x);\\\pause
+    return x;\\
+  }
+}
+
+\end{document}

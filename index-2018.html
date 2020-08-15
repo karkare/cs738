@@ -1,0 +1,206 @@
+<html>
+	<head> 
+		<!--<link rel="stylesheet" href="mystyle.css" type="text/css"> -->
+		<meta name="author" content="Amey Karkare">
+		<meta name="keywords" content="CS738, CS 738, Compiler, Optimizations, Program Analysis">
+	</head>
+	<title> CS 738: Advanced Compiler Optimizations</title>
+	<body>
+<h1 id="cs-738-advanced-compiler-optimizations-2017-18-ist-semester">CS 738: Advanced Compiler Optimizations (2018-19 Ist Semester)<a id="top"/></h1>
+<hr />
+<ul>
+<li><strong>Instructor</strong>: <a href="http://www.cse.iitk.ac.in/users/karkare">Amey Karkare</a> (<script type="text/javascript">
+<!--
+h='&#x63;&#x73;&#x65;&#46;&#x69;&#x69;&#116;&#x6b;&#46;&#x61;&#x63;&#46;&#x69;&#110;';a='&#64;';n='&#x6b;&#x61;&#114;&#x6b;&#x61;&#114;&#x65;';e=n+a+h;
+document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+e+'<\/'+'a'+'>');
+// -->
+</script><noscript>&#x6b;&#x61;&#114;&#x6b;&#x61;&#114;&#x65;&#32;&#x61;&#116;&#32;&#x63;&#x73;&#x65;&#32;&#100;&#x6f;&#116;&#32;&#x69;&#x69;&#116;&#x6b;&#32;&#100;&#x6f;&#116;&#32;&#x61;&#x63;&#32;&#100;&#x6f;&#116;&#32;&#x69;&#110;</noscript>, <script type="text/javascript">
+<!--
+h='&#x67;&#x6d;&#x61;&#x69;&#108;&#46;&#x63;&#x6f;&#x6d;';a='&#64;';n='&#x6b;&#x61;&#114;&#x6b;&#x61;&#114;&#x65;';e=n+a+h;
+document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+e+'<\/'+'a'+'>');
+// -->
+</script><noscript>&#x6b;&#x61;&#114;&#x6b;&#x61;&#114;&#x65;&#32;&#x61;&#116;&#32;&#x67;&#x6d;&#x61;&#x69;&#108;&#32;&#100;&#x6f;&#116;&#32;&#x63;&#x6f;&#x6d;</noscript>)</li>
+<li><strong>Timings</strong>: Wed, Fri 10:35 -- 11:50 AM</li>
+<li><strong>Venue</strong>: KD 102, Dept of CSE</li>
+</ul>
+<hr />
+<p>This course aims to teach topics in program analysis and compiler optimizations.</p>
+<ul>
+<li><a href="#ethics">Code of Ethics</a></li>
+<li><a href="#announcements">Announcements</a></li>
+<li><a href="#outline">Course Outline</a></li>
+<li><a href="#eval">Evaluation Scheme</a></li>
+<li><a href="#handouts">Topics covered and handouts</a></li>
+<li><a href="#assignments">Assignments</a></li>
+<li><a href="#project">Course Project</a></li>
+<li><a href="#support">Supporting Material</a></li>
+<li><a href="#research">Research Material</a></li>
+<li><a href="#reference">Recommended References</a></li>
+</ul>
+<hr />
+<h2 id="code-of-ethics">Code of Ethics <a id="ethics"/></h2>
+<p>Any report/program/assignment you submit must <strong>clearly distinguish</strong> your contribution from others (webpages, softwares, report, discussions with other students). <font color="red">The penalty for copying in any form will be severe</font>.</p>
+<hr />
+<h2 id="announcements">Announcements <a id="announcements"/></h2>
+<p><font color="red">Important</font>: All emails' subject line should begin with &quot;<strong>[CS738]</strong>&quot;. Email not complying to this rule <strong>will NOT be entertained</strong>.</p>
+		<ol>
+			<li> We shall use <a href="https://sable.github.io/soot/">SOOT</a> for Assignments and Project. Download and install it. Also, go through <a href="https://github.com/Sable/soot/wiki">Wiki page</a> and <a href="https://github.com/Sable/soot/wiki/Tutorials">Tutorials</a> to familiarize yourself with soot.</li>
+			
+			<li> If you are registered for the course, subscribe to <a href="https://canvas.instructure.com/courses/1379521">CS738 on Canvas</a></li>
+	
+			<li> <a href="#assignments">Assignment 3</a> released.</li>
+			<li> <a href="#assignments">Assignment 2</a> released.</li>
+			<li> <a href="#assignments">Assignment 1</a> released.</li>
+		</ol>
+		
+<hr />
+<h2 id="topics-covered-and-slides">Topics Covered and Slides <a id="handouts"/></h2>
+<p>The slides are not suitable for taking prints as there is a lot of redundancy due to overlays. Use handouts if you really need a print.</p>
+<ol style="list-style-type: decimal">
+<li><p>Introduction [<a href="lecturenotes/01IntroHandout.pdf">handouts</a>] [<a href="lecturenotes/01IntroSlides.pdf">slides</a>]</p></li>
+<li><p>Overview of Optimizations [<a href="lecturenotes/02OptsOverviewHandout.pdf">handouts</a>] [<a href="lecturenotes/02OptsOverviewSlides.pdf">slides</a>]</p></li>
+<li><p>Data Flow Analysis [<a href="lecturenotes/03DataFlowAnalysisHandout.pdf">handouts</a>] [<a href="lecturenotes/03DataFlowAnalysisSlides.pdf">slides</a>]</p></li>
+<li><p>Data Flow Analysis (contd ...) [<a href="lecturenotes/04DataFlowAnalysisHandout.pdf">handouts</a>] [<a href="lecturenotes/04DataFlowAnalysisSlides.pdf">slides</a>]</p></li>
+<li><p>Data Flow Analysis Foundations [<a href="lecturenotes/05FoundationsDFAHandout.pdf">handouts</a>] [<a href="lecturenotes/05FoundationsDFASlides.pdf">slides</a>]</p></li>
+<li><p>DFA Foundations (contd ...) [<a href="lecturenotes/06FoundationsDFAHandout.pdf">handouts</a>] [<a href="lecturenotes/06FoundationsDFASlides.pdf">slides</a>]</p></li>
+<li><p>Flow Graph Theory [<a href="lecturenotes/07FlowGraphTheoryHandout.pdf">handouts</a>] [<a href="lecturenotes/07FlowGraphTheorySlides.pdf">slides</a>]</p></li>
+<li><p>Constant Propagation [<a href="lecturenotes/08ConstPropHandout.pdf">handouts</a>] [<a href="lecturenotes/08ConstPropSlides.pdf">slides</a>]</p></li>
+<li><p>SSA [<a href="lecturenotes/09SSAHandout.pdf">handouts</a>] [<a href="lecturenotes/09SSASlides.pdf">slides</a>] [<a href="http://dl.acm.org/citation.cfm?id=115320">paper</a>]</p></li>
+<li><p>SSA (contd ...) [<a href="lecturenotes/10SSAOptsHandout.pdf">handouts</a>] [<a href="lecturenotes/10SSAOptsSlides.pdf">slides</a>]</p></li>
+<li><p>Conditional Constant Propagation [<a href="lecturenotes/11CondConstPropHandout.pdf">handouts</a>] [<a href="lecturenotes/11CondConstPropSlides.pdf">slides</a>] [<a href="http://dl.acm.org/citation.cfm?id=103136">paper</a>]</p></li>
+<li><p>Pointer Analysis [<a href="lecturenotes/17PointerAnalysisHandout.pdf">handouts</a>] [<a href="lecturenotes/17PointerAnalysisSlides.pdf">slides</a>] [<a href="http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.109.6502">Anderson's</a>][<a href="http://dl.acm.org/citation.cfm?id=237727">Steensgaard's</a>] [<a href="https://yanniss.github.io/points-to-tutorial15.pdf">Yanniss's Tutorial</a>]</p></li>
+<li><p>Interprocedural analysis [<a href="lecturenotes/14InterProcHandout.pdf">handouts</a>] [<a href="lecturenotes/14InterProcSlides.pdf">slides</a>]</p></li>
+<li><p>... (Functional Approach) [<a href="lecturenotes/15InterProcHandout.pdf">handouts</a>] [<a href="lecturenotes/15InterProcSlides.pdf">slides</a>]</p></li>
+</ol>
+<p>RA. ... (Call-strings Approach) [<a href="lecturenotes/16InterProc_CallString_UK_Handout.pdf">handouts</a>] [<a href="lecturenotes/16InterProc_CallString_UK_Slides.pdf">slides</a>] <strong>By <a href="http://www.cse.iitb.ac.in/~uday">Prof Uday</a></strong></p>
+<ol start="15" style="list-style-type: decimal">
+<li><p>Liveness based Garbage Collection [<a href="lecturenotes/16LgcHandout.pdf">handouts</a>] [<a href="lecturenotes/16LgcSlides.pdf">slides</a>] [<a href="https://arxiv.org/abs/cs/0703155">paper1</a>][<a href="http://link.springer.com/chapter/10.1007%2F978-3-642-54807-9_5">paper2</a>][<a href="http://dl.acm.org/citation.cfm?doid=2926697.2926698">paper3</a>] [<a href="https://drona.csa.iisc.ernet.in/~deepakd/atc-common/RegApprox.pdf">Mohri-Nederhof Transformation</a>]</p></li>
+	<li><img src="Images/new.png" alt="[[NEW]]" width=32> Symbolic Execution [<a href="lecturenotes/kinder_symbolic_execution_tutorial_2014_part.pdf">Slides by Prof Johannes Kinder</a>] </li>
+	<li><p>Types and Program Analysis [<a href="lecturenotes/18TypesAndPLHandout.pdf">handouts</a>] [<a href="lecturenotes/18TypesAndPLSlides.pdf">slides</a>]</p></li>
+<li><p>Untyped Lambda Calculus [<a href="lecturenotes/19UTLambdaCalculusHandout.pdf">handouts</a>] [<a href="lecturenotes/19UTLambdaCalculusSlides.pdf">slides</a>]</p></li>
+<li><p>Typed Arithmetic Expressions [<a href="lecturenotes/20TypedArithExprHandout.pdf">handouts</a>] [<a href="lecturenotes/20TypedArithExprSlides.pdf">slides</a>]</p></li>
+<li><p>Simply Typed Lambda Calculus [<a href="lecturenotes/21STLambdaCalculusHandout.pdf">handouts</a>] [<a href="lecturenotes/21STLambdaCalculusSlides.pdf">slides</a>]</p></li>
+<li><p>Type-based Points-to Analysis [<a href="lecturenotes/22TypeBasedPointsToHandout.pdf">handouts</a>] [<a href="lecturenotes/22TypeBasedPointsToSlides.pdf">slides</a>] [<a href="http://dl.acm.org/citation.cfm?id=237727">Steensgaard's</a>] [<a href="http://dl.acm.org/citation.cfm?doid=349299.349309">Manuvir's</a>]</p></li>
+</ol>
+<p>RA: <strong>Reading Assignment</strong></p>
+<h2 id="assignments">Assignments <a id="assignments"/></h2>
+<p>There will be short assignments to give you a chance to apply the lecture material. Assignments will have some written and some programming tasks.</p>
+<ol style="list-style-type: decimal">
+  <li><a href="https://canvas.instructure.com/courses/1379521/assignments/9409822">Assignment 3</a>. Deadline: <strong>12th September, 2018</strong> . Submission through Canvas.</li>
+  
+  <li><a href="https://canvas.instructure.com/courses/1379521/assignments/9408441">Assignment 2</a>. Deadline: <strong>5th September, 2018</strong> . Submission through Canvas.</li>
+  
+  <li><a href="https://docs.google.com/document/d/1r3dADHDosSiUaXH_rsTeIyhBBld9KlII-9Kd1p1ASio/edit?usp=sharing">Assignment 1</a>. Deadline: <strong>8th August, 2018</strong> . Submission through Canvas.</li>
+</ol>
+<hr />
+<h2 id="course-project">Course Project<a id="project"/></h2>
+<ul>
+<li><strong>Project Description</strong> will come <a href="project/index.html">Here</a></li>
+</ul>
+<hr />
+<h2 id="course-outline">Course Outline <a id="outline"/></h2>
+<p>The course will mainly cover topics from the following list (not necessarily in the same order). Not all topics listed below will be covered, and depending on class feedback, new topics may be added.</p>
+<ul>
+<li>Introduction, compiler architecture, intermediate representations</li>
+<li>Control flow analysis, control-flow graphs, basic blocks</li>
+<li>Dataflow analysis</li>
+<li>SSA form</li>
+<li>Classical optimizations (constant folding, CSE, PRE)</li>
+<li>Pointer and alias analysis</li>
+<li>Interprocedural analysis</li>
+<li>Advanced Topics:
+<ul>
+<li>Garbage Collection</li>
+<li>Program Synthesis</li>
+<li>Program Testing and Debugging</li>
+<li>Types and Programming</li>
+</ul></li>
+</ul>
+<hr />
+<h3 id="evaluation-scheme">Evaluation Scheme <a id="eval"/></h3>
+<p><strong>Credit</strong></p>
+<table style="width:54%;">
+<colgroup>
+<col width="40%" />
+<col width="13%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td align="left">Assignments</td>
+<td align="right">5% - 10%</td>
+</tr>
+<tr class="even">
+<td align="left">Quizzes</td>
+<td align="right">5%</td>
+</tr>
+<tr class="odd">
+<td align="left">Mid semester exam</td>
+<td align="right">10% - 20%</td>
+</tr>
+<tr class="even">
+<td align="left">End semester exam</td>
+<td align="right">25% - 35%</td>
+</tr>
+<tr class="odd">
+<td align="left">Course Project</td>
+<td align="right">30% - 40%</td>
+</tr>
+<tr class="even">
+<td align="left">(Approx Breakup: Proposal: 5% Report: 15% Implementation: 10% Presentation: 5% )</td>
+<td align="right"></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="recommended-references">Recommended References <a id="reference"/></h2>
+<ul>
+<li>Uday P. Khedker, Amitabha Sanyal, and Bageshri Karkare, <strong>Data Flow Analysis: Theory and Practice</strong>, CRC Press, USA (2009).
+<ul>
+<li><a href="https://www.cse.iitb.ac.in/~uday/dfaBook-web">Indian Edition is available</a>, CRC Press, 2013.</li>
+</ul></li>
+<li>Appel, A., <strong>Modern Compiler Implementation in Java</strong> (or ML, or C), Cambridge University Press, 2002.</li>
+<li>Cooper, K., Torczon, L., <strong>Engineering a Compiler</strong>, Morgan Kaufmann, 2004</li>
+<li>Muchnick, S., <strong>Advanced Compiler Design and Implementation</strong>, Morgan Kaufmann, 1997.</li>
+<li>Aho, A., Lam, M., Sethi, R., Ullman, J., <strong>Compilers: Principles, Techniques, &amp; Tools</strong>, Addison Wesley, 2007.</li>
+<li>Y. N. Srikant, Priti Shankar, <strong>The Compiler Design Handbook: Optimizations and Machine Code Generation</strong>, CRC Press, 2008</li>
+<li>Randy Allen, Ken Kennedy,<strong>Optimizing Compilers for Modern Architectures: A Dependence-based Approach</strong>, Morgan Kaufmann, 2001</li>
+</ul>
+<h2 id="research-material">Research Material <a id="research"/></h2>
+<ul>
+<li>Journals
+<ul>
+<li>International Journal of Parallel Programming</li>
+<li>Journal of the ACM</li>
+<li>Communications of the ACM</li>
+<li>ACM Transactions on Programming Languages</li>
+<li>IEEE Software</li>
+<li>IEEE Computer</li>
+<li>IEEE Transactions on Computers</li>
+<li>IEEE Transactions on Parallel and Distributed Systems</li>
+<li>IEEE Transactions on Software Engineering</li>
+<li>IBM Journal of Research and Development</li>
+<li>IBM Systems Journal</li>
+<li>SIAM Jounal of Computing</li>
+<li>SIGPLAN Notices</li>
+<li>ACTA INFORMATICA</li>
+</ul></li>
+<li>Conference Proceedings
+<ul>
+<li>International Conferences on Parallel Processing (ICPP)</li>
+<li>Proceedings of International Conf on Software Engineering (ICSE)</li>
+<li>Lecture Notes in Computer Science series.</li>
+<li>Proceedings of SIGPLAN conference on Programming Language Design and Implementation (PLDI)</li>
+<li>ACM Transactions on Programming Languages and Systemes (TOPLAS)</li>
+<li>ACM Symposium on Principles of Programming Languages (POPL)</li>
+<li>Proceedings SIGPLAN Simposium on Compiler Construction (CC)</li>
+<li>Annual International Symposium on Computer Architecture (ISCA)</li>
+<li>Proc. International Conference on Architectural Support for Programming Languages and Operating Systems (IEEE) (ASPLOS)</li>
+<li>International Parallel Processing Symposium, IEEE Computer Society.</li>
+<li>International Static Analysis Symposium (SAS)</li>
+<li>and many more ...</li>
+</ul></li>
+</ul>
+<hr>
+<h3 id="take-me-to-the-top">Take me to the <a href="#top">Top</a></h3>
+</body>
+</html>

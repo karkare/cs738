@@ -1,0 +1,706 @@
+\mode<presentation>
+{
+  %\usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+
+\newcommand{\change}[1]{{\red #1}}
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[]{\ \\{\LARGE SSAPRE: SSA based Partial Redundancy
+    Elimination }}
+
+\begin{document}
+
+\frame{\titlepage}
+\frame{
+  \frametitle{PRE without SSA}
+  \begin{itemize}[<+->]
+  \item Based on well known DF analyses
+    \begin{itemize}[<+->]
+    \item Availability
+    \item Anticipability
+    \item Partial Availability
+    \item Partial Anticipability
+    \end{itemize}
+  \item Identifies paritially redundant computations, make
+    them totally redundant by inserting new compitations
+  \item Remove totally redundant computations (CSE)
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{PRE without SSA}
+  \begin{itemize}[<+->]
+  \item Iterative data flow analysis
+  \item Operates on control flow graph
+  \item Computes global and local versions of data flow
+    information 
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{SSAPRE}
+  \begin{itemize}[<+->]
+  \item Information flow along SSA edges
+  \item No distinction between global and local information
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{SSAPRE: Challenge}
+  \begin{itemize}[<+->]
+  \item SSA form defined for variables
+  \item How to identify potentially redundant expressions
+    \begin{itemize}[<+->]
+    \item Expressions having different variable versions as
+      operands
+      \uncover<4->{
+      \begin{center}
+        \psset{unit=1mm}
+        \begin{pspicture}(0,0)(40,-40)
+          %\psframe(0,0)(40,-40)
+          \putnode{b1}{origin}{10}{-10}{\psframebox{$a_1 + b_1$}}
+          \putnode{b2}{b1}{20}{0}{\psframebox{$a_2 =
+              \cdots$}}
+          \putnode{b3}{b1}{10}{-10}{\psframebox{$a_3 = \phi(a_1, a_2)$}}
+          \putnode{b4}{b3}{0}{-10}{\psframebox{$a_3 + b_1$}}
+          \ncline{->}{b1}{b3}
+          \ncline{->}{b2}{b3}
+          \ncline{->}{b3}{b4}
+        \end{pspicture}
+      \end{center}}
+    \item Here $a_1 + b_1$ is same as $a_3 + b_1$ when control follows the left branch. Lexically
+      different, but computationally identical
+    \end{itemize}
+  \end{itemize}
+}
+\frame{
+  \frametitle{SSAPRE: Key Idea}
+  \begin{itemize}[<+->]
+  \item Redundancy Class Variables (RCVs) 
+    \begin{itemize}[<+->]
+    \item variable (say $h$) to represent computation of
+      an expression (say $E$)
+    \end{itemize}
+  \item Computation of expression could represent either a
+    {\em def} or a {\em use} 
+    \begin{itemize}[<+->]
+    \item definition of $E \Rightarrow$ store into $h$
+    \item use of $E \Rightarrow$ load from $h$
+    \end{itemize}
+  \item PRE on SSA form of RCVs ($h$) to remove redundancies 
+  \item Final program will be in SSA form
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{SSAPRE: Preparations}
+  \begin{itemize}[<+->]
+  \item Split all the {\em critical edges} in the flow graph
+    \begin{itemize}[<+->]
+    \item Edge from a node with more than one successor to a
+      node with more than one predecessor
+    \item WHY is this important?
+    \end{itemize}
+  \item Single pass to identify identical expressions
+    \begin{itemize}[<+->]
+    \item Ignoring the version number of the operands
+    \item In the earlier example, $a_3 + b_1$ and $a_1 + b_1$ could be identical
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{SSAPRE Steps}
+  \begin{itemize}[<+->]
+  \item Six step algorithm
+    \begin{enumerate}[<+->]
+    \item $\Phi$-insertion
+    \item Renaming
+    \item Down-safety computation
+    \item WillBeAvail computation
+    \item Finalization
+    \item Code Motion
+    \end{enumerate}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Running Example}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(60,-70)
+      %\psframe(0,0)(60,-70)
+      \putnode{b1}{origin}{20}{0}{\psframebox{$a_1 = \cdots$}}
+      \putnode{b2}{b1}{0}{-15}{\psframebox{$a_2 = \phi(a_4, a_1)$}}
+      \putnode{b3}{b2}{20}{-15}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            &&$a_2 + b_1$\\ 
+            $a_3$&=&$\cdots$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{-20}{-15}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $a_4$&=&$\phi(a_2, a_3)$\\ 
+            && $a_4 + b_1$
+          \end{tabular}
+      }}
+      \putnode{b5}{b4}{0}{-15}{\psframebox{EXIT}}
+      \ncline{->}{b1}{b2}
+      \ncline{->}{b2}{b3}
+      \ncline{->}{b2}{b4}
+      \ncline{->}{b3}{b4}
+      \ncline{->}{b4}{b5}
+      \nccurve[angleA=-135, angleB=135,ncurv=1.5]{->}{b4}{b2}
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{$\Phi$-insertion}
+  \begin{itemize}[<+->]
+  \item $\Phi$ for an expression $E$ is required where two
+    potentially different values of an expression merge
+  \item At iterated dominance frontiers of occurances of $E$
+  \item At each block having a $\phi$ for some argument of
+    $E$ 
+    \begin{itemize}[<+->]
+    \item Potential change in the expression's value
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{$\Phi$-insertion}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(60,-70)
+      %\psframe(0,0)(60,-70)
+      \putnode{b1}{origin}{20}{0}{\psframebox{$a_1 = \cdots$}}
+      \putnode{b2}{b1}{0}{-15}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            &&$\Phi(\cdots)$\\
+            $a_2$ &=& $\phi(a_4, a_1)$
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{20}{-15}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            &&$a_2 + b_1$\\ 
+            $a_3$&=&$\cdots$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{-20}{-20}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            &&$\Phi(\cdots)$\\
+            $a_4$&=&$\phi(a_2, a_3)$\\ 
+            && $a_4 + b_1$
+          \end{tabular}
+      }}
+      \putnode{b5}{b4}{0}{-15}{\psframebox{EXIT}}
+      \ncline{->}{b1}{b2}
+      \ncline{->}{b2}{b3}
+      \ncline{->}{b2}{b4}
+      \ncline{->}{b3}{b4}
+      \ncline{->}{b4}{b5}
+      \nccurve[angleA=-135, angleB=135,ncurv=1.5]{->}{b4}{b2}
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Rename}
+  \begin{itemize}[<+->]
+  \item Similar to SSA variable renaming
+  \item Stack of every expression is maintained
+  \item Three kinds of occurrences of $E$
+    \begin{itemize}[<+->]
+    \item Real occurrences (present in original program)
+    \item Results of $\Phi$ operators inserted
+    \item Operands of inserted $\Phi$
+    \end{itemize}
+  \item After renaming
+    \begin{itemize}[<+->]
+    \item Identical SSA instances of $h$ represent identical
+      values of $E$
+    \item A control flow path with two different instances of
+      $h$ has to cross either an assignment to an operand of
+      $E$ or a $\Phi$ of $h$
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Rename Algorithm}
+  \begin{itemize}[<+->]
+  \item Runs with variable renaming
+  \item When an $E$ is encountered
+    \begin{itemize}[<+->]
+    \item if $E$ is result of $\Phi$, assign a new version to
+      $h$ and push it on $E$ stack
+    \item if $E$ is the real occurrence
+      \begin{itemize}[<+->]
+      \item for each operand, compare the version of operand
+        with the top of the rename stack for operand
+      \item If all match, $h$ gets same version as the top of
+        $E$ stack
+      \item If any mismatch, assign a new version to $h$ and
+        push it on $E$ stack
+      \end{itemize}
+    \item if $E$ is operand of $\Phi$, in the corresponding
+      predecessor block
+      \begin{itemize}[<+->]
+      \item for each operand of $E$, compare the version of operand
+        with the top of the rename stack for operand
+      \item If all match, $h$ gets same version as the top of
+        $E$ stack
+      \item If any mismatch, replace $E$ by $\bot$ in the operand
+        push it on $E$ stack (WHY?)
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Rename}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(60,-70)
+      %\psframe(0,0)(60,-70)
+      \putnode{b1}{origin}{20}{0}{\psframebox{$a_1 = \cdots$}}
+      \putnode{b2}{b1}{0}{-15}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $h_1$&=&$\Phi(h_2, \bot)$\\
+            $a_2$ &=& $\phi(a_4, a_1)$
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{20}{-15}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            &&$a_2 + b_1 : [h_1]$\\ 
+            $a_3$&=&$\cdots$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{-20}{-20}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $h_2$&=&$\Phi(h_1, \bot)$\\
+            $a_4$&=&$\phi(a_2, a_3)$\\ 
+            && $a_4 + b_1 : [h_2]$
+          \end{tabular}
+      }}
+      \putnode{b5}{b4}{0}{-15}{\psframebox{EXIT}}
+      \ncline{->}{b1}{b2}
+      \ncline{->}{b2}{b3}
+      \ncline{->}{b2}{b4}
+      \ncline{->}{b3}{b4}
+      \ncline{->}{b4}{b5}
+      \nccurve[angleA=-135, angleB=135,ncurv=1.5]{->}{b4}{b2}
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Down-safety}
+  \begin{itemize}[<+->]
+  \item Down-safety is same as very-busy (anticipability)
+    property of expressions
+    \begin{itemize}[<+->]
+    \item Do not want to introduce new computation of $E$
+    \end{itemize}
+  \item We only need to compute down-safety for inserted
+    $\Phi$-operators 
+  \item A $\Phi$ computation is {\bf NOT} down-safe if
+    \item there is a path to EXIT from $\Phi$ along which
+      the result of $\Phi$ is 
+    \begin{itemize}[<+->]
+    \item either not used
+    \item used only as an operand of another $\Phi$ that
+      itself is {\bf NOT} down-safe
+    \end{itemize}
+  \item \mbox{\em HasRealUse}: Real occurrence of an
+    expression
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Down-safety (ds = $\cdots$)}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(60,-70)
+      %\psframe(0,0)(60,-70)
+      \putnode{b1}{origin}{20}{0}{\psframebox{$a_1 = \cdots$}}
+      \putnode{b2}{b1}{0}{-15}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $h_1$&=&$\Phi(h_2, \bot) : [ds=1]$\\
+            $a_2$ &=& $\phi(a_4, a_1)$
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{20}{-15}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            &&$a_2 + b_1 : [h_1]$\\ 
+            $a_3$&=&$\cdots$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{-20}{-20}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $h_2$&=&$\Phi(h_1, \bot) : [ds=1]$\\
+            $a_4$&=&$\phi(a_2, a_3)$\\ 
+            && $a_4 + b_1 : [h_2]$
+          \end{tabular}
+      }}
+      \putnode{b5}{b4}{0}{-15}{\psframebox{EXIT}}
+      \ncline{->}{b1}{b2}
+      \ncline{->}{b2}{b3}
+      \ncline{->}{b2}{b4}
+      \ncline{->}{b3}{b4}
+      \ncline{->}{b4}{b5}
+      \nccurve[angleA=-135, angleB=135,ncurv=1.5]{->}{b4}{b2}
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{WillBeAvail}
+  \begin{itemize}[<+->]
+  \item The set of $\Phi$s where the expression must be
+    available in any computationally optimal placement
+  \item Computation of {\em two forward} properties:
+    \begin{itemize}[<+->]
+    \item {\em CanBeAvail\/}: $\Phi$s for which $E$ is either
+      available or anticipable or both
+    \item {\em Later\/}: $\Phi$s beyond which insertion can not
+      be postponed without introducing new redundancy
+    \end{itemize}
+    \uncover<4-> {
+    $$\mbox{\em WillBeAvail} = \mbox{\em CanBeAvail} \wedge
+    \neg\mbox{\em Later}$$ 
+}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{CanBeAvail}
+  \begin{itemize}[<+->]
+
+  \item Initialized to {\em true} for all $\Phi$s
+  \item Boundary $\Phi$s: 
+    \begin{itemize}[<+->]
+
+    \item Not Down-safe, and
+    \item At least one argument is $\bot$
+    \end{itemize}
+  \item Set {\em false} for boundary $\Phi$s
+  \item Propagate {\em false} value along the chain of
+    def-use to other $\Phi$s 
+    \begin{itemize}[<+->]
+
+    \item exclude edges along which  {\em HasRealUse} is {\em true} 
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Later}
+  \begin{itemize}[<+->]
+
+  \item Determines latest (final) insertion points
+  \item Initialize Later to {\em true} wherever CanBeAvail is
+    {\em true}, otherwise false
+  \item Assign {\em false} for $\Phi$s with at least one
+    operand with HasRealUse flag {\em true}
+  \item Propagate {\em false} value forward to other $\Phi$s
+  \item Later $\Rightarrow$ $\Phi$s that are CanBeAvail, but
+    do not reach any real occurrence of $E$
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Insertion Points}
+  \begin{itemize}[<+->]
+  \item Insertions are done for $\Phi$ operands
+  \item Along the corresponding predecessor edges
+  \item Insertion done along $i^{th}$ predecessor of $\Phi$
+    if {\em Insert} is {\em true}, i.e.
+    \begin{itemize}[<+->]
+    \item {\em WillBeAvail}($\Phi$) == {\em true}; AND
+    \item $Arg_i \mbox{ is } \bot$; OR 
+      \begin{itemize}[<+->]
+      \item (HasRealUse($Arg_i$) == \mbox{\em false}), AND
+      \item $Arg_i$ is defined by $\Phi'$ with {\em
+        WillBeAvail}($\Phi'$) == {\em false}
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Finalize}
+  \begin{itemize}[<+->]
+  \item Transforms the program with RCVs into a valid SSA
+    form 
+  \item For every real occurrence of $E$, decide whether it is
+    a {\em def} or a {\em use}
+  \item For every $\Phi$ with {\em WillBeAvail} being {\em true},
+    insert $E$ along incoming edges with {\em Insert} being
+    {\em true} 
+  \item For each $\Phi$ for $E$
+    \begin{itemize}[<+->]
+    \item If {\em WillBeAvail} is {\em true}, it is replaced by SSA
+      temporary with appropriate version ($h_x$)
+    \item If {\em WillBeAvail} is {\em false}, it is not part of
+      SSA form, and is removed
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Finalize: AvailDef}
+  \begin{itemize}[<+->]
+
+  \item AvailDef: Table to mark def of expression
+    occurrences
+  \item Computed for each class (say $h_x$) of $E$
+  \item Preorder traversal of dominator tree 
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{AvailDef Computation}
+  \begin{itemize}[<+->]
+
+  \item Initialize: AvailDef[$x$] = $\bot \ \forall x$ (all
+    classes of all expressions) 
+  \item During course of traversal, process occurrence $x$ of
+    $E$
+    \begin{itemize}[<+->]
+
+    \item $\Phi$ occurrence: 
+      \begin{itemize}[<+->]
+
+      \item If WillBeAvail is {\em false}, ignore. 
+      \item Otherwise AvailDef[$x$] = this $\Phi$ (we must
+        be visiting $x$ for first time)  \pause -- WHY?
+      \end{itemize}
+    \item Real occurrence: 
+      \begin{itemize}[<+->]
+      \item If AvailDef[$x$] is $\bot$, mark this
+        occurrence as def 
+      \item Else, if AvailDef[$x$] does not dominate this
+        occurrence, mark this occurrence as def
+      \item Else, mark this occurrence as use of AvailDef[$x$]
+      \end{itemize}
+    \item $\Phi$ operand (processed in predecessor block $P$)
+      \begin{itemize}[<+->]
+      \item If WillBeAvail of $\Phi$ is false, ignore.
+      \item Else, if {\em Insert} is true for the operand,
+        insert computation of $E$ in block $P$, set it as a
+        def, mark this occurrence as use of inserted.
+      \item Else ({\em Insert} is false), mark this occurrence
+        as use of AvailDef[$x$]
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+}
+\frame{
+  \frametitle{Finalize}
+  \begin{center}
+    \begin{tabular}{ccc}
+    \scalebox{0.8}{\psset{unit=1mm}
+    \begin{pspicture}(0,0)(60,-70)
+      %\psframe(0,0)(60,-70)
+      \putnode{b1}{origin}{20}{0}{\psframebox{$a_1 = \cdots$}}
+      \putnode{b2}{b1}{0}{-15}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $h_1$&=&$\Phi(h_2, \bot)$\\
+            $a_2$ &=& $\phi(a_4, a_1)$
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{20}{-15}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            &&$a_2 + b_1 : [h_1]$\\ 
+            $a_3$&=&$\cdots$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{-20}{-20}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $h_2$&=&$\Phi(h_1, \bot)$\\
+            $a_4$&=&$\phi(a_2, a_3)$\\ 
+            && $a_4 + b_1 : [h_2]$
+          \end{tabular}
+      }}
+      \putnode{b5}{b4}{0}{-15}{\psframebox{EXIT}}
+      \ncline{->}{b1}{b2}
+      \ncline{->}{b2}{b3}
+      \ncline{->}{b2}{b4}
+      \ncline{->}{b3}{b4}
+      \ncline{->}{b4}{b5}
+      \nccurve[angleA=-135, angleB=135,ncurv=1.5]{->}{b4}{b2}
+    \end{pspicture}}
+      & 
+    \scalebox{0.8}{\psset{unit=1mm}
+    \begin{pspicture}(0,0)(5,-70)
+      \putnode{arr}{origin}{0}{-35}{\Huge $\Rightarrow$}
+    \end{pspicture}
+      }&
+    \scalebox{0.8}{\psset{unit=1mm}
+    \begin{pspicture}(0,0)(60,-70)
+      %\psframe(0,0)(60,-70)
+      \putnode{b1}{origin}{20}{0}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $a_1$ &=& $\cdots$ \\
+            $h_3$ &=& $\cdots$
+          \end{tabular}
+      }}
+      \putnode{b2}{b1}{0}{-15}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $h_1$&=&$\Phi(h_2, h_3)$\\
+            $a_2$ &=& $\phi(a_4, a_1)$
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{20}{-18}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            &&$a_2 + b_1 : [h_1]$\\ 
+            $a_3$&=&$\cdots$ \\ 
+            $h_4$&=& $\cdots$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{-20}{-20}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $h_2$&=&$\Phi(h_1, h_4)$\\
+            $a_4$&=&$\phi(a_2, a_3)$\\ 
+            && $a_4 + b_1 : [h_2]$
+          \end{tabular}
+      }}
+      \putnode{b5}{b4}{0}{-15}{\psframebox{EXIT}}
+      \ncline{->}{b1}{b2}
+      \ncline{->}{b2}{b3}
+      \ncline{->}{b2}{b4}
+      \ncline{->}{b3}{b4}
+      \ncline{->}{b4}{b5}
+      \nccurve[angleA=-135, angleB=135,ncurv=1.2]{->}{b4}{b2}
+    \end{pspicture}}
+    \end{tabular}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Code Motion}
+  \begin{itemize}[<+->]
+  \item  For real {\em def} occurance of $E$, compute $E$ in
+    a new version of temporary $t$
+  \item  For real {\em use} occurance of $E$, replace $E$ by
+    current version of $t$
+  \item For inserted occurrence of $E$, compute $E$ in
+    a new version of temporary $t$
+  \item For a $\Phi$ occurrence, insert appropriate $\phi$ for
+    $t$ 
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Code Motion}
+  \begin{center}
+    \begin{tabular}{ccc}
+    \scalebox{0.8}{\psset{unit=1mm}
+    \begin{pspicture}(0,0)(60,-70)
+      %\psframe(0,0)(60,-70)
+      \putnode{b1}{origin}{20}{0}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $a_1$ &=& $\cdots$ \\
+            $h_3$ &=& $\cdots$
+          \end{tabular}
+      }}
+      \putnode{b2}{b1}{0}{-15}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $h_1$&=&$\Phi(h_2, h_3)$\\
+            $a_2$ &=& $\phi(a_4, a_1)$
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{20}{-18}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            &&$a_2 + b_1 : [h_1]$\\ 
+            $a_3$&=&$\cdots$ \\ 
+            $h_4$&=& $\cdots$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{-20}{-20}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $h_2$&=&$\Phi(h_1, h_4)$\\
+            $a_4$&=&$\phi(a_2, a_3)$\\ 
+            && $a_4 + b_1 : [h_2]$
+          \end{tabular}
+      }}
+      \putnode{b5}{b4}{0}{-15}{\psframebox{EXIT}}
+      \ncline{->}{b1}{b2}
+      \ncline{->}{b2}{b3}
+      \ncline{->}{b2}{b4}
+      \ncline{->}{b3}{b4}
+      \ncline{->}{b4}{b5}
+      \nccurve[angleA=-135, angleB=135,ncurv=1.2]{->}{b4}{b2}
+    \end{pspicture}}
+    &
+    \scalebox{0.8}{\psset{unit=1mm}
+    \begin{pspicture}(0,0)(5,-70)
+      \putnode{arr}{origin}{0}{-35}{\Huge $\Rightarrow$}
+    \end{pspicture}
+    }
+    &
+    \scalebox{0.8}{
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(60,-70)
+      %\psframe(0,0)(60,-70)
+      \putnode{b1}{origin}{20}{0}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $a_1$ &=& $\cdots$ \\
+            $t_1$ &=& $a_1 + b_1$
+          \end{tabular}
+      }}
+      \putnode{b2}{b1}{0}{-18}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $t_2$&=&$\phi(t_4, t_1)$\\
+            $a_2$ &=& $\phi(a_4, a_1)$
+          \end{tabular}
+      }}
+      \putnode{b3}{b2}{20}{-18}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            &&$t_2$\\ 
+            $a_3$&=&$\cdots$ \\ 
+            $t_3$&=& $a_3 + b_1$
+          \end{tabular}
+      }}
+      \putnode{b4}{b3}{-20}{-20}{\psframebox{
+          \begin{tabular}{@{}r@{}c@{}l@{}}
+            $t_4$&=&$\phi(t_2, t_3)$\\
+            $a_4$&=&$\phi(a_2, a_3)$\\ 
+            && $t_4$
+          \end{tabular}
+      }}
+      \putnode{b5}{b4}{0}{-15}{\psframebox{EXIT}}
+      \ncline{->}{b1}{b2}
+      \ncline{->}{b2}{b3}
+      \ncline{->}{b2}{b4}
+      \ncline{->}{b3}{b4}
+      \ncline{->}{b4}{b5}
+      \nccurve[angleA=-135, angleB=135,ncurv=1.2]{->}{b4}{b2}
+    \end{pspicture}}
+    \end{tabular}
+  \end{center}
+}
+
+
+\end{document}
+

@@ -1,0 +1,642 @@
+\mode<presentation>
+{
+  %\usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{xspace}
+
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[]{\ \\{\LARGE SSA Continued}\\}
+
+\input{defs.tex}
+\begin{document}
+
+\frame{\titlepage}
+
+\frame{
+  \frametitle{Agenda}
+  \begin{itemize}
+  \item Properties of SSA
+  \item SSA to Executable
+  \item SSA for Optimizations
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Complexity of Construction}
+  \begin{itemize}[<+->]
+  \item $R$ = $\operatorname{max}(N, E, A, M)$
+  \item $N$: nodes, $E$: edges in flow graph
+  \item $A$: number of assignments
+  \item $M$: number of uses of variables
+  \item Computation of DF: $O(R^2)$
+  \item Computation of SSA: $O(R^3)$
+  \item In practice, worst case is rare.
+  \item Practical complexity: $O(R)$
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Linear Time Algorithm for $\phi$-functions}
+  \begin{itemize}[<+->]
+  \item By Sreedhar and Gao, in POPL'95
+  \item Uses a new data structure called DJ-graph
+  \item Linear time is achieved by careful ordering of nodes in the DJ-graph
+  \item DF for a node is computed only once an reused later if required.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Variants of SSA Form: Simple Example}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(60,67)
+      %\psframe(0,0)(60,67)
+      \putnode{n0}{origin}{10}{56}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            x = \ldots\\
+            \ldots = x\\
+            y = \ldots\\
+            z = \ldots
+          \end{tabular}
+      }}
+      \putnode{n1}{n0}{40}{0}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            x = \ldots\\
+            \ldots = x\\
+            y = \ldots\\
+            z = \ldots
+          \end{tabular}
+      }}
+      \putnode{n2}{n0}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            \ldots = y
+          \end{tabular}
+      }}
+      \putnode{n3}{n1}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            \ldots = y
+          \end{tabular}
+      }}
+      \putnode{n4}{n2}{20}{-25}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            \\
+            \\
+            \\
+            \ldots = z
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{n2}
+      \ncline{->}{n1}{n3}
+      \ncline{->}{n2}{n4}
+      \ncline{->}{n3}{n4}
+      \putnode{lbl}{n4}{0}{-13}{Original Program}
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Variants of SSA Form: Simple Example}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(60,67)
+      %\psframe(0,0)(60,67)
+      \putnode{n0}{origin}{10}{56}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            x1 = \ldots\\
+            \ldots = x1\\
+            y1 = \ldots\\
+            z1 = \ldots
+          \end{tabular}
+      }}
+      \putnode{n1}{n0}{40}{0}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            x2 = \ldots\\
+            \ldots = x2\\
+            y2 = \ldots\\
+            z2 = \ldots
+          \end{tabular}
+      }}
+      \putnode{n2}{n0}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            \ldots = y1
+          \end{tabular}
+      }}
+      \putnode{n3}{n1}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            \ldots = y2
+          \end{tabular}
+      }}
+      \putnode{n4}{n2}{20}{-25}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            x3 = $\phi$(x1, x2)\\
+            y3 = $\phi$(y1, y2)\\
+            z3 = $\phi$(z1, z2)\\
+            \ldots = z3
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{n2}
+      \ncline{->}{n1}{n3}
+      \ncline{->}{n2}{n4}
+      \ncline{->}{n3}{n4}
+      \putnode{lbl}{n4}{0}{-13}{Minimal SSA form}
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Variants of SSA Form}
+  \begin{itemize}[<+->]
+  \item Minimal SSA still contains extraneous $\phi$-functions 
+    \begin{itemize}
+    \item Inserts some $\phi$-functions where they are dead
+    \item Would like to avoid inserting them
+    \end{itemize}
+  \item Pruned SSA
+  \item Semi-Pruned SSA
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Pruned SSA}
+  \begin{itemize}[<+->]
+  \item Only insert $\phi$-functions where their value is live
+  \item Inserts fewer $\phi$-functions 
+  \item Costs more to do
+  \item Requires global Live variable analysis
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Variants of SSA Form: Pruned SSA Example}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(60,67)
+      %\psframe(0,0)(60,67)
+      \putnode{n0}{origin}{10}{56}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            x1 = \ldots\\
+            \ldots = x1\\
+            y1 = \ldots\\
+            z1 = \ldots
+          \end{tabular}
+      }}
+      \putnode{n1}{n0}{40}{0}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            x2 = \ldots\\
+            \ldots = x2\\
+            y2 = \ldots\\
+            z2 = \ldots
+          \end{tabular}
+      }}
+      \putnode{n2}{n0}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            \ldots = y1
+          \end{tabular}
+      }}
+      \putnode{n3}{n1}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            \ldots = y2
+          \end{tabular}
+      }}
+      \putnode{n4}{n2}{20}{-25}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            \\
+            \\
+            z3 = $\phi$(z1, z2)\\
+            \ldots = z3
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{n2}
+      \ncline{->}{n1}{n3}
+      \ncline{->}{n2}{n4}
+      \ncline{->}{n3}{n4}
+      %\putnode{lbl}{n4}{0}{-10}{Pruned SSA form}
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Semi-Pruned SSA Form}
+  \begin{itemize}[<+->]
+  \item Discard names used in only one block
+  \item Total number of $\phi$-functions between minimal and pruned SSA
+  \item Needs only local Live information
+  \item Non-locals can be computed without iteration or elimination
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Variants of SSA Form: Semi-pruned SSA Example}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(60,67)
+      %\psframe(0,0)(60,67)
+      \putnode{n0}{origin}{10}{56}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            x1 = \ldots\\
+            \ldots = x1\\
+            y1 = \ldots\\
+            z1 = \ldots
+          \end{tabular}
+      }}
+      \putnode{n1}{n0}{40}{0}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            x2 = \ldots\\
+            \ldots = x2\\
+            y2 = \ldots\\
+            z2 = \ldots
+          \end{tabular}
+      }}
+      \putnode{n2}{n0}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            \ldots = y1
+          \end{tabular}
+      }}
+      \putnode{n3}{n1}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            \ldots = y2
+          \end{tabular}
+      }}
+      \putnode{n4}{n2}{20}{-25}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            \\
+            y3 = $\phi$(y1, y2)\\
+            z3 = $\phi$(z1, z2)\\
+            \ldots = z3
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{n2}
+      \ncline{->}{n1}{n3}
+      \ncline{->}{n2}{n4}
+      \ncline{->}{n3}{n4}
+      %\putnode{lbl}{n4}{0}{-10}{Semi-pruned SSA form}
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Computing Non-locals}
+  \tt
+  \begin{tabbing}
+    for\=each block B \{\\ \pause
+    \>defined = \{\}\\ \pause
+    \>for\=each instruction $v = x \operatorname{op} y$ \{\\ \pause
+    \>\>if $x$\=\ not in defined \\ \pause
+    \>\>\>non-locals = non-locals $\cup\ \{x\}$\\ \pause
+    \>\>if $y$ not in defined\\ \pause 
+    \>\>\>non-locals = non-locals $\cup\ \{y\}$\\ \pause
+    \>\>defined = defined $\cup\ \{v\}$ \\
+    \>\}\\
+    \}
+  \end{tabbing}
+}
+
+\frame{
+  \frametitle{SSA to Executable}
+  \begin{itemize}[<+->]
+  \item At some point, we need executable code
+    \begin{itemize}
+    \item Need to fix up the $\phi$-function
+    \end{itemize}
+  \item Basic idea
+    \begin{itemize}
+    \item Insert copies in predecessors to mimick $\phi$-function 
+    \item Simple algorithm
+      \begin{itemize}
+      \item Works in most cases, but \alert{not always}
+      \end{itemize}
+    \item Adds lots of copies
+      \begin{itemize}
+      \item Many of them will be optimized by later passes
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{$\phi$-removal: Example}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(60,72)
+      %\psframe(0,0)(60,72)
+      \putnode{n0}{origin}{10}{72}{}
+      \putnode{n2}{n0}{0}{0}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            x0 = \ldots \\
+            \\
+          \end{tabular}
+      }}
+      \putnode{n3}{n2}{40}{0}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            x1 = \ldots \\
+            \\
+          \end{tabular}
+      }}
+      \putnode{n4}{n2}{20}{-18}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            x2 = $\phi$(x0, x1)\\
+            \ldots = x2
+          \end{tabular}
+      }}
+      \ncline{->}{n2}{n4}
+      \ncline{->}{n3}{n4}
+      \onslide<2->{
+        \putnode{lbl}{origin}{38}{40}{{\Huge$\Downarrow$} $\phi$-removal}
+      \putnode{n0}{origin}{10}{26}{}
+      \putnode{n2}{n0}{0}{0}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            x0 = \ldots \\
+            x2 = x0 \\
+          \end{tabular}
+      }}
+      \putnode{n3}{n2}{40}{0}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            x1 = \ldots \\
+            x2 = x1\\
+          \end{tabular}
+      }}
+      \putnode{n4}{n2}{20}{-18}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            \\ 
+            \ldots = x2
+          \end{tabular}
+      }}
+      \ncline{->}{n2}{n4}
+      \ncline{->}{n3}{n4}}
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Lost Copy Problem}
+  \begin{center}
+  \begin{tabular}{ccc}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(33,50)
+      %\psframe(0,0)(33,50)
+      \putnode{n0}{origin}{15}{50}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            x = 1 \\
+          \end{tabular}
+      }}
+      \putnode{n2}{n0}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            y = x \\
+            x = x + 1\\
+          \end{tabular}
+      }}
+      \putnode{n3}{n2}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            print y
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{n2}
+      \ncline{->}{n2}{n3}
+      \nccurve[ncurv=3,angleA=-45,angleB=45]{->}{n2}{n2}
+    \end{pspicture} &
+    \onslide<2->{\psset{unit=1mm}
+    \begin{pspicture}(0,0)(33,50)
+      %\psframe(0,0)(33,50)
+      \putnode{n0}{origin}{15}{50}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            x1 = 1 \\
+          \end{tabular}
+      }}
+      \putnode{n2}{n0}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            x2 = $\phi$(x1, x3)\\
+            x3 = x2 + 1\\
+          \end{tabular}
+      }}
+      \putnode{n3}{n2}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            print x2
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{n2}
+      \ncline{->}{n2}{n3}
+      \nccurve[ncurv=3,angleA=-45,angleB=45]{->}{n2}{n2}
+    \end{pspicture}} &
+    \onslide<3->{\psset{unit=1mm}
+    \begin{pspicture}(0,0)(33,50)
+      %\psframe(0,0)(33,50)
+      \putnode{n0}{origin}{15}{50}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            x1 = 1 \\
+            x2 = x1
+          \end{tabular}
+      }}
+      \putnode{n2}{n0}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            x3 = x2 + 1\\
+            x2 = x3 \\
+          \end{tabular}
+      }}
+      \putnode{n3}{n2}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            print x2
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{n2}
+      \ncline{->}{n2}{n3}
+      \nccurve[ncurv=3,angleA=-45,angleB=45]{->}{n2}{n2}
+    \end{pspicture}} \\
+    Program &
+    \onslide<2->{SSA from with} &
+    \onslide<3->{After $\phi$-removel} \\
+    & \onslide<2->{copy propagation} & \\
+  \end{tabular}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Lost Copy Problem: Solutions}
+  \begin{center}
+  \begin{tabular}{ccc}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(33,50)
+      %\psframe(0,0)(33,50)
+      \putnode{n0}{origin}{15}{50}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            x1 = 1 \\
+            x2 = x1
+          \end{tabular}
+      }}
+      \putnode{n2}{n0}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            x3 = x2 + 1 \\
+            t = x2 \\
+            x2 = x3 \\
+          \end{tabular}
+      }}
+      \putnode{n3}{n2}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            print t
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{n2}
+      \ncline{->}{n2}{n3}
+      \nccurve[ncurv=3,angleA=-45,angleB=45]{->}{n2}{n2}
+    \end{pspicture} & \rule{10mm}{0pt} &
+    \onslide<2->{\psset{unit=1mm}
+    \begin{pspicture}(0,0)(53,50)
+      %\psframe(0,0)(53,50)
+      \putnode{n0}{origin}{15}{50}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            x1 = 1 \\
+            x2 = x1
+          \end{tabular}
+      }}
+      \putnode{n2}{n0}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            x3 = x2 + 1
+          \end{tabular}
+      }}
+      \putnode{n3}{n2}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            print x2
+          \end{tabular}
+      }}
+      \putnode{n4}{n2}{25}{0}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            x2 = x3
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{n2}
+      \ncline{->}{n2}{n3}
+      \nccurve[angleA=-45,angleB=-135]{->}{n2}{n4}
+      \nccurve[angleA=135,angleB=45]{->}{n4}{n2}
+    \end{pspicture}} \\
+    1. Use of Temporary &&
+    \onslide<2->{2. Critical Edge Split} \\
+  \end{tabular}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Swap Problem}
+  \begin{center}
+  \begin{tabular}{ccc}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(33,50)
+      %\psframe(0,0)(33,50)
+      \putnode{n0}{origin}{15}{50}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            a = 1 \\
+            b = 2
+          \end{tabular}
+      }}
+      \putnode{n2}{n0}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            x = a \\
+            a = b \\
+            b = x \\
+          \end{tabular}
+      }}
+      \putnode{n3}{n2}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            print b
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{n2}
+      \ncline{->}{n2}{n3}
+      \nccurve[ncurv=3,angleA=-45,angleB=45]{->}{n2}{n2}
+    \end{pspicture} &
+    \onslide<2->{\psset{unit=1mm}
+    \begin{pspicture}(0,0)(33,50)
+      %\psframe(0,0)(53,50)
+      \putnode{n0}{origin}{15}{50}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            a1 = 1 \\
+            b1 = 2
+          \end{tabular}
+      }}
+      \putnode{n2}{n0}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            a2 = $\phi$(a1, b2) \\
+            b2 = $\phi$(b1, a2)
+          \end{tabular}
+      }}
+      \putnode{n3}{n2}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            print a2
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{n2}
+      \ncline{->}{n2}{n3}
+      \nccurve[ncurv=4,angleA=-45,angleB=45]{->}{n2}{n2}
+    \end{pspicture}} &
+    \onslide<3->{\psset{unit=1mm}
+    \begin{pspicture}(0,0)(33,50)
+      %\psframe(0,0)(53,50)
+      \putnode{n0}{origin}{15}{50}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            a1 = 1 \\
+            b1 = 2 \\
+            a2 = a1 \\
+            b2 = b1
+          \end{tabular}
+      }}
+      \putnode{n2}{n0}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}l@{}}
+            a2 = b2 \\
+            b2 = a2
+          \end{tabular}
+      }}
+      \putnode{n3}{n2}{0}{-20}{\psframebox{
+          \begin{tabular}{@{}c@{}}
+            print a2
+          \end{tabular}
+      }}
+      \ncline{->}{n0}{n2}
+      \ncline{->}{n2}{n3}
+      \nccurve[ncurv=3,angleA=-45,angleB=45]{->}{n2}{n2}
+    \end{pspicture}} \\
+    Program &
+    \onslide<2->{SSA form with} &
+    \onslide<3->{After $\phi$-removel} \\
+    & \onslide<2->{copy propagation} &
+  \end{tabular}
+  \end{center}
+}
+\frame{
+  \frametitle{Swap Problem: Solution}
+  \begin{itemize}[<+->]
+  \item Fix requires compiler to detect and break dependency from
+    output of one $\phi$-function to input of another
+    $\phi$-function.
+  \item May require temporary if cyclic dependency exists.
+  \end{itemize}
+}
+\frame{
+  \frametitle{SSA Form for Optimizations}
+  \begin{itemize}[<+->]
+  \item SSA form can improve and/or speed up many analyses and optimizations
+    \begin{itemize}
+    \item (Conditional) Constant propagation
+    \item Dead code elimination
+    \item Value numbering
+    \item PRE
+    \item Loop Invariant Code Motion
+    \item Strength Reduction
+    \end{itemize}
+  \end{itemize}
+}
+\end{document}

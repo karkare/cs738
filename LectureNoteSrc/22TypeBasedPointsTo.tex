@@ -1,0 +1,137 @@
+\mode<presentation>
+{
+  %\usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{etex}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{bcprules}
+\usepackage{graphicx}
+\newcommand{\change}[1]{{\red #1}}
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[Types]{\ \\{\LARGE Points-to Analysis using Types}}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\frame{
+  \frametitle{Reference Papers}
+  \begin{itemize}
+  \item Bjarne Steensgaard: Points-to Analysis in Almost Linear Time. POPL 1996
+  \item Manuvir Das: Unification-based pointer analysis with directional assignments. PLDI 2000
+  \end{itemize}
+}
+\newcommand{\opp}{\ensuremath{\mathsf{op}}}
+\newcommand{\alloc}{\ensuremath{\mathsf{allocate}}}
+\newcommand{\func}{\ensuremath{\mathsf{fun}}}
+\newcommand{\rets}{\ensuremath{\mathsf{returns}}}
+\newcommand{\proc}{\ensuremath{\mathsf{p}}}
+\newcommand{\inn}{\ensuremath{\mathsf{in}}}
+\newcommand{\wt}{\ensuremath{\mathsf{welltyped}}}
+\newcommand{\ptr}{\ensuremath{\mathsf{ptr}}}
+\frame{
+  \frametitle{Language}
+  \begin{tabular}{rcl@{\qquad}r}
+    $S$ & ::= &   $x = y$  \\ \pause
+        & | & $x = \&y$  \\ \pause
+        & | & $x = *y$  \\ \pause
+        & | & $x = \alloc(y)$  \\ \pause
+        & | & $*x = y$  \\ \pause
+        & | & $x = \func(f_1,\ldots,f_n)\ \rets\ r\ \inn\ S^{\ast}$  \\ \pause
+        & | & $x = \proc(y_1,\ldots,y_n)$  \\ \pause
+  \end{tabular}
+
+}
+
+\frame{
+  \frametitle{Steensgaard's Analysis}
+  \begin{itemize}[<+->]
+  \item Non standard Types
+    \begin{eqnarray*}
+      s&\in&\mathsf{Symbols}\\ \pause
+      \tau&\in& \mathsf{Locations} ::= (\varphi, \alpha) \\ \pause
+      \varphi&\in&\mathsf{Ids} ::= \{s_1, \ldots, s_n\} \\ \pause
+      \alpha&\in&\mathsf{Values} ::= \bot \mid \ptr(\tau) \\\pause
+    \end{eqnarray*}
+    $A$ denotes type environment.
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Steensgaard's Analysis}
+  \begin{itemize}[<+->]
+  \item Partial Order
+    \begin{eqnarray*}
+      \alpha_1 \trianglelefteq \alpha_2 &\Leftrightarrow& (\alpha_1 = \bot) \vee (\alpha_1 = \alpha_2)
+    \end{eqnarray*}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Steensgaard's Analysis: Typing Rules}
+    \infrule{A\vdash x:(\varphi, \alpha) \andalso A\vdash y:(\varphi', \alpha') \andalso \alpha'\trianglelefteq\alpha}{A\vdash \wt(x=y)}\pause
+    \infrule{A\vdash x:(\varphi, \alpha) \andalso A\vdash y:\tau \andalso \ptr(\tau)\trianglelefteq\alpha}{A\vdash \wt(x=\&y)}\pause
+    \infrule{A\vdash x:(\varphi, \alpha) \andalso A\vdash y:(\varphi', \ptr(\varphi'',\alpha'')) \andalso \alpha''\trianglelefteq\alpha}{A\vdash \wt(x=*y)}\pause
+    \infrule{A\vdash x:(\varphi, \ptr(\varphi',\alpha')) \andalso A\vdash y:(\varphi'', \alpha'') \andalso \alpha''\trianglelefteq\alpha'}{A\vdash \wt(*x=y)}\pause
+    \infrule{A\vdash x:\tau}{A\vdash \wt(x=\alloc(y))}
+}
+
+\frame{
+  \frametitle{Steensgaard's Analysis}
+  \begin{itemize}[<+->]
+  \item Function Definitions
+  \item Need a new type value: $(\tau_1\ldots\tau_n)\rightarrow\tau$
+    \pause
+    \infrule{A\vdash x:(\tau_1\ldots\tau_n)\rightarrow\tau  \\\pause
+      \forall i \in \{1\ldots n\}. A\vdash f_i: \tau_i \\\pause
+      A\vdash r:\tau \\\pause
+      \forall s\in S^\ast. A\vdash \wt(s)\pause}{A\vdash \wt(x = \func(f_1,\ldots,f_n)\ \rets\ r\ \inn\ S^{\ast})}
+    \end{itemize}
+}
+
+\frame{
+  \frametitle{Steensgaard's Analysis}
+  \begin{itemize}[<+->]
+  \item Function Calls
+    \infrule{\begin{array}{l@{\qquad\qquad}l} A\vdash x:\tau & \tau=(\varphi, \alpha)  \\\pause
+      A\vdash \proc:(\tau_1\ldots\tau_n)\rightarrow\tau' & \tau_i=(\varphi_i, \alpha_i) \\\pause
+      \forall i \in \{1\ldots n\}. A\vdash y_i: \tau_i' & \tau_i'=(\varphi'_i, \alpha'_i) \\ \pause
+      \alpha_i' \trianglelefteq \alpha_i &\alpha'\trianglelefteq\alpha\pause
+             \end{array}}
+    {A\vdash \wt(x = \proc(y_1,\ldots,y_n))}
+    \end{itemize}
+}
+\frame{
+  \frametitle{Manuvir Das's {\em One-level Flow-based} Analysis}
+  \begin{eqnarray*}
+    \alpha_1 \leq \alpha_2
+    &\Leftrightarrow& \ptr(\tau_1) \leq \ptr(\tau_2) \\ \pause
+    &\Leftrightarrow& \ptr((\varphi', \alpha')) \leq \ptr((\varphi, \alpha)) \\ \pause
+    &\Leftrightarrow& (\varphi' \subseteq \varphi) \wedge (\alpha' = \alpha)
+  \end{eqnarray*}
+}
+
+\frame{
+  \frametitle{One-level Flow-based Analysis}
+  \begin{itemize}[<+->]
+  \item Replace $\trianglelefteq$ by $\leq$ in Steensgaard's analysis
+  \item Keeps ``top'' level pointees separate!
+  \end{itemize}
+}
+\end{document}

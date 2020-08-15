@@ -1,0 +1,415 @@
+\mode<presentation>
+{
+  %\usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+
+\newcommand{\change}[1]{{\red #1}}
+\newcommand{\myexample}{
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(50,-78)
+      %\psframe(0,0)(50,-78)
+      \putnode{entry}{origin}{25}{5}{\psframebox{ENTRY}}
+      
+      \putnode{b1}{entry}{0}{-11}{\psframebox{a = 2}}
+      \putnode{b2}{b1}{0}{-13}{\psframebox{b = 3}}
+      \putnode{b3}{b2}{0}{-13}{\psframebox{a < b}}
+      \putnode{b4}{b3}{-13}{-13}{\psframebox{c1 = 4}}
+      \putnode{b5}{b3}{10}{-13}{\psframebox{c2 = 5}}
+      \putnode{b6}{b3}{0}{-26}{\psframebox{c3 = $\phi$(c1, c2)}}
+
+      \putnode{exit}{entry}{0}{-74}{\psframebox{EXIT}}
+
+      \ncline{->}{entry}{b1}
+      \ncline{->}{b1}{b2}
+      \ncline{->}{b2}{b3}
+      \ncline{->}{b3}{b4} \Bput[0.1]{true}
+      \ncline{->}{b3}{b5} \Aput[0.1]{false}
+      \ncline{->}{b4}{b6}
+      \ncline{->}{b5}{b6}
+      \ncline{->}{b6}{exit}
+
+      \nccurve[linestyle=dotted,dotsep=0.3]{->}{b1}{b3}
+      \nccurve[linestyle=dotted,dotsep=0.3,angle=180]{->}{b2}{b3}
+      \nccurve[linestyle=dotted,dotsep=0.3,angle=180]{->}{b4}{b6}
+      \nccurve[linestyle=dotted,dotsep=0.3]{->}{b5}{b6}
+    \end{pspicture}
+  \end{center}
+}
+
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[]{\ \\{\LARGE Overview of Optimizations}\\}
+
+\begin{document}
+
+\frame{\titlepage}
+\frame{
+  \frametitle{Recap}
+  \begin{itemize}[<+->]
+  \item Optimizations
+    \begin{itemize}
+    \item To improve efficiency of generated executable (time, space, resources, \ldots)
+    \item Maintain semantic equivalence
+    \end{itemize}
+  \item Two levels
+    \begin{itemize}
+    \item Machine Independent
+    \item Machine Dependent 
+    \end{itemize}
+  \end{itemize}
+}
+
+\mypart{
+  \begin{tabular}{c}
+    Machine Independent \\ Code Optimizations
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Machine Independent Optimizations}
+  \begin{itemize}[<+->]
+  \item Scope of optimizations
+    \begin{itemize}[<+->]
+    \item Intraprocedural
+      \begin{itemize}
+      \item Local
+      \item Global
+      \end{itemize}
+    \item Interprocedural
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Local Optimizations}
+  \begin{itemize}[<+->]
+  \item Restricted to a basic block
+  \item Simplifies the analysis
+  \item Not all optimizations can be applied locally
+    \begin{itemize}[<+->]
+    \item E.g. Loop optimizations
+  \end{itemize}
+  \item Gains are also limited
+  \item Simplify global/interprocedural optimizations
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Global Optimizations}
+    \begin{itemize}[<+->]
+    \item Typically restricted within a procedure/function
+      \begin{itemize}[<+->]
+      \item Could be restricted to a smaller scope, e.g. a loop
+      \end{itemize}
+    \item Most compiler implement up to global optimizations
+    \item Well founded theory
+    \item Practical gains
+    \end{itemize}
+}
+
+\frame{
+  \frametitle{Interprocedural Optimizations}
+    \begin{itemize}[<+->]
+    \item Spans multiple procedures, files
+      \begin{itemize}[<+->]
+      \item In some cases multiple languages!
+      \end{itemize}
+    \item Not as popular as global optimizations
+      \begin{itemize}[<+->]
+      \item No single theory applicable to all scenarios
+      \item Time consuming
+      \end{itemize}
+    \end{itemize}
+}
+
+\mypart{
+  \begin{tabular}{c}
+    A Catalog of \\ Code Optimizations
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Compile-time Evaluation}
+  \begin{itemize}[<+->]
+  \item Move run-time actions to compile-time
+  \item Constant Folding
+    \[ \mbox{Volume} = \frac{4}{3}\times \pi
+    \times\ r \times r\times r\]
+    \begin{itemize}
+    \item Compute $\frac{4}{3}\times \pi$ at compile-time
+    \item Applied frequently for linearizing indices of
+      multidimensional arrays
+    \end{itemize}
+  \item \alert{\psshadowbox{When should we NOT apply it?}}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Compile-time Evaluation}
+  \begin{itemize}
+  \item<1-> Constant Propagation
+    \begin{itemize}
+    \item Replace a variable by its ``constant'' value
+      \begin{center}
+        \begin{tabular}{|l|} \hline
+          \\i = 5 \\
+          \vdots \\
+          j = i * 4\\ \\ \hline
+        \end{tabular}
+        \pause can be replaced by
+        \begin{tabular}{|l|} \hline
+          \\ i = 5 \\
+          \vdots \\
+          j = 5 * 4\\ \\\hline
+        \end{tabular}
+      \end{center}\pause
+    \item May result in the application of constant folding
+    \end{itemize}\pause
+  \item \alert{\psshadowbox{When should we NOT apply it?}}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Common Subexpression Elimination}
+  \begin{itemize}
+  \item Reuse a computation if already ``available''
+    \begin{center}
+      \begin{tabular}{|l|} \hline
+        \\x = u + v \\
+        \vdots \\
+        y = u + v\\ \\ \hline
+      \end{tabular}
+      \pause can be replaced by
+      \begin{tabular}{|l|} \hline
+        \\ t = u + v
+        \\ x = t \\
+        \vdots \\
+        y = t\\ \\\hline
+      \end{tabular}
+    \end{center}\pause
+  \item How to check if an expression is already available?\pause
+  \item \alert{\psshadowbox{When should we NOT apply it?}}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Copy Propagation}
+  \begin{itemize}
+  \item Replace (use of) a variable by  another variable
+    \begin{itemize}
+    \item If they are guaranteed to have the ``same value''
+      \begin{center}
+        \begin{tabular}{|l|} \hline
+          \\i = k \\
+          \vdots \\
+          j = i * 4\\ \\ \hline
+        \end{tabular}
+        \pause can be replaced by
+        \begin{tabular}{|l|} \hline
+          \\ i = k \\
+          \vdots \\
+          j = k * 4\\ \\\hline
+        \end{tabular}
+      \end{center}\pause
+    \item May result in dead code, common subexpression
+    \end{itemize}\pause
+  \item \alert{\psshadowbox{When should we NOT apply it?}}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Code Movement}
+  \begin{itemize}[<+->]
+  \item Move the code around in a program
+  \item Benefits
+    \begin{itemize}
+    \item Code size reduction
+    \item Reduction in the frequency of execution
+    \end{itemize}
+  \item How to find out which code to move?
+  \end{itemize}
+}
+
+\frame{
+  \newcommand{\opp}{\mbox{$\oplus$}}
+  \frametitle{Code Movement}
+  \begin{itemize}
+  \item Code size reduction
+    \begin{itemize}
+    \item Suppose the operator $\opp$ results in the generation of
+      a large number of machine instructions. Then,
+      \begin{center}
+        \begin{tabular}{|l|} \hline
+          \\
+          if (a $<$ b)\\
+          \ \ \ \ u = x\opp y \\
+          else \\
+          \ \ \ \ v = x\opp y \\
+          \\ \hline
+        \end{tabular}
+        \pause can be replaced by
+        \begin{tabular}{|l|} \hline
+          \\
+          t = x\opp y \\
+          if (a $<$ b)\\
+          \ \ \ \ u = t \\
+          else \\
+          \ \ \ \ v = t \\
+          \\ \hline
+        \end{tabular}
+      \end{center}\pause
+    \end{itemize}
+  \item \alert{\psshadowbox{When should we NOT apply it?}}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Code Movement}
+  \begin{itemize}
+  \item Execution frequency reduction
+    \begin{center}
+      \begin{tabular}{|l|} \hline
+        \\
+        if (a $<$ b)\\
+        \ \ \ \ u = \ldots  \\
+        else \\
+        \ \ \ \ v = x *  y \\
+        w = x * y \\
+        \\ \hline
+        \end{tabular}
+        \pause can be replaced by
+        \begin{tabular}{|l|} \hline
+          \\
+          if (a $<$ b)\\
+          \ \ \ \ u = \ldots \\
+          \ \ \ \ t = x *  y \\
+          else \\
+          \ \ \ \ t = x * y \\
+          \ \ \ \ v = t \\
+          w = t \\
+          \\ \hline
+        \end{tabular}
+    \end{center} \pause
+  \item \alert{\psshadowbox{When should we NOT apply it?}}
+  \end{itemize}
+}
+
+
+\frame{
+  \frametitle{Loop Invariant Code Movement}
+  \begin{itemize}
+  \item Move loop invariant code out of the loop
+    \begin{center}
+      \begin{tabular}{|l|} \hline
+        \\
+        for (\ldots) \{ \\
+        \ \ \ \ \ldots  \\
+        \ \ \ \ u = a + b \\
+        \ \ \ \ \ldots \\
+        \} \\ \\ \hline
+      \end{tabular}
+      \pause can be replaced by
+      \begin{tabular}{|l|} \hline
+        \\
+        t = a + b \\
+        for (\ldots) \{ \\
+        \ \ \ \ \ldots  \\
+        \ \ \ \ u = t \\
+        \ \ \ \ \ldots \\
+        \} \\ \\ \hline
+      \end{tabular}
+    \end{center} \pause
+  \item \alert{\psshadowbox{When should we NOT apply it?}}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Code Movement}
+  \begin{itemize}[<alert@+|+->]
+  \item[]{Safety of code motion}
+  \item[]{Profitability of code motion}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Other Optimizations}
+  \begin{itemize}[<+->]
+  \item Dead code elimination
+    \begin{itemize}
+    \item Remove unreachable and/or unused code.
+    \item \alert{Can we always do it?}
+    \item \alert{Is there ever a need to introduce unused code?}
+    \end{itemize}
+  \item Strength Reduction
+    \begin{itemize}
+    \item Use of {\em low strength} operators in place of {\em high} strength ones.
+      \begin{itemize}
+      \item $i*i$ instead of $i**\ 2$, pow($i$, 2)
+      \item $i<<1$ instead of $i*2$ 
+      \end{itemize}
+    \item Typically performed for integers only -- \alert{Why?}
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Agenda}
+  \begin{itemize}[<+->]
+  \item Static analysis and compile-time optimizations
+  \item For the next few lectures
+  \item {\em Intraprocedural} Data Flow Analysis
+    \begin{itemize}
+    \item Classical Examples
+    \item Components
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Assumptions}
+  \begin{itemize}[<+->]
+  \item Intraprocedural: Restricted to a single function
+  \item Input in 3-address format
+  \item \alert{Unless otherwise specified}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{3-address Code Format}
+  \begin{itemize}[<+->]
+  \item Assignments
+    \begin{itemize}
+    \item[] x = y op z
+    \item[] x = op y
+    \item[] x = y
+    \end{itemize}
+  \item Jump/control transfer
+    \begin{itemize}
+    \item[] goto L
+    \item[] if x relop y goto L
+    \end{itemize}
+  \item Statements can have label(s)
+    \begin{itemize}
+    \item[] L: \ldots
+    \end{itemize}
+  \item \alert{Arrays, Pointers and Functions to be added later when needed}
+  \end{itemize}
+}
+\end{document}

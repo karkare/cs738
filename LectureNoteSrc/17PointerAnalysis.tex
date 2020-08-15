@@ -1,0 +1,1018 @@
+\mode<presentation>
+{
+  %\usetheme{umbc4}
+  %\setbeamercovered{dynamic}
+}
+\usepackage[english]{babel}
+% or whatever
+
+\usepackage[latin1]{inputenc}
+% or whatever
+
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{etex}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+%--------------------------------------------------------------------------------------------
+%--- Other packages
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-rel-points}
+\usepackage{graphicx}
+
+\newcommand{\change}[1]{{\red #1}}
+%%%%%% Declarations Defined in custom-foils
+\input{title.tex}
+\subtitle[Pointer Analysis]{\ \\{\LARGE Pointer Analysis}}
+
+\begin{document}
+\newcommand{\st}[1]{S#1. }
+\newcommand{\sst}[1]{S#1 }
+
+\frame{\titlepage}
+
+\frame{
+  \frametitle{Why Pointer Analysis?}
+\begin{itemize}[<+->]
+\item Static analysis  of pointers \&  references
+  \alt<2>{
+  \scalebox{.70}{%
+  \begin{tabular}{@{}c|c} \hline
+    {\renewcommand{\arraystretch}{.9} $\begin{array}{ll}
+	\\
+	\st{1} & \ldots\\
+	\st{2} & q = p;\\
+	\st{3} & \mbox{\em\blue while } (\ldots) \;\{\\
+	\st{4} & \hspace{0.5cm} q = q.next;\\
+	\st{5} & \}\\
+	\st{6} & \mathbf {p.data = r1;}\\
+	\st{7} & q.data = q.data + r2;\\
+	\st{8} & \mathbf {p.data = r1;}\\
+	\st{9} & r3 = p.data + r2;\\
+	\st{10} & \ldots\\
+      \end{array}$}
+    &
+    \psset{unit=0.99mm}
+    \begin{pspicture}(0,0)(100,3)
+      \psrelpoint{origin}{p0}{15}{-7}
+      \psrelpoint{p0}{q0}{0}{20}
+      \psrelpoint{p0}{l0}{6}{-10}
+      \psrelpoint{q0}{l1}{6}{8}
+      \psrelpoint{p0}{caption}{37}{-15}
+      \rput(\x{p0},\y{p0}){\rnode{p0}{\psframebox{$p$}}}
+      \rput(\x{q0},\y{q0}){\rnode{q0}{\psframebox{$q$}}}
+      \psline[linestyle=dotted]{-}(\x{l0},\y{l0})(\x{l1},\y{l1})
+      \psrelpoint{p0}{p1}{20}{0}
+      \psrelpoint{p1}{p2}{19}{0}
+      \psrelpoint{p2}{p3}{19}{0}
+      \psrelpoint{p3}{p4}{15}{0}
+      \rput(\x{p1},\y{p1}){\circlenode{p1}{\small $m_1$}}
+      \rput(\x{p2},\y{p2}){\circlenode{p2}{\small $m_2$}}
+      \rput(\x{p3},\y{p3}){\circlenode{p3}{\small $m_3$}}
+      \rput(\x{p4},\y{p4}){\circlenode{p4}{\small $m_k$}}
+      \ncline[arrowsize=1.5 1]{->}{p0}{p1}
+      \Aput[.5]{\small$p$}
+      \ncline[arrowsize=1.5 1]{->}{p1}{p2}
+      \Aput[.5]{\small$next$}
+      \ncline[arrowsize=1.5 1]{->}{p2}{p3}
+      \Aput[.5]{\small$next$}
+      \ncline[linestyle=dotted,dotsep=2pt,linewidth=2pt,nodesep=5pt]{p3}{p4}
+      \nccurve[linestyle=dashed,angleB=90,arrowsize=1.5 1,
+	linecolor=blue]{->}{q0}{p1}
+      \Bput[.5]{\small$q$}
+      \nccurve[linestyle=dashed,angleB=90,arrowsize=1.5 1]{->}{q0}{p2}
+      \Bput[.5]{\small$q$}
+      \nccurve[linestyle=dashed,angleB=90,arrowsize=1.5 1]{->}{q0}{p3}
+      \Bput[.5]{\small$q$}
+      \nccurve[linestyle=dashed,angleB=90,arrowsize=1.5 1]{->}{q0}{p4}
+      \Aput[.5]{\small$q$}
+      \psrelpoint{p0}{stk}{0}{-8}
+      \psrelpoint{stk}{heap}{40}{0}
+      \psrelpoint{heap}{h0}{-32}{0}
+      \psrelpoint{heap}{h1}{-4}{0}
+      \psrelpoint{heap}{h2}{4}{0}
+      \psrelpoint{heap}{h3}{35}{0}
+      \psline(\x{h0},\y{h0})(\x{h1},\y{h1}) \rput(\x{heap},
+      \y{heap}){Heap} \psline{->}(\x{h2},\y{h2})(\x{h3},\y{h3})
+      \rput(\x{stk}, \y{stk}){Stack}
+      \rput(\x{caption},\y{caption}){Superimposition of memory
+	graphs after {\em while} loop}
+     \end{pspicture}
+    \\
+    & \\
+     \multicolumn{2}{c}{\mbox{$p$ and $q$ may be aliases
+	statement \sst{6} onwards.} \rule{0cm}{.5cm}} \\
+     \multicolumn{2}{c}{Statement \sst{8} {\bf is not} redundant.} \\\hline
+  \end{tabular}
+  }} {\scalebox{.70}{%
+  \begin{tabular}{@{}c|c} \hline
+    {\renewcommand{\arraystretch}{.9} $\begin{array}{ll}
+	\\
+	\st{1} & \ldots \\
+	\st{2} & q = p;\\
+	\st{3} & \mbox{\em\blue do } \{\\
+	\st{4} & \hspace{0.5cm} q = q.next;\\
+	\st{5} & \}\; \mbox{\em\blue while } (\ldots)\\
+	\st{6} & \mathbf {p.data = r1;}\\
+	\st{7} &  q.data = q.data + r2;\\
+	\st{8} & \mathbf {p.data = r1;}\\
+	\st{9} & r3 = p.data + r2;\\
+	\st{10} & \ldots\\
+      \end{array}$}
+    &
+    \psset{unit=0.99mm}
+    \begin{pspicture}(0,0)(100,3)
+      \psrelpoint{origin}{p0}{15}{-7}
+      \psrelpoint{p0}{q0}{0}{20}
+      \psrelpoint{p0}{l0}{6}{-10}
+      \psrelpoint{q0}{l1}{6}{8}
+      \psrelpoint{p0}{caption}{37}{-15}
+      \rput(\x{p0},\y{p0}){\rnode{p0}{\psframebox{$p$}}}
+      \rput(\x{q0},\y{q0}){\rnode{q0}{\psframebox{$q$}}}
+      \psline[linestyle=dotted]{-}(\x{l0},\y{l0})(\x{l1},\y{l1})
+      \psrelpoint{p0}{p1}{20}{0}
+      \psrelpoint{p1}{p2}{19}{0}
+      \psrelpoint{p2}{p3}{19}{0}
+      \psrelpoint{p3}{p4}{15}{0}
+      \rput(\x{p1},\y{p1}){\circlenode{p1}{\small $m_1$}}
+      \rput(\x{p2},\y{p2}){\circlenode{p2}{\small $m_2$}}
+      \rput(\x{p3},\y{p3}){\circlenode{p3}{\small $m_3$}}
+      \rput(\x{p4},\y{p4}){\circlenode{p4}{\small $m_k$}}
+      \ncline[arrowsize=1.5 1]{->}{p0}{p1}
+      \Aput[.5]{\small$p$}
+      \ncline[arrowsize=1.5 1]{->}{p1}{p2}
+      \Aput[.5]{\small$next$}
+      \ncline[arrowsize=1.5 1]{->}{p2}{p3}
+      \Aput[.5]{\small$next$}
+      \ncline[linestyle=dotted,dotsep=2pt,linewidth=2pt,nodesep=5pt]{p3}{p4}
+      \nccurve[linestyle=dashed,angleB=90,arrowsize=1.5 1]{->}{q0}{p2}
+      \Bput[.5]{\small$q$}
+      \nccurve[linestyle=dashed,angleB=90,arrowsize=1.5 1]{->}{q0}{p3}
+      \Bput[.5]{\small$q$}
+      \nccurve[linestyle=dashed,angleB=90,arrowsize=1.5 1]{->}{q0}{p4}
+      \Aput[.5]{\small$q$}
+      \psrelpoint{p0}{stk}{0}{-8}
+      \psrelpoint{stk}{heap}{40}{0}
+      \psrelpoint{heap}{h0}{-32}{0}
+      \psrelpoint{heap}{h1}{-4}{0}
+      \psrelpoint{heap}{h2}{4}{0}
+      \psrelpoint{heap}{h3}{35}{0}
+      \psline(\x{h0},\y{h0})(\x{h1},\y{h1}) \rput(\x{heap},
+      \y{heap}){Heap} \psline{->}(\x{h2},\y{h2})(\x{h3},\y{h3})
+      \rput(\x{stk}, \y{stk}){Stack}
+      \rput(\x{caption},\y{caption}){Superimposition of memory
+	graphs after {\em do-while} loop}
+     \end{pspicture}
+    \\
+    & \\
+    \multicolumn{2}{c}{\mbox{$p$ and $q$ are definitely
+	not aliases statement \sst{6} onwards.}\rule{0cm}{.5cm}} \\
+    \multicolumn{2}{c}{Statement \sst{8} {\bf is} redundant.} \\\hline
+  \end{tabular}
+  }}
+\end{itemize}
+}
+
+\frame{
+  \frametitle{Why Pointer Analysis?}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(50,-100)
+      %\psframe(0,0)(50,-50)
+      \putnode{b0}{origin}{25}{-5}{\psframebox{x = \&a;}}
+      \putnode{b1}{b0}{-15}{-15}{\psframebox{a = 5;}}
+      \putnode{b2}{b0}{15}{-15}{\psframebox{*x = 15;}}
+      \putnode{b3}{b0}{0}{-30}{\psframebox{c = a + 1;}}
+      \putnode{capt}{b3}{0}{-30}{Reaching definitions analysis}
+      \only<2->{\putnode{b4}{b3}{35}{0}{\psovalbox[linestyle=none,framesep=0]{
+            \begin{tabular}{@{}l@{}}Which defs \\ of {\bf
+                a} reach \\ here? 
+            \end{tabular}
+      }}}
+      \ncline{->}{b0}{b1}
+      \ncline{->}{b0}{b2}
+      \ncline{->}{b1}{b3}
+      \ncline{->}{b2}{b3}
+      \only<2->{\nccurve[angleA=-90,angleB=75,nodesepA=-4,nodesepB=-2,doubleline=true,linecolor=blue]{->}{b4}{b3}}
+    \end{pspicture}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Flow Sensitivity in Data Flow Analysis}
+  \begin{itemize}[<+->]
+  \item Flow Sensitive Analysis
+    \begin{itemize}[<+->]
+    \item Order of execution: Determined by the semantics of
+      language
+    \item Point-specific information computed at each program
+      point within a procedure
+    \item A statement can ``override'' information computed
+      by a previous statement
+      \begin{itemize}[<+->]
+      \item {\em Kill} component in the flow function
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Flow Sensitivity in Data Flow Analysis}
+  \begin{itemize}[<+->]
+  \item Flow Insensitive Analysis
+    \begin{itemize}[<+->]
+    \item Order of execution: Statements are assumed to
+      execute in any order
+    \item As a result, all the program points in a
+      procedure receive identical data flow information.
+      \begin{itemize}[<+->]
+      \item ``Summary'' for the procedure
+      \item Safe approximation of flow-sensitive
+        point-specific information for any point, for any
+        given execution order
+      \end{itemize}
+    \item A statement can not ``override'' information computed
+      by another statement
+      \begin{itemize}[<+->]
+      \item {\em NO \em Kill} component in the flow function
+      \item If statement {\em s} kills some data flow
+        information, there is an alternate path that excludes
+        {\em s} 
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Examples of Flow Insensitive Analyses}
+  \begin{itemize}[<+->]
+  \item Type checking, Type inferencing
+    \begin{itemize}[<+->]
+    \item Compute/Verify type of a variable/expression
+    \end{itemize}
+  \item Address taken analysis
+    \begin{itemize}[<+->]
+    \item Which variables have their addresses taken?
+    \item A very simple form of pointer analysis
+    \end{itemize}
+  \item Side effects analysis
+    \begin{itemize}[<+->]
+    \item Does a procedure modify address / global
+      variable / reference parameter / \ldots ?
+    \end{itemize}
+  \end{itemize}
+}
+
+
+\frame{
+  \frametitle{Realizing Flow Insensitivity}
+  \begin{center}
+    \scalebox{.75}{
+      \psset{unit=1mm}
+      \begin{pspicture}(0,0)(150,-60)
+        %\psframe(0,10)(150,-60)
+        \putnode{bs0}{origin}{25}{5}{\psframebox{$b_0$}}
+        \putnode{b0}{bs0}{0}{-15}{\psframebox{$b_1$}}
+        \putnode{b1}{b0}{-15}{-15}{\psframebox{$b_2$}}
+        \putnode{b2}{b0}{15}{-15}{\psframebox{$b_3$}}
+        \putnode{b3}{b0}{0}{-30}{\psframebox{$b_4$}}
+        \putnode{b4}{b3}{0}{-15}{\psframebox{$b_5$}}
+        \ncline{->}{bs0}{b0}
+        \ncline{->}{b0}{b1}
+        \ncline{->}{b0}{b2}
+        \ncline{->}{b1}{b3}
+        \ncline{->}{b2}{b3}
+        \ncline{->}{b3}{b4}
+        \nccurve[angleA=-45,angleB=45,nodesep=-0.1,ncurv=2]{->}{b3}{b0}
+       \only<2->{  
+        \putnode{fs0}{origin}{95}{0}{\psframebox[linestyle=none]{ENTRY}}
+        \putnode{fb0}{fs0}{-40}{-25}{\psframebox{$b_0$}}
+        \putnode{fb1}{fs0}{-24}{-25}{\psframebox{$b_1$}}
+        \putnode{fb2}{fs0}{-8}{-25}{\psframebox{$b_2$}}
+        \putnode{fb3}{fs0}{8}{-25}{\psframebox{$b_3$}}
+        \putnode{fb4}{fs0}{24}{-25}{\psframebox{$b_4$}}
+        \putnode{fb5}{fs0}{40}{-25}{\psframebox{$b_5$}}
+        \putnode{fe0}{fs0}{0}{-50}{\psframebox[linestyle=none]{EXIT}}
+        
+        \nccurve[angleA=-135,angleB=90]{->}{fs0}{fb0}
+        \nccurve[angleA=-120,angleB=90]{->}{fs0}{fb1}
+        \nccurve[angleA=-105,angleB=90]{->}{fs0}{fb2}
+        \nccurve[angleA=-75,angleB=90]{->}{fs0}{fb3}
+        \nccurve[angleA=-60,angleB=90]{->}{fs0}{fb4}
+        \nccurve[angleA=-45,angleB=90]{->}{fs0}{fb5}
+        
+        \nccurve[angleA=-90,angleB=135]{->}{fb0}{fe0}
+        \nccurve[angleA=-90,angleB=120]{->}{fb1}{fe0}
+        \nccurve[angleA=-90,angleB=105]{->}{fb2}{fe0}
+        \nccurve[angleA=-90,angleB=75]{->}{fb3}{fe0}
+        \nccurve[angleA=-90,angleB=60]{->}{fb4}{fe0}
+        \nccurve[angleA=-90,angleB=45]{->}{fb5}{fe0}
+        
+        \nccurve[angleA=-45, angleB=45,ncurv=2,arm=15,linearc=2]{->}{fe0}{fs0}
+      }
+    \end{pspicture}}
+  \end{center}
+  \uncover<3->{
+    \alt<4>{{\em In practice, dependent constraints are collected
+        in a global repository in one pass and solved independently}}
+           {{\em Allows arbitrary compositions of flow
+               functions in any order $\Rightarrow$ Flow
+               insensitivity}}
+  }
+}
+
+% to add basic block number to a block
+% we add hidden number on the other side to make sure box is
+% in the center.
+\newcommand{\bbnum}[2]{#1#2\phantom{#1}}
+
+\frame{
+  \frametitle{Alias Analysis vs. Points-to Analysis}
+  \begin{tabular}{rccc} \hline
+    &{\bf Points-to Analysis} & \rule{5mm}{0pt} & {\bf Alias Analysis}
+    \\ \hline
+    &x = \&a && x = a \\ 
+    &x points-to a && x and a are aliases \\ \pause
+    &x $\rightarrow$ a && x $\equiv$ a \\ \pause
+    
+    Reflexive? & \pause No && Yes \\ \pause
+    
+    Symmetric? & \pause No && Yes \\ \pause
+    
+    Transitive? & \pause No && \pause Must alias: Yes, \\
+                &    && May alias: No \\
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Andersen's Flow Insensitive Points-to Analysis}
+  \begin{itemize}
+  \item Subset based analysis
+    \uncover<2->{\item $P_{lhs} \supseteq P_{rhs}$}
+  \end{itemize}
+  \begin{tabular}[b]{@{}c@{}c@{}c} \hline
+    Program & Constraints & Points-to Graph \\ \hline
+    \psset{unit=1mm}
+    \begin{pspicture}(0,10)(50,-40)
+      %\psframe(0,10)(50,-30)
+      \putnode{bs0}{origin}{25}{5}{\bbnum{1}{\psframebox{a = \&b}}}
+      \putnode{b0}{bs0}{0}{-15}{\bbnum{2}{\psframebox{c = a}}}
+      \putnode{b1}{b0}{-15}{-15}{\bbnum{3}{\psframebox{a = \&d}}}
+      \putnode{b2}{b0}{15}{-15}{\bbnum{4}{\psframebox{a = \&e}}}
+      \putnode{b3}{b0}{0}{-30}{\bbnum{5}{\psframebox{b = a}}}
+      \ncline{->}{bs0}{b0}
+      \ncline{->}{b0}{b1}
+      \ncline{->}{b0}{b2}
+      \ncline{->}{b1}{b3}
+      \ncline{->}{b2}{b3}
+    \end{pspicture} &
+    {
+      \begin{tabular}[b]{c|l}
+        \hline
+            {\bf \#} & {\bf Constraint} \\ \hline
+            \only<3->{1 & $P_a \supseteq \{b\}$} \\
+            \only<4->{2 & $P_c \supseteq P_a$} \\
+            \only<5->{3 & $P_a \supseteq \{d\}$} \\
+            \only<6->{4 & $P_a \supseteq \{e\}$} \\
+            \only<7->{5 & $P_b \supseteq P_a$} \\ \hline
+      \end{tabular}
+    } &
+    \psset{unit=1mm}
+    \begin{pspicture}(0,10)(30,-20)
+      %\psframe(0,10)(30,-20)
+      \only<3>{
+        \putnode{a0}{origin}{10}{5}{\pscirclebox{a}}
+        \putnode{b0}{a0}{15}{0}{\pscirclebox{b}}
+        \ncline{->}{a0}{b0}
+      }
+      \only<4-7>{
+        \putnode{a0}{origin}{10}{5}{\pscirclebox{a}}
+        \putnode{c0}{a0}{0}{-20}{\pscirclebox{c}}
+        \putnode{b0}{a0}{15}{-10}{\psovalbox{
+            \begin{tabular}{@{}c@{}}b%
+              \only<5-7>{\\ d}
+              \only<6-7>{\\ e}
+            \end{tabular}
+        }}
+        \ncline{->}{a0}{b0}
+        \ncline{->}{c0}{b0}
+        \only<7>{\putnode{pb0}{a0}{0}{-10}{\pscirclebox{b}}
+          \ncline{->}{pb0}{b0}}
+      }
+      \only<8>{
+        \putnode{a0}{origin}{10}{5}{\pscirclebox{a}}
+        \putnode{c0}{a0}{0}{-20}{\pscirclebox{c}}
+
+        \putnode{b0}{a0}{15}{-10}{\pscirclebox{b}}
+        \putnode{d0}{a0}{15}{0}{\pscirclebox{d}}
+        \putnode{e0}{a0}{15}{-20}{\pscirclebox{e}}
+
+        \ncline[nodesep=-.5]{->}{a0}{b0}
+        \ncline[nodesep=-.5]{->}{c0}{b0}
+        \nccurve[angleA=-45,angleB=45,ncurv=3,nodesep=-1.1]{->}{b0}{b0}
+        \ncline{->}{a0}{d0}
+        \ncline[nodesep=-.8]{->}{c0}{d0}
+        \ncline[nodesep=-.8]{->}{a0}{e0}
+        \ncline{->}{c0}{e0}
+
+        \ncline{->}{b0}{d0}
+        \ncline{->}{b0}{e0}
+      }
+    \end{pspicture}
+  \end{tabular}
+}
+
+\frame{
+  \frametitle{Steensgaard's Flow Insensitive Points-to Analysis}
+  \begin{itemize}
+  \item Equality based analysis:  $P_{lhs} \equiv P_{rhs}$
+  \item Only one Points-to successor at any time, merge
+    (potential) multiple successors
+  \end{itemize}
+  \begin{tabular}[b]{@{}c@{}c@{}c} \hline
+    Program & Constraints & Points-to Graph \\ \hline
+    \psset{unit=1mm}
+    \begin{pspicture}(0,10)(50,-30)
+      %\psframe(0,10)(50,-30)
+      \putnode{bs0}{origin}{25}{5}{\bbnum{1}{\psframebox{a = \&b}}}
+      \putnode{b0}{bs0}{0}{-12}{\bbnum{2}{\psframebox{c = a}}}
+      \putnode{b1}{b0}{-15}{-12}{\bbnum{3}{\psframebox{a = \&d}}}
+      \putnode{b2}{b0}{15}{-12}{\bbnum{4}{\psframebox{a = \&e}}}
+      \putnode{b3}{b0}{0}{-24}{\bbnum{5}{\psframebox{b = a}}}
+      \ncline{->}{bs0}{b0}
+      \ncline{->}{b0}{b1}
+      \ncline{->}{b0}{b2}
+      \ncline{->}{b1}{b3}
+      \ncline{->}{b2}{b3}
+    \end{pspicture} &
+    {\scalebox{.85}{
+      \begin{tabular}[b]{c|l}
+        \hline
+            {\bf \#} & {\bf Constraint} \\ \hline
+            \only<2->{1 & $P_a \supseteq \{b\}$} \\
+            \only<3->{2 & MERGE($P_c, P_a$)} \\
+            \only<4->{3 & $P_a \supseteq \{d\}$} \\
+            \only<5->{4 & $P_a \supseteq \{e\}$} \\
+            \only<6->{5 & MERGE($P_b, P_a$)} \\ \hline
+      \end{tabular}}
+    } &
+    \psset{unit=1mm}
+    \begin{pspicture}(0,10)(30,-20)
+      %\psframe(0,10)(30,-20)
+      \only<2>{
+        \putnode{a0}{origin}{5}{5}{\pscirclebox{a}}
+        \putnode{b0}{a0}{15}{0}{\pscirclebox{b}}
+        \ncline{->}{a0}{b0}
+      }
+      \only<3-6>{
+        \putnode{a0}{origin}{5}{5}{\pscirclebox{a}}
+        \putnode{c0}{a0}{0}{-20}{\pscirclebox{c}}
+        \putnode{b0}{a0}{15}{-10}{\psovalbox{
+            \begin{tabular}{@{}c@{}}b%
+              \only<4-6>{\\ d}
+              \only<5-6>{\\ e}
+            \end{tabular}
+        }}
+        \ncline{->}{a0}{b0}
+        \ncline{->}{c0}{b0}
+        \only<6>{\nccurve[angleA=-45,angleB=45,ncurv=3,nodesep=-.5]{->}{b0}{b0}}
+      }
+      \only<7>{
+        \putnode{a0}{origin}{5}{5}{\pscirclebox{a}}
+        \putnode{c0}{a0}{0}{-20}{\pscirclebox{c}}
+
+        \putnode{b0}{a0}{15}{-10}{\pscirclebox{b}}
+        \putnode{d0}{a0}{15}{0}{\pscirclebox{d}}
+        \putnode{e0}{a0}{15}{-20}{\pscirclebox{e}}
+
+        \ncline[nodesep=-.5]{->}{a0}{b0}
+        \ncline[nodesep=-.5]{->}{c0}{b0}
+
+        \ncline{->}{a0}{d0}
+        \ncline[nodesep=-.8]{->}{c0}{d0}
+
+        \ncline[nodesep=-.8]{->}{a0}{e0}
+        \ncline{->}{c0}{e0}
+
+        \nccurve[angleA=-45,angleB=45,ncurv=3,nodesep=-1.1]{->}{b0}{b0}
+        \nccurve[angleA=-45,angleB=45,ncurv=3,nodesep=-1.1]{->}{d0}{d0}
+        \nccurve[angleA=-45,angleB=45,ncurv=3,nodesep=-1.1]{->}{e0}{e0}
+
+        \nccurve[angleA=-60,angleB=60,ncurv=1,nodesep=-.5]{->}{b0}{e0}
+        \nccurve[angleA=120,angleB=-120,ncurv=1,nodesep=-.5]{->}{e0}{b0}
+
+        \nccurve[angleA=120,angleB=-120,ncurv=1,nodesep=-.5]{->}{b0}{d0}
+        \nccurve[angleA=-60,angleB=60,ncurv=1,nodesep=-.5]{->}{d0}{b0}
+
+        \nccurve[angleA=115,angleB=-115,ncurv=2,nodesep=-.5]{->}{d0}{e0}
+        \nccurve[angleA=-65,angleB=65,ncurv=2,nodesep=-.5]{->}{e0}{d0}
+        
+      }
+    \end{pspicture}
+  \end{tabular}
+
+}
+
+\frame{
+  \frametitle{Comparing Anderson's and Steensgaard's Analyses}
+  \begin{tabular}[b]{@{}c@{}c@{}c} \hline
+    Program & Subset based & Equality based \\ 
+            & Points-to Graph & Points-to Graph \\ \hline
+    \psset{unit=1mm}
+    \begin{pspicture}(0,10)(50,-40)
+      %\psframe(0,10)(50,-30)
+      \putnode{bs0}{origin}{25}{5}{\psframebox{a = \&b}}
+      \putnode{b0}{bs0}{0}{-10}{\psframebox{c = a}}
+      \putnode{b1}{b0}{-15}{-10}{\psframebox{a = \&d}}
+      \putnode{b2}{b0}{15}{-10}{\psframebox{a = \&e}}
+      \putnode{b3}{b0}{0}{-20}{\psframebox{b = a}}
+      \ncline{->}{bs0}{b0}
+      \ncline{->}{b0}{b1}
+      \ncline{->}{b0}{b2}
+      \ncline{->}{b1}{b3}
+      \ncline{->}{b2}{b3}
+    \end{pspicture} &
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(30,-20)
+      \putnode{a0}{origin}{10}{15}{\pscirclebox{a}}
+      \putnode{c0}{a0}{0}{-20}{\pscirclebox{c}}
+      
+      \putnode{b0}{a0}{15}{-10}{\pscirclebox{b}}
+      \putnode{d0}{a0}{15}{0}{\pscirclebox{d}}
+      \putnode{e0}{a0}{15}{-20}{\pscirclebox{e}}
+      
+      \ncline[nodesep=-.5]{->}{a0}{b0}
+      \ncline[nodesep=-.5]{->}{c0}{b0}
+      \nccurve[angleA=-45,angleB=45,ncurv=3,nodesep=-1.1]{->}{b0}{b0}
+      \ncline{->}{a0}{d0}
+      \ncline[nodesep=-.8]{->}{c0}{d0}
+      \ncline[nodesep=-.8]{->}{a0}{e0}
+      \ncline{->}{c0}{e0}
+      
+      \ncline{->}{b0}{d0}
+      \ncline{->}{b0}{e0}
+    \end{pspicture}
+    &
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(30,-20)
+      \putnode{a0}{origin}{5}{15}{\pscirclebox{a}}
+      \putnode{c0}{a0}{0}{-20}{\pscirclebox{c}}
+      
+      \putnode{b0}{a0}{15}{-10}{\pscirclebox{b}}
+      \putnode{d0}{a0}{15}{0}{\pscirclebox{d}}
+      \putnode{e0}{a0}{15}{-20}{\pscirclebox{e}}
+
+      \ncline[nodesep=-.5]{->}{a0}{b0}
+      \ncline[nodesep=-.5]{->}{c0}{b0}
+      
+      \ncline{->}{a0}{d0}
+      \ncline[nodesep=-.8]{->}{c0}{d0}
+      
+      \ncline[nodesep=-.8]{->}{a0}{e0}
+      \ncline{->}{c0}{e0}
+      
+      \nccurve[angleA=-45,angleB=45,ncurv=3,nodesep=-1.1]{->}{b0}{b0}
+      \nccurve[angleA=-45,angleB=45,ncurv=3,nodesep=-1.1]{->}{d0}{d0}
+      \nccurve[angleA=-45,angleB=45,ncurv=3,nodesep=-1.1]{->}{e0}{e0}
+      
+      \nccurve[angleA=-60,angleB=60,ncurv=1,nodesep=-.5]{->}{b0}{e0}
+      \nccurve[angleA=120,angleB=-120,ncurv=1,nodesep=-.5]{->}{e0}{b0}
+      
+      \nccurve[angleA=120,angleB=-120,ncurv=1,nodesep=-.5]{->}{b0}{d0}
+      \nccurve[angleA=-60,angleB=60,ncurv=1,nodesep=-.5]{->}{d0}{b0}
+      
+      \nccurve[angleA=115,angleB=-115,ncurv=2,nodesep=-.5]{->}{d0}{e0}
+      \nccurve[angleA=-65,angleB=65,ncurv=2,nodesep=-.5]{->}{e0}{d0}
+      
+    \end{pspicture}
+
+  \end{tabular}
+
+}
+
+
+\frame{
+  \frametitle{Comparing Anderson's and Steensgaard's
+    Analyses}
+  \begin{center}
+  \begin{tabular}{l}
+    \psframebox[linestyle=none,fillstyle=solid,fillcolor=lightgray]{
+      a = \&b;} \\ \pause
+    $\qquad$\rnode{a0}{\pscirclebox{a}}%
+    $\qquad$\rnode{b0}{\pscirclebox{b}}
+    \ncline{->}{a0}{b0} \\ \pause
+
+    \psframebox[linestyle=none,fillstyle=solid,fillcolor=lightgray]{
+      b = \&c;} \\ \pause
+    $\qquad$\rnode{a0}{\pscirclebox{a}}
+    $\qquad$\rnode{b0}{\pscirclebox{b}}
+    \ncline{->}{a0}{b0}
+    $\qquad$\rnode{c0}{\pscirclebox{c}}
+    \ncline{->}{b0}{c0} \\ \pause
+
+    \psframebox[linestyle=none,fillstyle=solid,fillcolor=lightgray]{
+      d = \&e;} \\ \pause
+    $\qquad$\rnode{a0}{\pscirclebox{a}}
+    $\qquad$\rnode{b0}{\pscirclebox{b}}
+    \ncline{->}{a0}{b0}
+    $\qquad$\rnode{c0}{\pscirclebox{c}}
+    \ncline{->}{b0}{c0} \\ 
+    $\qquad\qquad$\rnode{d0}{\pscirclebox{d}}
+    $\qquad$\rnode{e0}{\pscirclebox{e}}
+    \ncline{->}{d0}{e0} \\ \pause
+
+    \psframebox[linestyle=none,fillstyle=solid,fillcolor=lightgray]{
+      a = \&d;} \\ \pause
+    \begin{tabular}{c|c}
+      {Subset based} & {Equality based} \\
+      \psset{unit=1mm}
+      \begin{pspicture}(0,0)(40,-20)
+        %\psframe(0,0)(20,-20)
+        \putnode{a0}{origin}{5}{-10}{\pscirclebox{a}}
+        \putnode{b0}{a0}{10}{5}{\pscirclebox{b}}
+        \putnode{c0}{b0}{10}{0}{\pscirclebox{c}}
+        \putnode{d0}{a0}{10}{-5}{\pscirclebox{d}}
+        \putnode{e0}{d0}{10}{0}{\pscirclebox{e}}
+        \ncline[nodesep=-.5]{->}{a0}{b0}
+        \ncline[nodesep=-.5]{->}{a0}{d0}
+        \ncline{->}{b0}{c0}
+        \ncline{->}{d0}{e0}
+      \end{pspicture}
+      &
+      \psset{unit=1mm}
+      \begin{pspicture}(0,0)(40,-20)
+        %\psframe(0,0)(20,-20)
+        \putnode{a0}{origin}{5}{-10}{\pscirclebox{a}}
+        \putnode{b0}{a0}{15}{0}{\pscirclebox{b,d}}
+        \putnode{c0}{b0}{15}{0}{\pscirclebox{c,e}}
+        \ncline{->}{a0}{b0}
+        \ncline{->}{b0}{c0}
+      \end{pspicture}
+    \end{tabular}
+  \end{tabular}
+  \end{center}
+}
+
+\frame{
+  \frametitle{Pointer Indirection Constraints}
+  
+  \begin{center}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    Stmt & Subset based & Equality based \\ \hline \hline
+    a = *b & $P_a \supseteq P_c, \forall c \in P_b$ &
+    MERGE($P_a, P_c$), $\forall c \in P_b$ \\ \hline
+    *a = b & $P_c \supseteq P_b, \forall c \in P_a$ &
+    MERGE($P_b, P_c$), $\forall c \in P_a$ \\ \hline
+  \end{tabular}
+  \end{center}
+}
+
+\newcommand{\D}{\scalebox{0.5}{D}}
+\newcommand{\myP}{\scalebox{0.5}{P}}
+\frame{
+  \frametitle{Must Points-to Analysis}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(50,-40)
+      %\psframe(0,0)(50,-40)
+      \putnode{b0}{origin}{25}{-5}{1\psframebox{$x = \&a$;}}
+      \putnode{b1}{b0}{-15}{-15}{2\psframebox{\phantom{x = \&a;}}}
+      \putnode{b2}{b0}{15}{-15}{3\psframebox{\phantom{x = \&a;}}}
+      \putnode{b3}{b0}{0}{-30}{4\psframebox{\phantom{x = \&a;}}}
+      \ncline{->}{b0}{b1}
+      \ncline{->}{b0}{b2}
+      \ncline{->}{b1}{b3}
+      \ncline{->}{b2}{b3}
+    \end{pspicture}
+  \end{center}
+  \begin{itemize}
+  \item $x$ {\em definitely} points-to $a$ at various points in
+    the program
+  \item $x \stackrel{\D}{\rightarrow}a$ 
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{May Points-to Analysis}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(50,-40)
+      %\psframe(0,0)(50,-40)
+      \putnode{b0}{origin}{25}{-5}{1\psframebox{$x = \&a;$}}
+      \putnode{b1}{b0}{-15}{-15}{2\psframebox{$x = \&b;$}}
+      \putnode{b2}{b0}{15}{-15}{3\psframebox{\phantom{x = \&a;}}}
+      \putnode{b3}{b0}{0}{-30}{4\psframebox{\phantom{x = \&a;}}}
+      \ncline{->}{b0}{b1}
+      \ncline{->}{b0}{b2}
+      \ncline{->}{b1}{b3}
+      \ncline{->}{b2}{b3}
+    \end{pspicture}
+  \end{center}
+  \begin{itemize}
+  \item At OUT of 2, $x$ definitely points-to $b$
+  \item At OUT of 3, $x$ definitely points-to $a$
+  \item At IN of 4, $x$ {\em possibly} points-to $a$ (or $b$)
+  \begin{itemize}
+    \alt<2>{\item $x \stackrel{\myP}{\rightarrow}\{a,b\}$}
+           {\item $x \stackrel{\myP}{\rightarrow}a$,
+             $x \stackrel{\myP}{\rightarrow}b$} 
+  \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Must Alias Analysis}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(50,-40)
+      %\psframe(0,0)(50,-40)
+      \putnode{b0}{origin}{25}{-5}{1\psframebox{$x = a$;}}
+      \putnode{b1}{b0}{-15}{-15}{2\psframebox{\phantom{x = a;}}}
+      \putnode{b2}{b0}{15}{-15}{3\psframebox{\phantom{x = a;}}}
+      \putnode{b3}{b0}{0}{-30}{4\psframebox{$y = a$;}}
+      \ncline{->}{b0}{b1}
+      \ncline{->}{b0}{b2}
+      \ncline{->}{b1}{b3}
+      \ncline{->}{b2}{b3}
+    \end{pspicture}
+  \end{center}
+  \begin{itemize}
+  \item $x$ and $a$ always refer to same memory location
+  \item $x \stackrel{\D}{\equiv}a$ \pause
+  \item $x, y$ and $a$ refer to same location at OUT of 4.
+  \item $x \stackrel{\D}{\equiv} y \stackrel{\D}{\equiv}a$ 
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{May Alias Analysis}
+  \begin{center}
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(50,-40)
+      %\psframe(0,0)(50,-40)
+      \putnode{b0}{origin}{25}{-5}{1\psframebox{$x = a;$}}
+      \putnode{b1}{b0}{-15}{-15}{2\psframebox{$x = b;$}}
+      \putnode{b2}{b0}{15}{-15}{3\psframebox{\phantom{x = \&a;}}}
+      \putnode{b3}{b0}{0}{-30}{4\psframebox{\phantom{x = \&a;}}}
+      \ncline{->}{b0}{b1}
+      \ncline{->}{b0}{b2}
+      \ncline{->}{b1}{b3}
+      \ncline{->}{b2}{b3}
+    \end{pspicture}
+  \end{center}
+  \begin{itemize}
+  \item At OUT of 2, $x$ and $b$ are must aliases
+  \item At OUT of 3, $x$ and $a$ are must aliases
+  \item At IN of 4, $x$ can {\em possibly} be aliased with
+    either $a$ (or $b$)
+    \begin{itemize}
+      \alt<2->{\item $(x,a),(x,b)$}
+             {\item $x \stackrel{\myP}{\equiv}a$,
+               $x \stackrel{\myP}{\equiv}b$} 
+    \end{itemize}
+    \pause \ \pause
+  \item If we say: $(x,a,b)$, Is it {\em Precise?} \pause
+    {\em Safe?} 
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Must Pointer Analysis}
+  \begin{itemize}[<+->]
+  \item Makes sense only for Flow Sensitive analysis
+  \item Why?
+  \item Must analysis $\Rightarrow$ Flow sensitive analysis
+  \item Flow insensitive analysis $\Rightarrow$ May
+    analysis 
+  \item Why?
+  \end{itemize}
+}
+\frame{
+  \frametitle{Updating Information: When Can We {\em Kill}?}
+  \begin{itemize}[<+->]
+  \item Never if flow insensitive analysis
+  \item For flow sensitive
+      \begin{center}
+    \scalebox{0.75}{
+      \psset{unit=1mm}
+      \begin{pspicture}(0,0)(50,-40)
+        %\psframe(0,0)(50,-40)
+        \putnode{b0}{origin}{45}{15}{1\psframebox{$x = \&a$;}}
+        \putnode{b1}{b0}{0}{-15}{2\psframebox{\begin{tabular}{l}
+              $y = \&b$;\\
+              $w = \&c$;\\
+            \end{tabular}
+        }}
+        \putnode{b2}{b1}{-15}{-15}{3\psframebox{$z = \&x$;}}
+        \putnode{b3}{b1}{15}{-15}{4\psframebox{$z = \&y$;}}
+        \putnode{b4}{b1}{0}{-30}{5\psframebox{\begin{tabular}{l}
+              $*z = NULL$;\\
+              $*w = NULL$;\\
+            \end{tabular}
+        }}
+        \ncline{->}{b0}{b1}
+        \ncline{->}{b1}{b2}
+        \ncline{->}{b1}{b3}
+        \ncline{->}{b2}{b4}
+        \ncline{->}{b3}{b4}
+      \end{pspicture}}
+      \end{center}
+  \item $x$, $y$ may or may not get modified in 5: {\em Weak}
+    update 
+  \item $c$ definitely gets modified in 5:
+    {\em Strong update}
+  \item Must information is killed by Strong and Weak updates
+  \item May information is killed only by Strong updates
+  \end{itemize}
+}
+
+\newcommand{\ygen}{\ensuremath{\mbox{May}_{gen}}}
+\newcommand{\ykill}{\ensuremath{\mbox{May}_{kill}}}
+\newcommand{\yin}{\ensuremath{\mbox{May}_{IN}}}
+\newcommand{\yout}{\ensuremath{\mbox{May}_{out}}}
+
+\newcommand{\tgen}{\ensuremath{\mbox{Must}_{gen}}}
+\newcommand{\tkill}{\ensuremath{\mbox{Must}_{kill}}}
+\newcommand{\tin}{\ensuremath{\mbox{Must}_{IN}}}
+\newcommand{\tout}{\ensuremath{\mbox{Must}_{out}}}
+
+\newcommand{\allvars}[1]{\ensuremath{\bigcup_{#1 \in Vars}}}
+
+\frame{
+  \frametitle{Flow Functions for Points-to Analysis}
+  \begin{itemize}[<+->]
+  \item Basic statements for pointer manipulation
+    \begin{itemize}[<+->]
+    \item x = y
+    \item x = \&y
+    \item x = *y
+    \item *x = y
+    \end{itemize}
+  \item Other statements can be rewritten in terms of above
+    \begin{itemize}[<+->]
+    \item *x = *y $\Rightarrow$ t = *y, *x = t
+    \item x = NULL $\Rightarrow$ treat NULL as a special
+      variable 
+    \end{itemize}
+  \item $OUT = IN - kill \cup gen$
+    \begin{itemize}[<+->]
+    \item with a twist!
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Flow Function: x = y} 
+  \begin{eqnarray*}
+    \ygen &=& \{x\rightarrow p \mid y\rightarrow p \in \yin \}
+    \\
+    \ykill &=& \allvars{p} \{x\rightarrow p \}
+  \end{eqnarray*}
+  \pause
+  \begin{eqnarray*}
+    \tgen &=& \{x\rightarrow p \mid y\rightarrow p \in \tin \}
+    \\
+    \tkill &=& \allvars{p}  \{x\rightarrow p \}
+  \end{eqnarray*}
+}
+
+\frame{
+  \frametitle{Flow Function: x = \&y} 
+  \begin{eqnarray*}
+    \ygen &=& \{x\rightarrow y \}
+    \\
+    \ykill &=& \allvars{p} \{x\rightarrow p \}
+  \end{eqnarray*}
+  \pause
+  \begin{eqnarray*}
+    \tgen &=& \{x\rightarrow y \}
+    \\
+    \tkill &=& \allvars{p} \{x\rightarrow p \}
+  \end{eqnarray*}
+}
+
+\frame{
+  \frametitle{Flow Function: x = *y} 
+  \begin{eqnarray*}
+    \ygen &=& \{x\rightarrow p \mid y\rightarrow p' \in \yin \mbox{ and
+    } p' \rightarrow p \in \yin \}
+    \\
+    \ykill &=& \allvars{p} \{x\rightarrow p \}
+  \end{eqnarray*}
+  \pause
+  \begin{eqnarray*}
+    \tgen &=& \{x\rightarrow p \mid y\rightarrow p' \in \tin \mbox{ and
+    } p' \rightarrow p \in \tin \}
+    \\
+    \tkill &=& \allvars{p} \{x\rightarrow p \}
+  \end{eqnarray*}
+}
+
+\frame{
+  \frametitle{Flow Function: *x = y} 
+  \begin{eqnarray*}
+    \ygen &=& \{p \rightarrow p' \mid x\rightarrow p \in
+    \yin, y\rightarrow p' \in \yin \}
+    \\
+    \ykill &=& \allvars{p'} \{p\rightarrow p' \mid x\rightarrow p \in
+    \tin \} \onslide<3>{\blue\psovalbox{\mbox{\em Strong update!!}}}
+  \end{eqnarray*}
+  \pause
+  \begin{eqnarray*}
+    \tgen &=& \{p \rightarrow p' \mid x\rightarrow p \in
+    \tin, y\rightarrow p' \in \tin \}
+    \\
+    \tkill &=& \allvars{p'} \{p\rightarrow p' \mid x\rightarrow p \in
+    \yin \} \onslide<3>{\blue \psovalbox{\mbox{\em Weak update!!}}}
+  \end{eqnarray*}
+}
+
+\frame{
+  \frametitle{Summarizing Flow Functions}
+  \begin{itemize}[<+->]
+  \item  May Points-To analysis
+    \begin{itemize}[<+->]
+    \item A points-to pair should be removed only if it must
+      be removed along all paths
+    \item $\Rightarrow$ should remove only strong updates
+    \item $\Rightarrow$ should kill using Must Points-To information
+    \end{itemize}
+  \item Must Points-To analysis
+    \begin{itemize}[<+->]
+    \item A points-to pair should be removed if it can be
+      removed along some path
+    \item $\Rightarrow$ should remove all weak updates
+    \item $\Rightarrow$ should kill using May Points-To information
+    \end{itemize}
+  \item Must Points-To $\subseteq$ May Points-To
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Safe Approximations for May and Must Points-to}
+
+  \begin{itemize}
+  \item A pointer variable 
+    \begin{center}
+      \begin{tabular}{|l||p{40mm}|p{30mm}|} \hline
+        &{\bf May} & {\bf Must} \\ \hline \hline
+        {\bf Points-to} & points to every possible location
+        & points to nothing \\ \hline
+        {\bf Alias} & aliased to every other pointer variable  &
+        only to itself \\ \hline
+      \end{tabular}
+    \end{center}
+  \end{itemize}
+}
+
+
+\frame{
+  \frametitle{Non-Distributivity of Points-to Analysis}
+  \begin{tabular}{c|c}
+    {\bf May Information} & {\bf Must Information}\\
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(50,-40)
+      %\psframe(0,0)(50,-40)
+      \putnode{b0}{origin}{25}{-5}{1\psframebox{\phantom{$x = a$}}}
+      \putnode{b1}{b0}{-15}{-15}{2\psframebox{$x = \&z$}}
+      \putnode{b2}{b0}{15}{-15}{3\psframebox{$y = \&w$}}
+      \putnode{b3}{b0}{0}{-30}{4\psframebox{$*x = y$}}
+      \ncline{->}{b0}{b1}
+      \ncline{->}{b0}{b2}
+      \ncline{->}{b1}{b3}
+      \ncline{->}{b2}{b3}
+    \end{pspicture}
+ &
+    \psset{unit=1mm}
+    \begin{pspicture}(0,0)(50,-40)
+      %\psframe(0,0)(50,-40)
+      \putnode{b0}{origin}{25}{-5}{1\psframebox{$x = a;$}}
+      \putnode{b1}{b0}{-15}{-15}{2\psframebox{
+          \begin{tabular}{@{}l@{}}
+            $b = \&c$\\
+            $c = \&d$
+          \end{tabular}
+      }}
+      \putnode{b2}{b0}{15}{-15}{3\psframebox{
+          \begin{tabular}{@{}l@{}}
+            $b = \&e$\\
+            $e = \&d$
+          \end{tabular}
+      }}
+      \putnode{b3}{b0}{0}{-30}{4\psframebox{$a = *b$}}
+      \ncline{->}{b0}{b1}
+      \ncline{->}{b0}{b2}
+      \ncline{->}{b1}{b3}
+      \ncline{->}{b2}{b3}
+    \end{pspicture}
+ \\ \pause
+ $z \rightarrow w$ is spurious & 
+ \pause $a \rightarrow d$ is missing 
+  \end{tabular}
+}
+
+
+\end{document}
+
