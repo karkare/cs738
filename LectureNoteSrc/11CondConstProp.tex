@@ -133,7 +133,7 @@
     \item Height of CP lattice  = 2
     \item Each SSA edge is examined at most
       twice, for each lowering
-    \item Theoritical size of SSA graph: $O(V \times E)$
+    \item Theoretical size of SSA graph: $O(V \times E)$
     \item Practical size: linear in the program size
     \end{itemize}
 }
@@ -150,7 +150,7 @@
 }
 
 \frame{
-  \frametitle{Sparse Condtional Constant Propagation (SCC)}
+  \frametitle{Sparse Conditional Constant Propagation (SCC)}
   \begin{itemize}[<+->]
   \item Constant Propagation with {\em unreachable code
     elimination}
@@ -222,7 +222,7 @@ We ignore paths that are not ``yet'' marked executable
     \item {\bf Visit-$\phi$} for all $\phi$-functions in the
       destination
     \item If only one of the {\eflag}s of incoming flow graph
-      edges for dest is true (dest visted for the first time),
+      edges for dest is true (dest visited for the first time),
       then {\bf VisitExpression} for all expressions in dest
     \item If the dest contains only one outgoing flow graph
       edge, add that edge to \fwl

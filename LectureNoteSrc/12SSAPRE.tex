@@ -38,8 +38,8 @@
     \item Partial Availability
     \item Partial Anticipability
     \end{itemize}
-  \item Identifies paritially redundant computations, make
-    them totally redundant by inserting new compitations
+  \item Identifies partially redundant computations, make
+    them totally redundant by inserting new computations
   \item Remove totally redundant computations (CSE)
   \end{itemize}
 }
@@ -177,7 +177,7 @@
   \begin{itemize}[<+->]
   \item $\Phi$ for an expression $E$ is required where two
     potentially different values of an expression merge
-  \item At iterated dominance frontiers of occurances of $E$
+  \item At iterated dominance frontiers of occurrences of $E$
   \item At each block having a $\phi$ for some argument of
     $E$ 
     \begin{itemize}[<+->]
@@ -600,9 +600,9 @@
 \frame{
   \frametitle{Code Motion}
   \begin{itemize}[<+->]
-  \item  For real {\em def} occurance of $E$, compute $E$ in
+  \item  For real {\em def} occurrence of $E$, compute $E$ in
     a new version of temporary $t$
-  \item  For real {\em use} occurance of $E$, replace $E$ by
+  \item  For real {\em use} occurrence of $E$, replace $E$ by
     current version of $t$
   \item For inserted occurrence of $E$, compute $E$ in
     a new version of temporary $t$
