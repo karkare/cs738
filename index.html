@@ -23,7 +23,19 @@ crossorigin="anonymous">
         ul,ol {
                 margin-left: 20px;
         }
-
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+        } 
+          
+        th, td { 
+            text-align: left; 
+            padding: 8px; 
+        } 
+          
+        tr:nth-child(even) { 
+            background-color: Lightgreen; 
+        } 
 </style>
 
 </head>
@@ -77,50 +89,129 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+e+'<\
 
 <h2 id="topics-covered-and-slides">Topics Covered and Slides <a id="handouts"/></h2>
 <p>The slides are not suitable for taking prints as there is a lot of redundancy due to overlays. Use handouts if you really need a print.</p>
-<table>
+<p>The videos for the course are available through the Canvas page.</p>
+<table style="width:54%; border:1px solid black">
+  <tr>
+    <td>0. First Course Handout</td>
+    <td>[<a href="lecturenotes/00FCH_CS738.pdf">FCH</a>]</td>
+    <td></td>
+    <td></td>
+  </tr>
   <tr>
     <td>1. Introduction</td>
     <td>[<a href="lecturenotes/01IntroHandout.pdf">handouts</a>]</td>
     <td>[<a href="lecturenotes/01IntroSlides.pdf">slides</a>]</td>
+    <td></td>
   </tr>
   <tr>
     <td>2. Overview of Optimizations</td>
     <td>[<a href="lecturenotes/02OptsOverviewHandout.pdf">handouts</a>]</td>
     <td>[<a href="lecturenotes/02OptsOverviewSlides.pdf">slides</a>]</td>
+    <td></td>
   </tr>
-  <tr></tr>
+  <tr>
+	  <td>3. Data Flow Analysis</td>
+	  <td>[<a href="lecturenotes/03DataFlowAnalysisHandout.pdf">handouts</a>]</td>
+	  <td>[<a href="lecturenotes/03DataFlowAnalysisSlides.pdf">slides</a>]</td>
+ 	  <td></td>
+  </tr>
+  <tr>
+	  <td>4. Data Flow Analysis (contd...)</td>
+	  <td>[<a href="lecturenotes/04DataFlowAnalysisHandout.pdf">handouts</a>]</td>
+	  <td>[<a href="lecturenotes/04DataFlowAnalysisSlides.pdf">slides</a>]</td>
+ 	  <td></td>
+  </tr>
+  <tr>
+	  <td>5. Data Flow Analysis Foundations</td>
+	  <td>[<a href="lecturenotes/05FoundationsDFAHandout.pdf">handouts</a>]</td>
+	  <td>[<a href="lecturenotes/05FoundationsDFASlides.pdf">slides</a>]</td>
+	  <td></td>
+  </tr>
+  <tr>
+	  <td>6. DFA Foundations (contd ...)</td>
+	  <td>[<a href="lecturenotes/06FoundationsDFAHandout.pdf">handouts</a>]</td>
+	  <td>[<a href="lecturenotes/06FoundationsDFASlides.pdf">slides</a>]</td>
+	  <td></td>
+  </tr>
+  <tr>
+	  <td>7. Flow Graph Theory</td>
+	  <td>[<a href="lecturenotes/07FlowGraphTheoryHandout.pdf">handouts</a>] </td>
+	  <td>[<a href="lecturenotes/07FlowGraphTheorySlides.pdf">slides</a>]</td>
+ 	  <td></td>
+ </tr>
+  <tr>
+	  <td>8. Constant Propagation</td>
+	  <td>[<a href="lecturenotes/08ConstPropHandout.pdf">handouts</a>]</td>
+	  <td>[<a href="lecturenotes/08ConstPropSlides.pdf">slides</a>]</td>
+	  <td></td>
+  </tr>
+  <tr>
+	  <td>9. SSA</td>
+	  <td>[<a href="lecturenotes/09SSAHandout.pdf">handouts</a>]</td>
+	  <td>[<a href="lecturenotes/09SSASlides.pdf">slides</a>]</td>
+	  <td>[<a href="http://dl.acm.org/citation.cfm?id=115320">paper</a>]</td>
+  </tr>
+  <tr>
+	  <td>10. SSA (contd ...)</td>
+	  <td>[<a href="lecturenotes/10SSAOptsHandout.pdf">handouts</a>]</td>
+	  <td>[<a href="lecturenotes/10SSAOptsSlides.pdf">slides</a>]</td>
+	  <td></td>
+  </tr>
+  <tr>
+	  <td>11. Conditional Constant Propagation</td>
+	  <td>[<a href="lecturenotes/11CondConstPropHandout.pdf">handouts</a>]</td>
+	  <td>[<a href="lecturenotes/11CondConstPropSlides.pdf">slides</a>]</td>
+	  <td>[<a href="http://dl.acm.org/citation.cfm?id=103136">paper</a>]</td>
+  </tr>
+  <tr>
+	  <td>12. SSA PRE</td>
+	  <td>[<a href="lecturenotes/12SSAPREHandout.pdf">handouts</a>]</td>
+	  <td>[<a href="lecturenotes/12SSAPRESlides.pdf">slides</a>]</td>
+	  <td>[<a href="http://dl.acm.org/citation.cfm?id=319348">paper</a>]</td>
+  </tr>
+  <tr>
+	  <td>13. SSA PRE Example</td>
+	  <td>[<a href="lecturenotes/13SsaPreExampleHandout.pdf">handouts</a>]</td>
+	  <td>[<a href="lecturenotes/13SsaPreExampleSlides.pdf">slides</a>]</td>
+	  <td></td>
+  </tr>	
+  <tr>
+	  <td>14. Interprocedural Analysis</td>
+	  <td>[<a href="lecturenotes/14InterProcHandout.pdf">handouts</a>]</td>
+	  <td>[<a href="lecturenotes/14InterProcSlides.pdf">slides</a>]</td>
+	  <td></td>
+  </tr>
+  <tr>
+	  <td>15. Interprocedural Analysis: Functional Approach</td>
+	  <td>[<a href="lecturenotes/15InterProcHandout.pdf">handouts</a>]</td>
+	  <td>[<a href="lecturenotes/15InterProcSlides.pdf">slides</a>]</td>
+	  <td></td>
+  </tr>
+  <tr>
+	  <td>16. Interprocedural Analysis: Call-strings Approach</td>
+	  <td>[<a href="lecturenotes/16InterProc_CallString_UK_Handout.pdf">handouts</a>]</td>
+	  <td>[<a href="lecturenotes/16InterProc_CallString_UK_Slides.pdf">slides</a>]</td>
+	  <td><strong>By <a href="http://www.cse.iitb.ac.in/~uday">Prof Uday</a></strong></td>
+  </tr>
 </table>
 <!-- ol style="list-style-type: decimal">
-<li><p>Data Flow Analysis [<a href="lecturenotes/03DataFlowAnalysisHandout.pdf">handouts</a>] [<a href="lecturenotes/03DataFlowAnalysisSlides.pdf">slides</a>]</p></li>
-<li><p>Data Flow Analysis (contd ...) [<a href="lecturenotes/04DataFlowAnalysisHandout.pdf">handouts</a>] [<a href="lecturenotes/04DataFlowAnalysisSlides.pdf">slides</a>]</p></li>
-<li><p>Data Flow Analysis Foundations [<a href="lecturenotes/05FoundationsDFAHandout.pdf">handouts</a>] [<a href="lecturenotes/05FoundationsDFASlides.pdf">slides</a>]</p></li>
-<li><p>DFA Foundations (contd ...) [<a href="lecturenotes/06FoundationsDFAHandout.pdf">handouts</a>] [<a href="lecturenotes/06FoundationsDFASlides.pdf">slides</a>]</p></li>
-<li><p>Flow Graph Theory [<a href="lecturenotes/07FlowGraphTheoryHandout.pdf">handouts</a>] [<a href="lecturenotes/07FlowGraphTheorySlides.pdf">slides</a>]</p></li>
-<li><p>Constant Propagation [<a href="lecturenotes/08ConstPropHandout.pdf">handouts</a>] [<a href="lecturenotes/08ConstPropSlides.pdf">slides</a>]</p></li>
-<li><p>SSA [<a href="lecturenotes/09SSAHandout.pdf">handouts</a>] [<a href="lecturenotes/09SSASlides.pdf">slides</a>] [<a href="http://dl.acm.org/citation.cfm?id=115320">paper</a>]</p></li>
-<li><p>SSA (contd ...) [<a href="lecturenotes/10SSAOptsHandout.pdf">handouts</a>] [<a href="lecturenotes/10SSAOptsSlides.pdf">slides</a>]</p></li>
-<li><p>Conditional Constant Propagation [<a href="lecturenotes/11CondConstPropHandout.pdf">handouts</a>] [<a href="lecturenotes/11CondConstPropSlides.pdf">slides</a>] [<a href="http://dl.acm.org/citation.cfm?id=103136">paper</a>]</p></li>
-<li><p>SSA PRE [<a href="lecturenotes/12SSAPREHandout.pdf">handouts</a>] [<a href="lecturenotes/12SSAPRESlides.pdf">slides</a>] [<a href="http://dl.acm.org/citation.cfm?id=319348">paper</a>]</p></li>
-<li><p>SSA PRE Example[<a href="lecturenotes/13SsaPreExampleHandout.pdf">handouts</a>] [<a href="lecturenotes/13SsaPreExampleSlides.pdf">slides</a>]</p></li>	
-<li><p>Interprocedural analysis [<a href="lecturenotes/14InterProcHandout.pdf">handouts</a>] [<a href="lecturenotes/14InterProcSlides.pdf">slides</a>]</p></li>
-<li><p>... (Functional Approach) [<a href="lecturenotes/15InterProcHandout.pdf">handouts</a>] [<a href="lecturenotes/15InterProcSlides.pdf">slides</a>]</p></li>
-<li><p>... (Call-strings Approach) [<a href="lecturenotes/16InterProc_CallString_UK_Handout.pdf">handouts</a>] [<a href="lecturenotes/16InterProc_CallString_UK_Slides.pdf">slides</a>] <strong>By <a href="http://www.cse.iitb.ac.in/~uday">Prof Uday</a></strong></p></li>
-<li><p>Pointer Analysis [<a href="lecturenotes/17PointerAnalysisHandout.pdf">handouts</a>] [<a href="lecturenotes/17PointerAnalysisSlides.pdf">slides</a>] [<a href="http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.109.6502">Anderson's</a>][<a href="http://dl.acm.org/citation.cfm?id=237727">Steensgaard's</a>] [<a href="https://yanniss.github.io/points-to-tutorial15.pdf">Yanniss's Tutorial</a>]</p></li>
-<li><p>Types and Program Analysis [<a href="lecturenotes/18TypesAndPLHandout.pdf">handouts</a>] [<a href="lecturenotes/18TypesAndPLSlides.pdf">slides</a>]</p></li>
-<li><p>Untyped Lambda Calculus [<a href="lecturenotes/19UTLambdaCalculusHandout.pdf">handouts</a>] [<a href="lecturenotes/19UTLambdaCalculusSlides.pdf">slides</a>]</p></li>
-<li><p>Typed Arithmetic Expressions [<a href="lecturenotes/20TypedArithExprHandout.pdf">handouts</a>] [<a href="lecturenotes/20TypedArithExprSlides.pdf">slides</a>]</p></li>
-<li><p>Simply Typed Lambda Calculus [<a href="lecturenotes/21STLambdaCalculusHandout.pdf">handouts</a>] [<a href="lecturenotes/21STLambdaCalculusSlides.pdf">slides</a>]</p></li>
-<li><p>Type-based Points-to Analysis [<a href="lecturenotes/22TypeBasedPointsToHandout.pdf">handouts</a>] [<a href="lecturenotes/22TypeBasedPointsToSlides.pdf">slides</a>] [<a href="http://dl.acm.org/citation.cfm?id=237727">Steensgaard's</a>] [<a href="http://dl.acm.org/citation.cfm?doid=349299.349309">Manuvir's</a>]</p></li>
-<li><p>Symbolic Execution [<a href="lecturenotes/kinder_symbolic_execution_tutorial_2014_part.pdf">Slides by Prof Johannes Kinder</a>]</p></li -->
-<!-- li><p>Liveness based Garbage Collection [<a href="lecturenotes/16LgcHandout.pdf">handouts</a>] [<a href="lecturenotes/16LgcSlides.pdf">slides</a>] [<a href="https://arxiv.org/abs/cs/0703155">paper1</a>][<a href="http://link.springer.com/chapter/10.1007%2F978-3-642-54807-9_5">paper2</a>][<a href="http://dl.acm.org/citation.cfm?doid=2926697.2926698">paper3</a>] [<a href="https://drona.csa.iisc.ernet.in/~deepakd/atc-common/RegApprox.pdf">Mohri-Nederhof Transformation</a>]</p></li -->
+<li><p>17. Pointer Analysis [<a href="lecturenotes/17PointerAnalysisHandout.pdf">handouts</a>] [<a href="lecturenotes/17PointerAnalysisSlides.pdf">slides</a>] [<a href="http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.109.6502">Anderson's</a>][<a href="http://dl.acm.org/citation.cfm?id=237727">Steensgaard's</a>] [<a href="https://yanniss.github.io/points-to-tutorial15.pdf">Yanniss's Tutorial</a>]</p></li>
+<li><p>18. Types and Program Analysis [<a href="lecturenotes/18TypesAndPLHandout.pdf">handouts</a>] [<a href="lecturenotes/18TypesAndPLSlides.pdf">slides</a>]</p></li>
+<li><p>19. Untyped Lambda Calculus [<a href="lecturenotes/19UTLambdaCalculusHandout.pdf">handouts</a>] [<a href="lecturenotes/19UTLambdaCalculusSlides.pdf">slides</a>]</p></li>
+<li><p>20. Typed Arithmetic Expressions [<a href="lecturenotes/20TypedArithExprHandout.pdf">handouts</a>] [<a href="lecturenotes/20TypedArithExprSlides.pdf">slides</a>]</p></li>
+<li><p>21. Simply Typed Lambda Calculus [<a href="lecturenotes/21STLambdaCalculusHandout.pdf">handouts</a>] [<a href="lecturenotes/21STLambdaCalculusSlides.pdf">slides</a>]</p></li>
+<li><p>22. Type-based Points-to Analysis [<a href="lecturenotes/22TypeBasedPointsToHandout.pdf">handouts</a>] [<a href="lecturenotes/22TypeBasedPointsToSlides.pdf">slides</a>] [<a href="http://dl.acm.org/citation.cfm?id=237727">Steensgaard's</a>] [<a href="http://dl.acm.org/citation.cfm?doid=349299.349309">Manuvir's</a>]</p></li>
+<li><p>23. Symbolic Execution [<a href="lecturenotes/kinder_symbolic_execution_tutorial_2014_part.pdf">Slides by Prof Johannes Kinder</a>]</p></li -->
+<!-- li><p>24. Liveness based Garbage Collection [<a href="lecturenotes/16LgcHandout.pdf">handouts</a>] [<a href="lecturenotes/16LgcSlides.pdf">slides</a>] [<a href="https://arxiv.org/abs/cs/0703155">paper1</a>][<a href="http://link.springer.com/chapter/10.1007%2F978-3-642-54807-9_5">paper2</a>][<a href="http://dl.acm.org/citation.cfm?doid=2926697.2926698">paper3</a>] [<a href="https://drona.csa.iisc.ernet.in/~deepakd/atc-common/RegApprox.pdf">Mohri-Nederhof Transformation</a>]</p></li -->
 <!-- /ol -->
 <h2 id="assignments">Assignments <a id="assignments"/></h2>
 
 	<p>There will be short assignments to give you a chance to apply the lecture material. Assignments will have some written and some programming tasks.</p>
 	
 <h2 id="course-project">Course Project<a id="project"/></h2>
+The project is a vital component of this course. A group of two or three students will work for the project.
 <ul>
-<li><strong>Project Description</strong> will come <a href="project/index.html">Here</a></li>
+<li><strong>Project Description</strong> will come <a href="project/index.html">Here</a> in about three weeks after the classes start.</li>
 </ul>
 
 <h2 id="course-outline">Course Outline <a id="outline"/></h2>
@@ -144,34 +235,34 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+e+'<\
 
 <h3 id="evaluation-scheme">Evaluation Scheme <a id="eval"/></h3>
 <p><strong>Credit</strong></p>
-<table style="width:54%;">
+<table style="width:54%; border:1px solid black">
 <colgroup>
 <col width="40%" />
 <col width="13%" />
 </colgroup>
 <tbody>
+<tr class="even">
+  <td align="left">Class Participation and Quizzes</td>
+  <td align="right">05%</td>
+</tr>
 <tr class="odd">
 <td align="left">Assignments</td>
-<td align="right">5% - 10%</td>
-</tr>
-<tr class="even">
-<td align="left">Quizzes</td>
-<td align="right">5%</td>
+<td align="right">10%</td>
 </tr>
 <tr class="odd">
 <td align="left">Mid semester exam</td>
-<td align="right">10% - 20%</td>
+<td align="right">20%</td>
 </tr>
 <tr class="even">
 <td align="left">End semester exam</td>
-<td align="right">25% - 35%</td>
+<td align="right">30%</td>
 </tr>
 <tr class="odd">
 <td align="left">Course Project</td>
-<td align="right">30% - 40%</td>
+<td align="right">35%</td>
 </tr>
 <tr class="even">
-<td align="left">(Approx Breakup: Proposal: 5% Report: 15% Implementation: 10% Presentation: 5% )</td>
+<td align="left">(Breakup: Proposal: 5% Report and Presentation: 10% Implementation: 20%)</td>
 <td align="right"></td>
 </tr>
 </tbody>
